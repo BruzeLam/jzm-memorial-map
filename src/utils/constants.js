@@ -26,6 +26,8 @@ export const MARKER_TYPES = {
 };
 
 export const STORAGE_KEY = 'jzm_memorial_markers';
+export const DATA_VERSION = 3; // 每次更新 SAMPLE_MARKERS 时递增
+export const VERSION_KEY = 'jzm_memorial_data_version';
 
 export const DEFAULT_CENTER = [35.8617, 104.1954];
 export const DEFAULT_ZOOM = 4;

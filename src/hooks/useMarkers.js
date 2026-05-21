@@ -1,18 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
-import { STORAGE_KEY, SAMPLE_MARKERS } from '../utils/constants';
+import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS } from '../utils/constants';
 
 function loadFromStorage() {
   try {
+    const storedVersion = parseInt(localStorage.getItem(VERSION_KEY) || '0', 10);
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+    const stored = raw ? JSON.parse(raw) : null;
+
+    if (Array.isArray(stored) && stored.length > 0) {
+      if (storedVersion < DATA_VERSION) {
+        // 版本升级：把 SAMPLE_MARKERS 中新增的 id 合并进来，不覆盖用户已有的标记
+        const storedIds = new Set(stored.map((m) => m.id));
+        const newItems = SAMPLE_MARKERS.filter((m) => !storedIds.has(m.id));
+        const merged = [...stored, ...newItems];
+        localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        return merged;
       }
+      return stored;
     }
   } catch (e) {
     console.error('Failed to load markers from localStorage:', e);
   }
+
+  // 首次访问：存入初始数据和版本号
+  localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
   return SAMPLE_MARKERS;
 }
 
