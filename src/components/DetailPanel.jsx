@@ -61,11 +61,7 @@ export default function DetailPanel({ marker, onClose }) {
                 </span>
               </div>
             )}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-600 min-w-16">📍 坐标:</span>
-              <span className="text-gray-800 font-mono">{marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}</span>
-            </div>
-            {marker.country && (
+            {(marker.country || marker.province || marker.city) && (
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-gray-600 min-w-16">🌍 地区:</span>
                 <span className="text-gray-800">
@@ -75,6 +71,10 @@ export default function DetailPanel({ marker, onClose }) {
                 </span>
               </div>
             )}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-600 min-w-16">📍 坐标:</span>
+              <span className="text-gray-800 font-mono">{marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}</span>
+            </div>
           </div>
 
           {/* Description */}
