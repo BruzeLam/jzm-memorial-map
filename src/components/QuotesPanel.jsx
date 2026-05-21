@@ -245,9 +245,7 @@ export default function QuotesPanel({ onClose }) {
                 <p className="text-sm">未找到相关语录</p>
               </div>
             ) : (
-              filteredQuotes.map((quote) => {
-                const category = QUOTE_CATEGORIES.find((c) => c.id === quote.categoryId);
-                return (
+              filteredQuotes.map((quote) => (
                   <div
                     key={quote.id}
                     className="border border-gray-100 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors group"
@@ -273,8 +271,7 @@ export default function QuotesPanel({ onClose }) {
                       <p className="text-xs text-gray-400 leading-relaxed">{quote.context}</p>
                     )}
                   </div>
-                );
-              })
+              ))
             )}
           </div>
 
