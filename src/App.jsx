@@ -180,10 +180,37 @@ export default function App() {
           onClose={() => setShowDetailPanel(false)}
         />
       )}
-      <div className="flex flex-1 overflow-hidden app-layout">
-        {/* Floating Sidebar */}
+      <div className="flex flex-1 overflow-hidden app-layout relative">
+        {/* Full-width Map - Base Layer (z-0) */}
+        <div className="absolute inset-0 map-panel" ref={mapContainerRef}>
+          {isAddingMode && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
+              点击地图选择位置
+            </div>
+          )}
+          <MapView
+            mapRef={mapRef}
+            markers={filteredMarkers}
+            selectedMarkerId={selectedMarkerId}
+            onMarkerSelect={handleMarkerSelect}
+            onMapClick={handleMapClick}
+            isAddingMode={isAddingMode}
+          />
+          {mapFloatingCard && (
+            <MapFloatingCard
+              coords={mapFloatingCard.coords}
+              pixelPos={mapFloatingCard.pixelPos}
+              containerSize={getContainerSize()}
+              onQuickSave={handleFloatingQuickSave}
+              onMoreDetails={handleFloatingMoreDetails}
+              onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
+            />
+          )}
+        </div>
+
+        {/* Floating Sidebar - Above Map (z-40) */}
         {!sidebarCollapsed && (
-          <div className="absolute top-0 left-0 bottom-0 w-80 z-[100] shadow-lg animate-slide-in">
+          <div className="absolute top-0 left-0 bottom-0 w-80 z-40 shadow-lg animate-slide-in">
             <Sidebar
               markers={markers}
               filteredMarkers={filteredMarkers}
@@ -218,43 +245,16 @@ export default function App() {
           </div>
         )}
 
-        {/* Expand Button */}
+        {/* Expand Button - Above Map (z-30) */}
         {sidebarCollapsed && (
           <button
             onClick={() => setSidebarCollapsed(false)}
-            className="absolute top-4 left-4 z-[90] bg-white rounded-lg shadow-md p-3 hover:shadow-lg hover:scale-105 transition-all group border border-gray-200"
+            className="absolute top-4 left-4 z-30 bg-white rounded-lg shadow-md p-3 hover:shadow-lg hover:scale-105 transition-all group border border-gray-200"
             title="展开侧边栏"
           >
             <span className="text-xl group-hover:text-blue-600 transition-colors">▶️</span>
           </button>
         )}
-
-        {/* Full-width Map */}
-        <div className="flex-1 relative map-panel" ref={mapContainerRef}>
-          {isAddingMode && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
-              点击地图选择位置
-            </div>
-          )}
-          <MapView
-            mapRef={mapRef}
-            markers={filteredMarkers}
-            selectedMarkerId={selectedMarkerId}
-            onMarkerSelect={handleMarkerSelect}
-            onMapClick={handleMapClick}
-            isAddingMode={isAddingMode}
-          />
-          {mapFloatingCard && (
-            <MapFloatingCard
-              coords={mapFloatingCard.coords}
-              pixelPos={mapFloatingCard.pixelPos}
-              containerSize={getContainerSize()}
-              onQuickSave={handleFloatingQuickSave}
-              onMoreDetails={handleFloatingMoreDetails}
-              onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
-            />
-          )}
-        </div>
       </div>
     </div>
   );
