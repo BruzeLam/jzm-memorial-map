@@ -34,7 +34,6 @@ export default function Sidebar({
   onPickManualMode,
   onResetToSample,
   onClearAll,
-  onToggleCollapse,
   onOpenDetail,
 }) {
   const [showSettings, setShowSettings] = useState(false);
@@ -62,16 +61,9 @@ export default function Sidebar({
 
   return (
     <div
-      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0 relative"
+      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0"
       style={{ width: 320 }}
     >
-      <button
-        onClick={onToggleCollapse}
-        className="absolute top-3 right-3 z-20 w-9 h-9 flex items-center justify-center rounded-lg bg-white hover:bg-gray-50 text-gray-600 hover:text-blue-600 transition-all group shadow-sm border border-gray-200 hover:shadow-md"
-        title="收起侧边栏"
-      >
-        <span className="text-base group-hover:scale-110 transition-transform">✕</span>
-      </button>
       <div className="px-3 pt-3 pb-2 border-b border-gray-100">
         <SearchBar
           searchQuery={searchQuery}

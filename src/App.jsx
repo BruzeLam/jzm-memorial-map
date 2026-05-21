@@ -42,11 +42,9 @@ export default function App() {
   const [mapFloatingCard, setMapFloatingCard] = useState(null);
 
   const [showQuotes, setShowQuotes] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
 
   const mapRef = useRef(null);
-  const mapContainerRef = useRef(null);
 
   const handleMarkerSelect = (id) => {
     selectMarker(id);
@@ -159,16 +157,6 @@ export default function App() {
     setShowAddForm(true);
   };
 
-  // Container size for clamping floating card
-  const getContainerSize = () => {
-    if (mapContainerRef.current) {
-      return {
-        width: mapContainerRef.current.offsetWidth,
-        height: mapContainerRef.current.offsetHeight,
-      };
-    }
-    return { width: 800, height: 600 };
-  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -180,9 +168,39 @@ export default function App() {
           onClose={() => setShowDetailPanel(false)}
         />
       )}
-      <div className="flex flex-1 overflow-hidden app-layout relative">
-        {/* Full-width Map - Base Layer (z-0) */}
-        <div className="absolute inset-0 map-panel" ref={mapContainerRef}>
+      <div className="flex flex-1 overflow-hidden app-layout">
+        <Sidebar
+          markers={markers}
+          filteredMarkers={filteredMarkers}
+          selectedMarkerId={selectedMarkerId}
+          selectedMarker={selectedMarker}
+          stats={stats}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          activeFilters={activeFilters}
+          toggleFilter={toggleFilter}
+          clearSearch={clearSearch}
+          onMarkerSelect={handleMarkerSelect}
+          onEditMarker={handleEditMarker}
+          onDeleteMarker={handleDeleteMarker}
+          onStartAddMode={handleStartAddMode}
+          isAddingMode={isAddingMode}
+          showAddForm={showAddForm}
+          showModePicker={showModePicker}
+          editingMarker={editingMarker}
+          pendingCoords={pendingCoords}
+          formPrefill={formPrefill}
+          onAddMarker={handleAddMarker}
+          onUpdateMarker={handleUpdateMarker}
+          onCancelAdd={handleCancelAdd}
+          onPickMapMode={handlePickMapMode}
+          onPickManualMode={handlePickManualMode}
+          onResetToSample={resetToSample}
+          onClearAll={clearAll}
+          onOpenDetail={() => setShowDetailPanel(true)}
+        />
+
+        <div className="flex-1 map-panel relative">
           {isAddingMode && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
               点击地图选择位置
@@ -200,61 +218,13 @@ export default function App() {
             <MapFloatingCard
               coords={mapFloatingCard.coords}
               pixelPos={mapFloatingCard.pixelPos}
-              containerSize={getContainerSize()}
+              containerSize={{ width: 800, height: 600 }}
               onQuickSave={handleFloatingQuickSave}
               onMoreDetails={handleFloatingMoreDetails}
               onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
             />
           )}
         </div>
-
-        {/* Floating Sidebar - Above Map (z-40) */}
-        {!sidebarCollapsed && (
-          <div className="absolute top-0 left-0 bottom-0 w-80 z-40 shadow-lg animate-slide-in">
-            <Sidebar
-              markers={markers}
-              filteredMarkers={filteredMarkers}
-              selectedMarkerId={selectedMarkerId}
-              selectedMarker={selectedMarker}
-              stats={stats}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              activeFilters={activeFilters}
-              toggleFilter={toggleFilter}
-              clearSearch={clearSearch}
-              onMarkerSelect={handleMarkerSelect}
-              onEditMarker={handleEditMarker}
-              onDeleteMarker={handleDeleteMarker}
-              onStartAddMode={handleStartAddMode}
-              isAddingMode={isAddingMode}
-              showAddForm={showAddForm}
-              showModePicker={showModePicker}
-              editingMarker={editingMarker}
-              pendingCoords={pendingCoords}
-              formPrefill={formPrefill}
-              onAddMarker={handleAddMarker}
-              onUpdateMarker={handleUpdateMarker}
-              onCancelAdd={handleCancelAdd}
-              onPickMapMode={handlePickMapMode}
-              onPickManualMode={handlePickManualMode}
-              onResetToSample={resetToSample}
-              onClearAll={clearAll}
-              onToggleCollapse={() => setSidebarCollapsed(true)}
-              onOpenDetail={() => setShowDetailPanel(true)}
-            />
-          </div>
-        )}
-
-        {/* Expand Button - Above Map (z-30) */}
-        {sidebarCollapsed && (
-          <button
-            onClick={() => setSidebarCollapsed(false)}
-            className="absolute top-4 left-4 z-30 bg-white rounded-lg shadow-md p-3 hover:shadow-lg hover:scale-105 transition-all group border border-gray-200"
-            title="展开侧边栏"
-          >
-            <span className="text-xl group-hover:text-blue-600 transition-colors">▶️</span>
-          </button>
-        )}
       </div>
     </div>
   );
