@@ -272,13 +272,6 @@ export default function QuotesPanel({ onClose }) {
                     {quote.context && (
                       <p className="text-xs text-gray-400 leading-relaxed">{quote.context}</p>
                     )}
-                    {quote.isUserAdded && (
-                      <div className="mt-2">
-                        <span className="inline-block px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 text-xs rounded-full">
-                          我上传的
-                        </span>
-                      </div>
-                    )}
                   </div>
                 );
               })
