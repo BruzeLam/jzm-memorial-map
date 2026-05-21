@@ -83,14 +83,14 @@ export default function Header() {
 
               {/* 悬浮 tooltip */}
               {hovered && (
-                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white rounded-lg shadow-lg whitespace-nowrap flex items-center gap-1.5 text-sm font-medium z-50">
-                  <span>1926.8.17</span>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2 text-sm font-medium z-50 border border-gray-100">
+                  <span className="font-semibold">1926.8.17</span>
                   <span className="text-gray-400 mx-0.5">—</span>
-                  <span className="text-yellow-300">
+                  <span className="text-red-600">
                     <Glasses size={28} />
                   </span>
-                  {/* 小三角 */}
-                  <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900" />
+                  {/* 小三角指向上方 */}
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-white" />
                 </div>
               )}
             </div>
