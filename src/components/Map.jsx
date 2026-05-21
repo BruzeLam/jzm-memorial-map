@@ -1,7 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MARKER_TYPES } from '../utils/constants';
+
+// 计算两点间距离（Haversine公式）单位：km
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // 地球半径（km）
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return (R * c).toFixed(2);
+}
+
+// 地理定位hook
+function useUserLocation() {
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setError('浏览器不支持地理定位');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (err) => {
+        setError(err.message);
+      }
+    );
+  }, []);
+
+  return { location, error };
+}
 
 function createDivIcon(marker, isSelected) {
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
@@ -55,6 +97,7 @@ function MapClickHandler({ isAddingMode, onMapClick }) {
 
 function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
   const map = useMap();
+  const { location } = useUserLocation();
 
   useEffect(() => {
     const markerInstances = [];
@@ -65,6 +108,8 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
       const leafletMarker = L.marker([m.latitude, m.longitude], { icon });
 
       const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
+      const distance = location ? calculateDistance(location.lat, location.lng, m.latitude, m.longitude) : null;
+
       const popupContent = `
         <div style="min-width:160px;font-family:system-ui,sans-serif">
           <div style="font-weight:700;font-size:14px;margin-bottom:4px">${m.name}</div>
@@ -73,6 +118,7 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
               ${typeInfo.label}
             </span>
             ${m.date ? `<span style="margin-left:6px">${m.date}</span>` : ''}
+            ${distance ? `<span style="margin-left:6px">距离您${distance}km</span>` : ''}
           </div>
           <div style="font-size:12px;color:#444">${m.title}</div>
         </div>
@@ -89,7 +135,7 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
     return () => {
       markerInstances.forEach((lm) => lm.remove());
     };
-  }, [markers, selectedMarkerId, onMarkerSelect, map]);
+  }, [markers, selectedMarkerId, onMarkerSelect, map, location]);
 
   return null;
 }
