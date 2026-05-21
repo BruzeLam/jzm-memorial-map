@@ -79,17 +79,17 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
         <div>
           <label className={labelClass}>类型</label>
           <div className="flex gap-2">
-            {Object.values(MARKER_TYPES).map((t) => (
+            {Object.entries(MARKER_TYPES).map(([key, t]) => (
               <button
-                key={t.key}
+                key={key}
                 type="button"
-                onClick={() => set('type', t.key)}
+                onClick={() => set('type', key)}
                 className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
-                  form.type === t.key
+                  form.type === key
                     ? 'text-white border-transparent'
                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
-                style={form.type === t.key ? { backgroundColor: t.color, borderColor: t.color } : {}}
+                style={form.type === key ? { backgroundColor: t.color, borderColor: t.color } : {}}
               >
                 {t.icon} {t.label}
               </button>
