@@ -4,6 +4,7 @@ import { useSearch } from './hooks/useSearch';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
+import MapFloatingCard from './components/MapFloatingCard';
 
 export default function App() {
   const {
@@ -24,10 +25,22 @@ export default function App() {
     useSearch(markers);
 
   const [isAddingMode, setIsAddingMode] = useState(false);
+  // 'map' | 'manual' | null
+  const [addInputMode, setAddInputMode] = useState(null);
+  // show the mode-picker popup
+  const [showModePicker, setShowModePicker] = useState(false);
+
   const [pendingCoords, setPendingCoords] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMarker, setEditingMarker] = useState(null);
+  // prefill data for "more details" flow from floating card
+  const [formPrefill, setFormPrefill] = useState(null);
+
+  // Floating card state: { coords: {lat,lng}, pixelPos: {x,y} }
+  const [mapFloatingCard, setMapFloatingCard] = useState(null);
+
   const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
 
   const handleMarkerSelect = (id) => {
     selectMarker(id);
@@ -38,7 +51,21 @@ export default function App() {
   };
 
   const handleMapClick = (latlng) => {
-    if (isAddingMode) {
+    if (!isAddingMode) return;
+
+    if (addInputMode === 'map') {
+      // Convert lat/lng to pixel position
+      let pixelPos = { x: 200, y: 200 };
+      if (mapRef.current) {
+        try {
+          const point = mapRef.current.latLngToContainerPoint([latlng.lat, latlng.lng]);
+          pixelPos = { x: point.x, y: point.y };
+        } catch (_) {}
+      }
+      setMapFloatingCard({ coords: latlng, pixelPos });
+      setIsAddingMode(false);
+    } else {
+      // Legacy single-mode (shouldn't be reached in new flow, but kept for safety)
       setPendingCoords(latlng);
       setShowAddForm(true);
       setIsAddingMode(false);
@@ -50,6 +77,7 @@ export default function App() {
     setShowAddForm(false);
     setPendingCoords(null);
     setEditingMarker(null);
+    setFormPrefill(null);
     selectMarker(newId);
   };
 
@@ -70,10 +98,30 @@ export default function App() {
     }
   };
 
+  // Called when "➕ 添加" button is clicked — show mode picker
   const handleStartAddMode = () => {
-    setIsAddingMode(true);
+    setShowModePicker(true);
     setShowAddForm(false);
     setPendingCoords(null);
+    setEditingMarker(null);
+    setFormPrefill(null);
+    setMapFloatingCard(null);
+  };
+
+  // User chose "地图标点"
+  const handlePickMapMode = () => {
+    setShowModePicker(false);
+    setAddInputMode('map');
+    setIsAddingMode(true);
+    deselectMarker();
+  };
+
+  // User chose "手动输入"
+  const handlePickManualMode = () => {
+    setShowModePicker(false);
+    setAddInputMode('manual');
+    setIsAddingMode(false);
+    setShowAddForm(true);
     deselectMarker();
   };
 
@@ -82,6 +130,38 @@ export default function App() {
     setShowAddForm(false);
     setPendingCoords(null);
     setEditingMarker(null);
+    setFormPrefill(null);
+    setAddInputMode(null);
+    setShowModePicker(false);
+    setMapFloatingCard(null);
+  };
+
+  // Floating card: quick save
+  const handleFloatingQuickSave = (data) => {
+    const newId = addMarker(data);
+    setMapFloatingCard(null);
+    setAddInputMode(null);
+    selectMarker(newId);
+  };
+
+  // Floating card: more details → open sidebar form pre-filled
+  const handleFloatingMoreDetails = (partial) => {
+    setMapFloatingCard(null);
+    setAddInputMode(null);
+    setFormPrefill(partial);
+    setPendingCoords(null);
+    setShowAddForm(true);
+  };
+
+  // Container size for clamping floating card
+  const getContainerSize = () => {
+    if (mapContainerRef.current) {
+      return {
+        width: mapContainerRef.current.offsetWidth,
+        height: mapContainerRef.current.offsetHeight,
+      };
+    }
+    return { width: 800, height: 600 };
   };
 
   return (
@@ -105,17 +185,21 @@ export default function App() {
           onStartAddMode={handleStartAddMode}
           isAddingMode={isAddingMode}
           showAddForm={showAddForm}
+          showModePicker={showModePicker}
           editingMarker={editingMarker}
           pendingCoords={pendingCoords}
+          formPrefill={formPrefill}
           onAddMarker={handleAddMarker}
           onUpdateMarker={handleUpdateMarker}
           onCancelAdd={handleCancelAdd}
+          onPickMapMode={handlePickMapMode}
+          onPickManualMode={handlePickManualMode}
           onResetToSample={resetToSample}
           onClearAll={clearAll}
         />
-        <div className="flex-1 relative map-panel">
+        <div className="flex-1 relative map-panel" ref={mapContainerRef}>
           {isAddingMode && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
               点击地图选择位置
             </div>
           )}
@@ -127,6 +211,16 @@ export default function App() {
             onMapClick={handleMapClick}
             isAddingMode={isAddingMode}
           />
+          {mapFloatingCard && (
+            <MapFloatingCard
+              coords={mapFloatingCard.coords}
+              pixelPos={mapFloatingCard.pixelPos}
+              containerSize={getContainerSize()}
+              onQuickSave={handleFloatingQuickSave}
+              onMoreDetails={handleFloatingMoreDetails}
+              onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
+            />
+          )}
         </div>
       </div>
     </div>

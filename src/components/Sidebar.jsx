@@ -23,11 +23,15 @@ export default function Sidebar({
   onStartAddMode,
   isAddingMode,
   showAddForm,
+  showModePicker,
   editingMarker,
   pendingCoords,
+  formPrefill,
   onAddMarker,
   onUpdateMarker,
   onCancelAdd,
+  onPickMapMode,
+  onPickManualMode,
   onResetToSample,
   onClearAll,
 }) {
@@ -38,6 +42,9 @@ export default function Sidebar({
     exportMarkers(markers, format);
     setShowExportMenu(false);
   };
+
+  // Determine what the add button shows
+  const inActiveAddFlow = isAddingMode || showAddForm || showModePicker;
 
   return (
     <div
@@ -64,16 +71,59 @@ export default function Sidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto sidebar-scrollable">
-        {showAddForm ? (
+        {showModePicker ? (
+          /* ── Mode Picker ─────────────────────────────────────── */
+          <div className="p-4">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-700">选择添加方式</span>
+                <button
+                  type="button"
+                  onClick={onCancelAdd}
+                  className="text-gray-400 hover:text-gray-600 text-xs leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-4 flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={onPickMapMode}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition-colors text-left"
+                >
+                  <span className="text-2xl">🗺️</span>
+                  <div>
+                    <div className="text-sm font-semibold text-blue-700">地图标点</div>
+                    <div className="text-xs text-blue-500 mt-0.5">点击地图选择位置，快速填写信息</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={onPickManualMode}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors text-left"
+                >
+                  <span className="text-2xl">✏️</span>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-700">手动输入</div>
+                    <div className="text-xs text-gray-500 mt-0.5">搜索地址或手动填写经纬度</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : showAddForm ? (
+          /* ── Add / Edit Form ─────────────────────────────────── */
           <div className="p-3">
             <AddMarkerForm
               onSubmit={editingMarker ? onUpdateMarker : onAddMarker}
               onCancel={onCancelAdd}
               initialCoords={pendingCoords}
               editingMarker={editingMarker}
+              prefillData={formPrefill}
             />
           </div>
         ) : selectedMarker ? (
+          /* ── Marker Details ──────────────────────────────────── */
           <div className="p-3">
             <MarkerDetails
               marker={selectedMarker}
@@ -83,6 +133,7 @@ export default function Sidebar({
             />
           </div>
         ) : (
+          /* ── Marker List ─────────────────────────────────────── */
           <ul className="py-1">
             {filteredMarkers.length === 0 ? (
               <li className="px-4 py-6 text-center text-sm text-gray-400">没有找到相关标记</li>
@@ -133,14 +184,14 @@ export default function Sidebar({
 
       <div className="px-3 py-2 border-t border-gray-100 flex gap-1.5">
         <button
-          onClick={isAddingMode ? onCancelAdd : onStartAddMode}
+          onClick={inActiveAddFlow ? onCancelAdd : onStartAddMode}
           className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors ${
-            isAddingMode
+            inActiveAddFlow
               ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
               : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
-          {isAddingMode ? '✕ 取消' : '➕ 添加'}
+          {inActiveAddFlow ? '✕ 取消' : '➕ 添加'}
         </button>
 
         <div className="relative">
