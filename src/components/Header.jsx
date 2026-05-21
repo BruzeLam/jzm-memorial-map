@@ -23,9 +23,33 @@ function useCountdown() {
   return seconds;
 }
 
+// 黑框眼镜 SVG —— 抽象为无尽符号
+function Glasses({ size = 32 }) {
+  return (
+    <svg
+      width={size}
+      height={size * 0.45}
+      viewBox="0 0 64 29"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* 左镜片 */}
+      <rect x="1" y="1" width="24" height="22" rx="4" ry="4"
+        stroke="currentColor" strokeWidth="3" fill="none" />
+      {/* 右镜片 */}
+      <rect x="39" y="1" width="24" height="22" rx="4" ry="4"
+        stroke="currentColor" strokeWidth="3" fill="none" />
+      {/* 中间鼻梁 */}
+      <path d="M25 11 Q32 17 39 11" stroke="currentColor" strokeWidth="2.5"
+        fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function Header() {
   const seconds = useCountdown();
   const showCountdown = Date.now() < CENTENARY;
+  const [hovered, setHovered] = useState(false);
 
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0">
@@ -44,7 +68,11 @@ export default function Header() {
 
         <div className="flex items-center gap-3">
           {showCountdown && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5">
+            <div
+              className="relative flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 cursor-default select-none"
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
               <span className="text-xs text-red-600 font-medium whitespace-nowrap">
                 距百岁诞辰
               </span>
@@ -52,6 +80,19 @@ export default function Header() {
                 {seconds.toLocaleString()}
               </span>
               <span className="text-xs text-red-600 font-medium">秒</span>
+
+              {/* 悬浮 tooltip */}
+              {hovered && (
+                <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white rounded-lg shadow-lg whitespace-nowrap flex items-center gap-1.5 text-sm font-medium z-50">
+                  <span>1926.8.17</span>
+                  <span className="text-gray-400 mx-0.5">—</span>
+                  <span className="text-yellow-300">
+                    <Glasses size={28} />
+                  </span>
+                  {/* 小三角 */}
+                  <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900" />
+                </div>
+              )}
             </div>
           )}
           <span className="text-xs text-gray-400">Leaflet + OpenStreetMap</span>
