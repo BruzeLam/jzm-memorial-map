@@ -83,7 +83,7 @@ export default function Header() {
 
               {/* 悬浮 tooltip */}
               {hovered && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg shadow-lg whitespace-nowrap flex items-center gap-2 text-sm font-medium z-50 border border-gray-100">
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg shadow-2xl whitespace-nowrap flex items-center gap-2 text-sm font-medium border border-gray-100" style={{ zIndex: 99999 }}>
                   <span className="font-semibold">1926.8.17</span>
                   <span className="text-gray-400 mx-0.5">—</span>
                   <span className="text-red-600">
