@@ -37,11 +37,23 @@ export default function Sidebar({
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [sortOrder, setSortOrder] = useState('date-asc');
 
   const handleExport = (format) => {
     exportMarkers(markers, format);
     setShowExportMenu(false);
   };
+
+  const sortedMarkers = [...filteredMarkers].sort((a, b) => {
+    const dateA = a.date || '';
+    const dateB = b.date || '';
+
+    if (sortOrder === 'date-asc') {
+      return dateA.localeCompare(dateB);
+    } else {
+      return dateB.localeCompare(dateA);
+    }
+  });
 
   // Determine what the add button shows
   const inActiveAddFlow = isAddingMode || showAddForm || showModePicker;
@@ -68,6 +80,30 @@ export default function Sidebar({
         {filteredMarkers.length !== stats.total && (
           <span>当前显示 <strong className="text-gray-700">{filteredMarkers.length}</strong> 个</span>
         )}
+      </div>
+
+      <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-1">
+        <span className="text-xs text-gray-500">排序:</span>
+        <button
+          onClick={() => setSortOrder('date-asc')}
+          className={`flex-1 text-xs py-1.5 px-2 rounded transition-colors ${
+            sortOrder === 'date-asc'
+              ? 'bg-blue-100 text-blue-700 font-medium'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          📅 时间↑
+        </button>
+        <button
+          onClick={() => setSortOrder('date-desc')}
+          className={`flex-1 text-xs py-1.5 px-2 rounded transition-colors ${
+            sortOrder === 'date-desc'
+              ? 'bg-blue-100 text-blue-700 font-medium'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          📅 时间↓
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto sidebar-scrollable">
@@ -135,10 +171,10 @@ export default function Sidebar({
         ) : (
           /* ── Marker List ─────────────────────────────────────── */
           <ul className="py-1">
-            {filteredMarkers.length === 0 ? (
+            {sortedMarkers.length === 0 ? (
               <li className="px-4 py-6 text-center text-sm text-gray-400">没有找到相关标记</li>
             ) : (
-              filteredMarkers.map((m) => {
+              sortedMarkers.map((m) => {
                 const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
                 const isActive = m.id === selectedMarkerId;
                 return (
