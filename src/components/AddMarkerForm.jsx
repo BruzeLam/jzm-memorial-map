@@ -44,6 +44,9 @@ function extractAdminInfo(address) {
     city: address.city || address.county || address.town || '',
   };
 }
+
+// ─── Location search hook ───────────────────────────────────────────────────
+function useLocationSearch(query) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -232,6 +235,7 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
         city: prev.city || adminInfo.city,
       }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
   const set = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
