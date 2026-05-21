@@ -16,10 +16,6 @@ export default function Sidebar({
   setSearchQuery,
   activeFilters,
   toggleFilter,
-  activeRegionFilters,
-  setCountryFilter,
-  toggleProvinceFilter,
-  regionStats,
   clearSearch,
   onMarkerSelect,
   onEditMarker,
@@ -77,15 +73,7 @@ export default function Sidebar({
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100">
-        <FilterPanel
-          activeFilters={activeFilters}
-          toggleFilter={toggleFilter}
-          stats={stats}
-          activeRegionFilters={activeRegionFilters}
-          setCountryFilter={setCountryFilter}
-          toggleProvinceFilter={toggleProvinceFilter}
-          regionStats={regionStats}
-        />
+        <FilterPanel activeFilters={activeFilters} toggleFilter={toggleFilter} stats={stats} />
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
