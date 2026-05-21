@@ -34,6 +34,7 @@ export default function Sidebar({
   onPickManualMode,
   onResetToSample,
   onClearAll,
+  onAutoFillAdminInfo,
   onOpenDetail,
 }) {
   const [showSettings, setShowSettings] = useState(false);
@@ -263,6 +264,12 @@ export default function Sidebar({
           </button>
           {showSettings && (
             <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-40">
+              <button
+                onClick={() => { onAutoFillAdminInfo(); setShowSettings(false); }}
+                className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
+              >
+                🌍 自动填充地区
+              </button>
               <button
                 onClick={() => { onResetToSample(); setShowSettings(false); }}
                 className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
