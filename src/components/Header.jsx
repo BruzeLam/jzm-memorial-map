@@ -63,7 +63,7 @@ export default function Header({ onOpenQuotes }) {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-3 ml-auto">
           <button
             onClick={onOpenQuotes}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
@@ -74,7 +74,7 @@ export default function Header({ onOpenQuotes }) {
 
           {showCountdown && (
             <div
-              className="relative flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 cursor-default select-none ml-auto"
+              className="relative flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 cursor-default select-none"
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
             >
@@ -96,6 +96,14 @@ export default function Header({ onOpenQuotes }) {
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-white" />
                 </div>
               )}
+            </div>
+          )}
+
+          {!showCountdown && (
+            <div className="flex items-center gap-2 text-gray-700 text-xs font-medium px-3 py-1.5">
+              <span>1926/8/17</span>
+              <span className="text-gray-400">-</span>
+              <span>♾️</span>
             </div>
           )}
         </div>
