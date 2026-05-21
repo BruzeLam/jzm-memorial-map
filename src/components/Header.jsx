@@ -46,7 +46,7 @@ function Glasses({ size = 32 }) {
   );
 }
 
-export default function Header() {
+export default function Header({ onOpenQuotes }) {
   const seconds = useCountdown();
   const showCountdown = Date.now() < CENTENARY;
   const [hovered, setHovered] = useState(false);
@@ -95,6 +95,13 @@ export default function Header() {
               )}
             </div>
           )}
+          <button
+            onClick={onOpenQuotes}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            <span>📚</span>
+            <span>长者语录</span>
+          </button>
           <span className="text-xs text-gray-400">Leaflet + OpenStreetMap</span>
         </div>
       </div>

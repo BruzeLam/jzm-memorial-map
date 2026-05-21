@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
+import QuotesPanel from './components/QuotesPanel';
 
 export default function App() {
   const {
@@ -38,6 +39,8 @@ export default function App() {
 
   // Floating card state: { coords: {lat,lng}, pixelPos: {x,y} }
   const [mapFloatingCard, setMapFloatingCard] = useState(null);
+
+  const [showQuotes, setShowQuotes] = useState(false);
 
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -166,7 +169,8 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <Header />
+      <Header onOpenQuotes={() => setShowQuotes(true)} />
+      {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
       <div className="flex flex-1 overflow-hidden app-layout">
         <Sidebar
           markers={markers}
