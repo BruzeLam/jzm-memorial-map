@@ -8,7 +8,6 @@ function useCountdown() {
   );
 
   useEffect(() => {
-    if (seconds <= 0) return;
     const timer = setInterval(() => {
       const remaining = Math.floor((CENTENARY - Date.now()) / 1000);
       if (remaining <= 0) {
@@ -19,7 +18,7 @@ function useCountdown() {
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return seconds;
 }
