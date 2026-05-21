@@ -58,18 +58,23 @@ export default function Header({ onOpenQuotes }) {
           <div className="w-8 h-8 rounded-full bg-red-700 flex items-center justify-center text-white text-sm font-bold">
             纪
           </div>
-          <div>
-            <h1 className="text-lg font-serif font-bold text-gray-800 leading-tight">
-              江泽民同志生平纪念地图
-            </h1>
-            <p className="text-xs text-gray-500">交互式历史足迹地图</p>
-          </div>
+          <h1 className="text-lg font-serif font-bold text-gray-800 leading-tight">
+            江泽民同志生平纪念地图
+          </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
+          <button
+            onClick={onOpenQuotes}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            <span>📚</span>
+            <span>长者语录</span>
+          </button>
+
           {showCountdown && (
             <div
-              className="relative flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 cursor-default select-none"
+              className="relative flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 cursor-default select-none ml-auto"
               onMouseEnter={() => setHovered(true)}
               onMouseLeave={() => setHovered(false)}
             >
@@ -81,7 +86,6 @@ export default function Header({ onOpenQuotes }) {
               </span>
               <span className="text-xs text-red-600 font-medium">秒</span>
 
-              {/* 悬浮 tooltip */}
               {hovered && (
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg shadow-2xl whitespace-nowrap flex items-center gap-2 text-sm font-medium border border-gray-100" style={{ zIndex: 99999 }}>
                   <span className="font-semibold">1926.8.17</span>
@@ -89,20 +93,11 @@ export default function Header({ onOpenQuotes }) {
                   <span className="text-red-600">
                     <Glasses size={28} />
                   </span>
-                  {/* 小三角指向上方 */}
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-white" />
                 </div>
               )}
             </div>
           )}
-          <button
-            onClick={onOpenQuotes}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
-          >
-            <span>📚</span>
-            <span>长者语录</span>
-          </button>
-          <span className="text-xs text-gray-400">Leaflet + OpenStreetMap</span>
         </div>
       </div>
     </header>

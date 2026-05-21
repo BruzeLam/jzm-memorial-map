@@ -20,7 +20,6 @@ function UploadForm({ onSave, onCancel }) {
   const [text, setText] = useState('');
   const [source, setSource] = useState('');
   const [context, setContext] = useState('');
-  const [categoryId, setCategoryId] = useState(QUOTE_CATEGORIES[0].id);
   const [error, setError] = useState('');
 
   const handleSubmit = () => {
@@ -30,7 +29,7 @@ function UploadForm({ onSave, onCancel }) {
     }
     onSave({
       id: 'user_' + Date.now(),
-      categoryId,
+      categoryId: 'cat_2',
       text: text.trim(),
       source: source.trim() || null,
       context: context.trim() || null,
@@ -85,19 +84,6 @@ function UploadForm({ onSave, onCancel }) {
               placeholder="如：1997年访美时引用，表达..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">分类</label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 bg-white"
-            >
-              {QUOTE_CATEGORIES.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.title}</option>
-              ))}
-            </select>
           </div>
         </div>
 
