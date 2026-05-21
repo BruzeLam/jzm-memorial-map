@@ -23,8 +23,18 @@ export default function App() {
     clearAll,
   } = useMarkers();
 
-  const { searchQuery, setSearchQuery, activeFilters, toggleFilter, clearSearch, filteredMarkers } =
-    useSearch(markers);
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeFilters,
+    toggleFilter,
+    clearSearch,
+    filteredMarkers,
+    activeRegionFilters,
+    setCountryFilter,
+    toggleProvinceFilter,
+    getRegionStats,
+  } = useSearch(markers);
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   // 'map' | 'manual' | null
@@ -179,6 +189,10 @@ export default function App() {
           setSearchQuery={setSearchQuery}
           activeFilters={activeFilters}
           toggleFilter={toggleFilter}
+          activeRegionFilters={activeRegionFilters}
+          setCountryFilter={setCountryFilter}
+          toggleProvinceFilter={toggleProvinceFilter}
+          regionStats={getRegionStats}
           clearSearch={clearSearch}
           onMarkerSelect={handleMarkerSelect}
           onEditMarker={handleEditMarker}

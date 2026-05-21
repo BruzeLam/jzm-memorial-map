@@ -16,6 +16,10 @@ export default function Sidebar({
   setSearchQuery,
   activeFilters,
   toggleFilter,
+  activeRegionFilters,
+  setCountryFilter,
+  toggleProvinceFilter,
+  regionStats,
   clearSearch,
   onMarkerSelect,
   onEditMarker,
@@ -73,7 +77,15 @@ export default function Sidebar({
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100">
-        <FilterPanel activeFilters={activeFilters} toggleFilter={toggleFilter} stats={stats} />
+        <FilterPanel
+          activeFilters={activeFilters}
+          toggleFilter={toggleFilter}
+          stats={stats}
+          activeRegionFilters={activeRegionFilters}
+          setCountryFilter={setCountryFilter}
+          toggleProvinceFilter={toggleProvinceFilter}
+          regionStats={regionStats}
+        />
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
@@ -83,27 +95,12 @@ export default function Sidebar({
         )}
       </div>
 
-      <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-1">
-        <span className="text-xs text-gray-500">排序:</span>
+      <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-2">
         <button
-          onClick={() => setSortOrder('date-asc')}
-          className={`flex-1 text-xs py-1.5 px-2 rounded transition-colors ${
-            sortOrder === 'date-asc'
-              ? 'bg-blue-100 text-blue-700 font-medium'
-              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-          }`}
+          onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
+          className="flex-1 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1"
         >
-          📅 时间↑
-        </button>
-        <button
-          onClick={() => setSortOrder('date-desc')}
-          className={`flex-1 text-xs py-1.5 px-2 rounded transition-colors ${
-            sortOrder === 'date-desc'
-              ? 'bg-blue-100 text-blue-700 font-medium'
-              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          📅 时间↓
+          📅 时间 {sortOrder === 'date-asc' ? '↑' : '↓'}
         </button>
       </div>
 
