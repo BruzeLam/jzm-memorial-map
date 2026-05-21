@@ -34,6 +34,8 @@ export default function Sidebar({
   onPickManualMode,
   onResetToSample,
   onClearAll,
+  onToggleCollapse,
+  onOpenDetail,
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -166,6 +168,7 @@ export default function Sidebar({
               onEdit={onEditMarker}
               onDelete={onDeleteMarker}
               onClose={() => onMarkerSelect(selectedMarkerId)}
+              onOpenDetail={onOpenDetail}
             />
           </div>
         ) : (
@@ -228,6 +231,14 @@ export default function Sidebar({
           }`}
         >
           {inActiveAddFlow ? '✕ 取消' : '➕ 添加'}
+        </button>
+
+        <button
+          onClick={onToggleCollapse}
+          className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+          title="收起侧边栏"
+        >
+          ◀️ 收起
         </button>
 
         <div className="relative">

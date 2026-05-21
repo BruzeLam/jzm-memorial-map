@@ -1,7 +1,7 @@
 import React from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 
-export default function MarkerDetails({ marker, onEdit, onDelete, onClose }) {
+export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpenDetail }) {
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
@@ -52,6 +52,12 @@ export default function MarkerDetails({ marker, onEdit, onDelete, onClose }) {
         )}
 
         <div className="flex gap-2 pt-2 border-t border-gray-100">
+          <button
+            onClick={() => onOpenDetail && onOpenDetail(marker)}
+            className="flex-1 text-sm py-1.5 px-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors font-medium"
+          >
+            📖 详情
+          </button>
           <button
             onClick={() => onEdit(marker)}
             className="flex-1 text-sm py-1.5 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"

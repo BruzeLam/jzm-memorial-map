@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
+import DetailPanel from './components/DetailPanel';
 
 export default function App() {
   const {
@@ -41,6 +42,8 @@ export default function App() {
   const [mapFloatingCard, setMapFloatingCard] = useState(null);
 
   const [showQuotes, setShowQuotes] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showDetailPanel, setShowDetailPanel] = useState(false);
 
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -171,36 +174,55 @@ export default function App() {
     <div className="flex flex-col h-screen bg-gray-100">
       <Header onOpenQuotes={() => setShowQuotes(true)} />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
-      <div className="flex flex-1 overflow-hidden app-layout">
-        <Sidebar
-          markers={markers}
-          filteredMarkers={filteredMarkers}
-          selectedMarkerId={selectedMarkerId}
-          selectedMarker={selectedMarker}
-          stats={stats}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          activeFilters={activeFilters}
-          toggleFilter={toggleFilter}
-          clearSearch={clearSearch}
-          onMarkerSelect={handleMarkerSelect}
-          onEditMarker={handleEditMarker}
-          onDeleteMarker={handleDeleteMarker}
-          onStartAddMode={handleStartAddMode}
-          isAddingMode={isAddingMode}
-          showAddForm={showAddForm}
-          showModePicker={showModePicker}
-          editingMarker={editingMarker}
-          pendingCoords={pendingCoords}
-          formPrefill={formPrefill}
-          onAddMarker={handleAddMarker}
-          onUpdateMarker={handleUpdateMarker}
-          onCancelAdd={handleCancelAdd}
-          onPickMapMode={handlePickMapMode}
-          onPickManualMode={handlePickManualMode}
-          onResetToSample={resetToSample}
-          onClearAll={clearAll}
+      {showDetailPanel && (
+        <DetailPanel
+          marker={selectedMarker}
+          onClose={() => setShowDetailPanel(false)}
         />
+      )}
+      <div className="flex flex-1 overflow-hidden app-layout">
+        {!sidebarCollapsed && (
+          <Sidebar
+            markers={markers}
+            filteredMarkers={filteredMarkers}
+            selectedMarkerId={selectedMarkerId}
+            selectedMarker={selectedMarker}
+            stats={stats}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeFilters={activeFilters}
+            toggleFilter={toggleFilter}
+            clearSearch={clearSearch}
+            onMarkerSelect={handleMarkerSelect}
+            onEditMarker={handleEditMarker}
+            onDeleteMarker={handleDeleteMarker}
+            onStartAddMode={handleStartAddMode}
+            isAddingMode={isAddingMode}
+            showAddForm={showAddForm}
+            showModePicker={showModePicker}
+            editingMarker={editingMarker}
+            pendingCoords={pendingCoords}
+            formPrefill={formPrefill}
+            onAddMarker={handleAddMarker}
+            onUpdateMarker={handleUpdateMarker}
+            onCancelAdd={handleCancelAdd}
+            onPickMapMode={handlePickMapMode}
+            onPickManualMode={handlePickManualMode}
+            onResetToSample={resetToSample}
+            onClearAll={clearAll}
+            onToggleCollapse={() => setSidebarCollapsed(true)}
+            onOpenDetail={() => setShowDetailPanel(true)}
+          />
+        )}
+        {sidebarCollapsed && (
+          <button
+            onClick={() => setSidebarCollapsed(false)}
+            className="w-12 h-screen bg-white border-r border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+            title="展开侧边栏"
+          >
+            <span className="text-xl">▶️</span>
+          </button>
+        )}
         <div className="flex-1 relative map-panel" ref={mapContainerRef}>
           {isAddingMode && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
