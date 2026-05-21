@@ -319,33 +319,6 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className={labelClass}>纬度 *</label>
-            <input
-              required
-              type="number"
-              step="any"
-              className={inputClass}
-              value={form.latitude}
-              onChange={(e) => set('latitude', e.target.value)}
-              placeholder="39.9042"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>经度 *</label>
-            <input
-              required
-              type="number"
-              step="any"
-              className={inputClass}
-              value={form.longitude}
-              onChange={(e) => set('longitude', e.target.value)}
-              placeholder="116.4074"
-            />
-          </div>
-        </div>
-
         <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
           <label className={labelClass}>行政区划</label>
           <div className="text-sm text-gray-700 space-y-1">
@@ -379,6 +352,33 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
                 placeholder="自动识别或手动输入"
               />
             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className={labelClass}>纬度 *</label>
+            <input
+              required
+              type="number"
+              step="any"
+              className={inputClass}
+              value={form.latitude}
+              onChange={(e) => set('latitude', e.target.value)}
+              placeholder="39.9042"
+            />
+          </div>
+          <div>
+            <label className={labelClass}>经度 *</label>
+            <input
+              required
+              type="number"
+              step="any"
+              className={inputClass}
+              value={form.longitude}
+              onChange={(e) => set('longitude', e.target.value)}
+              placeholder="116.4074"
+            />
           </div>
         </div>
 
