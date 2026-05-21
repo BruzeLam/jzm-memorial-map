@@ -181,50 +181,55 @@ export default function App() {
         />
       )}
       <div className="flex flex-1 overflow-hidden app-layout">
-        <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-0' : 'w-80'} flex-shrink-0 overflow-hidden`}>
-          <Sidebar
-            markers={markers}
-            filteredMarkers={filteredMarkers}
-            selectedMarkerId={selectedMarkerId}
-            selectedMarker={selectedMarker}
-            stats={stats}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            activeFilters={activeFilters}
-            toggleFilter={toggleFilter}
-            clearSearch={clearSearch}
-            onMarkerSelect={handleMarkerSelect}
-            onEditMarker={handleEditMarker}
-            onDeleteMarker={handleDeleteMarker}
-            onStartAddMode={handleStartAddMode}
-            isAddingMode={isAddingMode}
-            showAddForm={showAddForm}
-            showModePicker={showModePicker}
-            editingMarker={editingMarker}
-            pendingCoords={pendingCoords}
-            formPrefill={formPrefill}
-            onAddMarker={handleAddMarker}
-            onUpdateMarker={handleUpdateMarker}
-            onCancelAdd={handleCancelAdd}
-            onPickMapMode={handlePickMapMode}
-            onPickManualMode={handlePickManualMode}
-            onResetToSample={resetToSample}
-            onClearAll={clearAll}
-            onToggleCollapse={() => setSidebarCollapsed(true)}
-            onOpenDetail={() => setShowDetailPanel(true)}
-          />
-        </div>
+        {/* Floating Sidebar */}
+        {!sidebarCollapsed && (
+          <div className="absolute top-0 left-0 bottom-0 w-80 z-[100] shadow-lg animate-slide-in">
+            <Sidebar
+              markers={markers}
+              filteredMarkers={filteredMarkers}
+              selectedMarkerId={selectedMarkerId}
+              selectedMarker={selectedMarker}
+              stats={stats}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              activeFilters={activeFilters}
+              toggleFilter={toggleFilter}
+              clearSearch={clearSearch}
+              onMarkerSelect={handleMarkerSelect}
+              onEditMarker={handleEditMarker}
+              onDeleteMarker={handleDeleteMarker}
+              onStartAddMode={handleStartAddMode}
+              isAddingMode={isAddingMode}
+              showAddForm={showAddForm}
+              showModePicker={showModePicker}
+              editingMarker={editingMarker}
+              pendingCoords={pendingCoords}
+              formPrefill={formPrefill}
+              onAddMarker={handleAddMarker}
+              onUpdateMarker={handleUpdateMarker}
+              onCancelAdd={handleCancelAdd}
+              onPickMapMode={handlePickMapMode}
+              onPickManualMode={handlePickManualMode}
+              onResetToSample={resetToSample}
+              onClearAll={clearAll}
+              onToggleCollapse={() => setSidebarCollapsed(true)}
+              onOpenDetail={() => setShowDetailPanel(true)}
+            />
+          </div>
+        )}
 
+        {/* Expand Button */}
         {sidebarCollapsed && (
           <button
             onClick={() => setSidebarCollapsed(false)}
-            className="w-14 flex-shrink-0 bg-gradient-to-b from-gray-50 to-gray-100 border-r border-gray-200 flex flex-col items-center justify-center hover:from-blue-50 hover:to-blue-100 transition-all gap-4 py-4 group"
+            className="absolute top-4 left-4 z-[90] bg-white rounded-lg shadow-md p-3 hover:shadow-lg hover:scale-105 transition-all group border border-gray-200"
             title="展开侧边栏"
           >
-            <span className="text-2xl group-hover:scale-110 transition-transform">📍</span>
-            <span className="text-xs text-gray-500 group-hover:text-blue-600 transition-colors font-medium writing-vertical rotate-180">侧边栏</span>
+            <span className="text-xl group-hover:text-blue-600 transition-colors">▶️</span>
           </button>
         )}
+
+        {/* Full-width Map */}
         <div className="flex-1 relative map-panel" ref={mapContainerRef}>
           {isAddingMode && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">

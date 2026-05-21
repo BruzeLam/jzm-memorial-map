@@ -67,10 +67,10 @@ export default function Sidebar({
     >
       <button
         onClick={onToggleCollapse}
-        className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all group"
+        className="absolute top-3 right-3 z-20 w-9 h-9 flex items-center justify-center rounded-lg bg-white hover:bg-gray-50 text-gray-600 hover:text-blue-600 transition-all group shadow-sm border border-gray-200 hover:shadow-md"
         title="收起侧边栏"
       >
-        <span className="text-lg group-hover:scale-110 transition-transform">◀️</span>
+        <span className="text-base group-hover:scale-110 transition-transform">✕</span>
       </button>
       <div className="px-3 pt-3 pb-2 border-b border-gray-100">
         <SearchBar

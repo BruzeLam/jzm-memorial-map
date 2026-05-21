@@ -140,6 +140,42 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
   return null;
 }
 
+function ZoomControl({ mapRef }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (mapRef) mapRef.current = map;
+  }, [map, mapRef]);
+
+  const handleZoom = (direction) => {
+    if (direction === 'in') {
+      map.zoomIn();
+    } else {
+      map.zoomOut();
+    }
+  };
+
+  return (
+    <div className="absolute top-4 right-4 z-[400] flex flex-col gap-1 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+      <button
+        onClick={() => handleZoom('in')}
+        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-lg font-bold text-gray-600 hover:text-gray-800"
+        title="放大"
+      >
+        +
+      </button>
+      <div className="w-full h-px bg-gray-200" />
+      <button
+        onClick={() => handleZoom('out')}
+        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-lg font-bold text-gray-600 hover:text-gray-800"
+        title="缩小"
+      >
+        −
+      </button>
+    </div>
+  );
+}
+
 export default function MapView({ mapRef, markers, selectedMarkerId, onMarkerSelect, onMapClick, isAddingMode }) {
   return (
     <MapContainer
@@ -147,6 +183,7 @@ export default function MapView({ mapRef, markers, selectedMarkerId, onMarkerSel
       zoom={DEFAULT_ZOOM}
       style={{ width: '100%', height: '100%' }}
       className={isAddingMode ? 'cursor-crosshair' : ''}
+      zoomControl={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -159,6 +196,7 @@ export default function MapView({ mapRef, markers, selectedMarkerId, onMarkerSel
         selectedMarkerId={selectedMarkerId}
         onMarkerSelect={onMarkerSelect}
       />
+      <ZoomControl mapRef={mapRef} />
     </MapContainer>
   );
 }
