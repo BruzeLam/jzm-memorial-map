@@ -181,7 +181,7 @@ export default function App() {
         />
       )}
       <div className="flex flex-1 overflow-hidden app-layout">
-        {!sidebarCollapsed && (
+        <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-0' : 'w-80'} flex-shrink-0 overflow-hidden`}>
           <Sidebar
             markers={markers}
             filteredMarkers={filteredMarkers}
@@ -213,14 +213,16 @@ export default function App() {
             onToggleCollapse={() => setSidebarCollapsed(true)}
             onOpenDetail={() => setShowDetailPanel(true)}
           />
-        )}
+        </div>
+
         {sidebarCollapsed && (
           <button
             onClick={() => setSidebarCollapsed(false)}
-            className="w-12 h-screen bg-white border-r border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+            className="w-14 flex-shrink-0 bg-gradient-to-b from-gray-50 to-gray-100 border-r border-gray-200 flex flex-col items-center justify-center hover:from-blue-50 hover:to-blue-100 transition-all gap-4 py-4 group"
             title="展开侧边栏"
           >
-            <span className="text-xl">▶️</span>
+            <span className="text-2xl group-hover:scale-110 transition-transform">📍</span>
+            <span className="text-xs text-gray-500 group-hover:text-blue-600 transition-colors font-medium writing-vertical rotate-180">侧边栏</span>
           </button>
         )}
         <div className="flex-1 relative map-panel" ref={mapContainerRef}>

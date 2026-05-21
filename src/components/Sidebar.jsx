@@ -62,9 +62,16 @@ export default function Sidebar({
 
   return (
     <div
-      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0"
+      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0 relative"
       style={{ width: 320 }}
     >
+      <button
+        onClick={onToggleCollapse}
+        className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all group"
+        title="收起侧边栏"
+      >
+        <span className="text-lg group-hover:scale-110 transition-transform">◀️</span>
+      </button>
       <div className="px-3 pt-3 pb-2 border-b border-gray-100">
         <SearchBar
           searchQuery={searchQuery}
@@ -231,14 +238,6 @@ export default function Sidebar({
           }`}
         >
           {inActiveAddFlow ? '✕ 取消' : '➕ 添加'}
-        </button>
-
-        <button
-          onClick={onToggleCollapse}
-          className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
-          title="收起侧边栏"
-        >
-          ◀️ 收起
         </button>
 
         <div className="relative">
