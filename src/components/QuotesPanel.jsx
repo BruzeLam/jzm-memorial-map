@@ -272,18 +272,13 @@ export default function QuotesPanel({ onClose }) {
                     {quote.context && (
                       <p className="text-xs text-gray-400 leading-relaxed">{quote.context}</p>
                     )}
-                    <div className="mt-2 flex items-center gap-2">
-                      {activeCategoryId === null && (
-                        <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
-                          {category?.title}
-                        </span>
-                      )}
-                      {quote.isUserAdded && (
+                    {quote.isUserAdded && (
+                      <div className="mt-2">
                         <span className="inline-block px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 text-xs rounded-full">
                           我上传的
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })
