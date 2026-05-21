@@ -27,7 +27,9 @@ export default function MarkerDetails({ marker, onEdit, onDelete, onClose }) {
           <p className="text-sm font-medium text-gray-600 mb-2">{marker.title}</p>
         )}
         {marker.date && (
-          <p className="text-xs text-gray-400 mb-2">📅 {marker.date}</p>
+          <p className="text-xs text-gray-400 mb-2">
+            📅 {marker.date}{marker.endDate ? ` — ${marker.endDate}` : ''}
+          </p>
         )}
         {marker.description && (
           <p className="text-sm text-gray-700 leading-relaxed mb-3">{marker.description}</p>

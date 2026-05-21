@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { LocationInput } from './AddMarkerForm';
+import DatePicker from './DatePicker';
 
 export default function MapFloatingCard({ coords, pixelPos, containerSize, onQuickSave, onMoreDetails, onCancel }) {
   const [type, setType] = useState('spot');
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [lat, setLat] = useState(coords ? coords.lat.toFixed(6) : '');
   const [lng, setLng] = useState(coords ? coords.lng.toFixed(6) : '');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const CARD_W = 320;
   const CARD_H = 240; // approximate
@@ -34,6 +37,7 @@ export default function MapFloatingCard({ coords, pixelPos, containerSize, onQui
       type,
       name,
       date,
+      endDate: endDate || undefined,
       latitude: parseFloat(lat),
       longitude: parseFloat(lng),
       color: typeInfo.color,
@@ -55,6 +59,7 @@ export default function MapFloatingCard({ coords, pixelPos, containerSize, onQui
       type,
       name,
       date,
+      endDate: endDate || undefined,
       latitude: lat,
       longitude: lng,
     });
@@ -122,12 +127,36 @@ export default function MapFloatingCard({ coords, pixelPos, containerSize, onQui
           {/* Date */}
           <div>
             <label className={labelClass}>日期</label>
-            <input
-              className={inputClass}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              placeholder="YYYY-MM-DD"
-            />
+            <button
+              type="button"
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className={`w-full py-1.5 px-2.5 rounded-lg border text-xs font-medium transition-colors ${
+                showDatePicker
+                  ? 'bg-blue-50 border-blue-400 text-blue-600'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              📅 选择日期
+            </button>
+            {date && (
+              <div className="text-xs text-gray-600 mt-1 px-2 py-1 bg-blue-50 rounded-lg">
+                {date}{endDate ? ` — ${endDate}` : ''}
+              </div>
+            )}
+            {showDatePicker && (
+              <div className="mt-2 absolute z-[10000] bg-white rounded-lg border border-gray-200">
+                <DatePicker
+                  onSelect={({ date: d, endDate: ed }) => {
+                    setDate(d);
+                    setEndDate(ed || '');
+                    setShowDatePicker(false);
+                  }}
+                  initialDate={date}
+                  initialEndDate={endDate}
+                  onClose={() => setShowDatePicker(false)}
+                />
+              </div>
+            )}
           </div>
 
           {/* Coords display */}

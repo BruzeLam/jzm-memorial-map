@@ -167,7 +167,7 @@ export default function Sidebar({
                           >
                             {typeInfo.label}
                           </span>
-                          {m.date && <span>{m.date}</span>}
+                          {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
                         </div>
                         {m.title && (
                           <p className="text-xs text-gray-500 mt-0.5 truncate">{m.title}</p>

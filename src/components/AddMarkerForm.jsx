@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
+import DatePicker from './DatePicker';
 
 // ─── Location search hook ───────────────────────────────────────────────────
 function useLocationSearch(query) {
@@ -118,6 +119,7 @@ const emptyForm = {
   latitude: '',
   longitude: '',
   date: '',
+  endDate: '',
   title: '',
   description: '',
   sources: [{ title: '', note: '' }],
@@ -125,6 +127,7 @@ const emptyForm = {
 
 export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
   const [form, setForm] = useState(emptyForm);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const isEditing = !!editingMarker;
 
   useEffect(() => {
@@ -135,6 +138,7 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
         latitude: editingMarker.latitude ?? '',
         longitude: editingMarker.longitude ?? '',
         date: editingMarker.date || '',
+        endDate: editingMarker.endDate || '',
         title: editingMarker.title || '',
         description: editingMarker.description || '',
         sources: editingMarker.sources?.length > 0 ? editingMarker.sources : [{ title: '', note: '' }],
@@ -147,6 +151,7 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
         latitude: prefillData.latitude ?? prev.latitude,
         longitude: prefillData.longitude ?? prev.longitude,
         date: prefillData.date || prev.date,
+        endDate: prefillData.endDate || prev.endDate,
       }));
     } else if (initialCoords) {
       setForm((prev) => ({
@@ -264,12 +269,36 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
 
         <div>
           <label className={labelClass}>日期</label>
-          <input
-            className={inputClass}
-            value={form.date}
-            onChange={(e) => set('date', e.target.value)}
-            placeholder="YYYY-MM-DD 或 YYYY-MM 或 YYYY"
-          />
+          <button
+            type="button"
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className={`w-full py-1.5 px-3 rounded-lg border text-sm font-medium transition-colors ${
+              showDatePicker
+                ? 'bg-blue-50 border-blue-400 text-blue-600'
+                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+            }`}
+          >
+            📅 选择日期
+          </button>
+          {form.date && (
+            <div className="text-sm text-gray-600 mt-2 px-2 py-1.5 bg-blue-50 rounded-lg">
+              选中: {form.date}{form.endDate ? ` — ${form.endDate}` : ''}
+            </div>
+          )}
+          {showDatePicker && (
+            <div className="mt-2">
+              <DatePicker
+                onSelect={({ date, endDate }) => {
+                  set('date', date);
+                  set('endDate', endDate || '');
+                  setShowDatePicker(false);
+                }}
+                initialDate={form.date}
+                initialEndDate={form.endDate}
+                onClose={() => setShowDatePicker(false)}
+              />
+            </div>
+          )}
         </div>
 
         <div>
