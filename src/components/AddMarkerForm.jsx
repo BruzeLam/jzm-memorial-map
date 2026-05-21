@@ -2,8 +2,48 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import DatePicker from './DatePicker';
 
-// ─── Location search hook ───────────────────────────────────────────────────
-function useLocationSearch(query) {
+// ─── Reverse geocoding hook ─────────────────────────────────────────────────
+function useReverseGeocoding(lat, lng) {
+  const [address, setAddress] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!lat || !lng) {
+      setAddress(null);
+      return;
+    }
+
+    setLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=zh-CN`,
+          { headers: { 'Accept-Language': 'zh-CN,zh;q=0.9' } }
+        );
+        const data = await res.json();
+        setAddress(data.address || null);
+      } catch (e) {
+        setAddress(null);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [lat, lng]);
+
+  return { address, loading };
+}
+
+// ─── Extract administrative info ─────────────────────────────────────────────
+function extractAdminInfo(address) {
+  if (!address) return { country: '', province: '', city: '' };
+
+  return {
+    country: address.country || '',
+    province: address.state || address.province || '',
+    city: address.city || address.county || address.town || '',
+  };
+}
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -63,9 +103,17 @@ export function LocationInput({ value, onChange, onSelect, placeholder, inputCla
 
   const handleSelect = (item) => {
     const name = item.name || item.display_name.split(',')[0].trim();
+    const adminInfo = extractAdminInfo(item.address);
     setQuery(name);
     onChange(name);
-    onSelect({ name, lat: parseFloat(item.lat), lng: parseFloat(item.lon) });
+    onSelect({
+      name,
+      lat: parseFloat(item.lat),
+      lng: parseFloat(item.lon),
+      country: adminInfo.country,
+      province: adminInfo.province,
+      city: adminInfo.city,
+    });
     setFocused(false);
   };
 
@@ -118,6 +166,9 @@ const emptyForm = {
   name: '',
   latitude: '',
   longitude: '',
+  country: '',
+  province: '',
+  city: '',
   date: '',
   endDate: '',
   title: '',
@@ -130,6 +181,8 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
   const [showDatePicker, setShowDatePicker] = useState(false);
   const isEditing = !!editingMarker;
 
+  const { address } = useReverseGeocoding(form.latitude, form.longitude);
+
   useEffect(() => {
     if (editingMarker) {
       setForm({
@@ -137,6 +190,9 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
         name: editingMarker.name || '',
         latitude: editingMarker.latitude ?? '',
         longitude: editingMarker.longitude ?? '',
+        country: editingMarker.country || '',
+        province: editingMarker.province || '',
+        city: editingMarker.city || '',
         date: editingMarker.date || '',
         endDate: editingMarker.endDate || '',
         title: editingMarker.title || '',
@@ -150,6 +206,9 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
         name: prefillData.name || prev.name,
         latitude: prefillData.latitude ?? prev.latitude,
         longitude: prefillData.longitude ?? prev.longitude,
+        country: prefillData.country || prev.country,
+        province: prefillData.province || prev.province,
+        city: prefillData.city || prev.city,
         date: prefillData.date || prev.date,
         endDate: prefillData.endDate || prev.endDate,
       }));
@@ -161,6 +220,19 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
       }));
     }
   }, [editingMarker, initialCoords, prefillData]);
+
+  // Auto-fill admin info when reverse geocoding completes
+  useEffect(() => {
+    if (address && form.latitude && form.longitude) {
+      const adminInfo = extractAdminInfo(address);
+      setForm((prev) => ({
+        ...prev,
+        country: prev.country || adminInfo.country,
+        province: prev.province || adminInfo.province,
+        city: prev.city || adminInfo.city,
+      }));
+    }
+  }, [address]);
 
   const set = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
@@ -227,12 +299,15 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
           <LocationInput
             value={form.name}
             onChange={(v) => set('name', v)}
-            onSelect={({ name, lat, lng }) => {
+            onSelect={({ name, lat, lng, country, province, city }) => {
               setForm((prev) => ({
                 ...prev,
                 name,
                 latitude: lat.toFixed(6),
                 longitude: lng.toFixed(6),
+                country: country || prev.country,
+                province: province || prev.province,
+                city: city || prev.city,
               }));
             }}
             placeholder="如：北京、虎门大桥"
@@ -264,6 +339,42 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
               onChange={(e) => set('longitude', e.target.value)}
               placeholder="116.4074"
             />
+          </div>
+        </div>
+
+        <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
+          <label className={labelClass}>行政区划</label>
+          <div className="text-sm text-gray-700 space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 min-w-12">国家:</span>
+              <input
+                type="text"
+                className={inputClass + ' text-xs'}
+                value={form.country}
+                onChange={(e) => set('country', e.target.value)}
+                placeholder="自动识别或手动输入"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 min-w-12">省份:</span>
+              <input
+                type="text"
+                className={inputClass + ' text-xs'}
+                value={form.province}
+                onChange={(e) => set('province', e.target.value)}
+                placeholder="自动识别或手动输入"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 min-w-12">城市:</span>
+              <input
+                type="text"
+                className={inputClass + ' text-xs'}
+                value={form.city}
+                onChange={(e) => set('city', e.target.value)}
+                placeholder="自动识别或手动输入"
+              />
+            </div>
           </div>
         </div>
 
