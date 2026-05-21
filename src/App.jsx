@@ -21,7 +21,6 @@ export default function App() {
     deselectMarker,
     resetToSample,
     clearAll,
-    autoFillAdminInfo,
   } = useMarkers();
 
   const { searchQuery, setSearchQuery, activeFilters, toggleFilter, clearSearch, filteredMarkers } =
@@ -198,7 +197,6 @@ export default function App() {
           onPickManualMode={handlePickManualMode}
           onResetToSample={resetToSample}
           onClearAll={clearAll}
-          onAutoFillAdminInfo={autoFillAdminInfo}
           onOpenDetail={() => setShowDetailPanel(true)}
         />
 

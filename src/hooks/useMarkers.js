@@ -86,36 +86,6 @@ export function useMarkers() {
     setSelectedMarkerId(null);
   }, []);
 
-  const autoFillAdminInfo = useCallback(async () => {
-    const needsUpdate = markers.filter((m) => !m.country && !m.province && !m.city && m.latitude && m.longitude);
-    if (needsUpdate.length === 0) return;
-
-    const updated = [...markers];
-    for (const marker of needsUpdate) {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${marker.latitude}&lon=${marker.longitude}&addressdetails=1&accept-language=zh-CN`,
-          { headers: { 'Accept-Language': 'zh-CN,zh;q=0.9' } }
-        );
-        const data = await res.json();
-        const address = data.address || {};
-        const idx = updated.findIndex((m) => m.id === marker.id);
-        if (idx !== -1) {
-          updated[idx] = {
-            ...updated[idx],
-            country: address.country || '',
-            province: address.state || address.province || '',
-            city: address.city || address.county || address.town || '',
-          };
-        }
-        await new Promise((resolve) => setTimeout(resolve, 300));
-      } catch (e) {
-        console.error(`Failed to fetch admin info for ${marker.name}:`, e);
-      }
-    }
-    setMarkers(updated);
-  }, [markers]);
-
   const stats = {
     total: markers.length,
     spot: markers.filter((m) => m.type === 'spot').length,
@@ -135,6 +105,5 @@ export function useMarkers() {
     deselectMarker,
     resetToSample,
     clearAll,
-    autoFillAdminInfo,
   };
 }
