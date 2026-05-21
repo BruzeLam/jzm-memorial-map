@@ -26,7 +26,6 @@ export const MARKER_TYPES = {
 };
 
 export const STORAGE_KEY = 'jzm_memorial_markers';
-export const DATA_VERSION = 3; // 每次更新 SAMPLE_MARKERS 时递增
 export const VERSION_KEY = 'jzm_memorial_data_version';
 
 export const DEFAULT_CENTER = [35.8617, 104.1954];
@@ -244,3 +243,6 @@ export const SAMPLE_MARKERS = [
     sources: [{ title: '官方新闻', note: '' }],
   },
 ];
+
+// 自动版本号：等于数据条数，新增数据后无需手动维护
+export const DATA_VERSION = SAMPLE_MARKERS.length;
