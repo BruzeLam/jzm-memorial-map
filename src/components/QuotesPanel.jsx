@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { QUOTES, QUOTE_CATEGORIES } from '../data/quotes';
+import { QUOTES } from '../data/quotes';
 
 const STORAGE_KEY = 'jzm_user_quotes';
 
@@ -29,7 +29,6 @@ function UploadForm({ onSave, onCancel }) {
     }
     onSave({
       id: 'user_' + Date.now(),
-      categoryId: 'cat_2',
       text: text.trim(),
       source: source.trim() || null,
       context: context.trim() || null,
@@ -109,7 +108,6 @@ function UploadForm({ onSave, onCancel }) {
 }
 
 export default function QuotesPanel({ onClose }) {
-  const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [userQuotes, setUserQuotes] = useState(loadUserQuotes);
@@ -117,22 +115,16 @@ export default function QuotesPanel({ onClose }) {
   const allQuotes = useMemo(() => [...QUOTES, ...userQuotes], [userQuotes]);
 
   const filteredQuotes = useMemo(() => {
-    let result = activeCategoryId
-      ? allQuotes.filter((q) => q.categoryId === activeCategoryId)
-      : allQuotes;
+    if (!searchQuery.trim()) return allQuotes;
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(
-        (quote) =>
-          quote.text.toLowerCase().includes(q) ||
-          (quote.source && quote.source.toLowerCase().includes(q)) ||
-          (quote.context && quote.context.toLowerCase().includes(q))
-      );
-    }
-
-    return result;
-  }, [allQuotes, activeCategoryId, searchQuery]);
+    const q = searchQuery.trim().toLowerCase();
+    return allQuotes.filter(
+      (quote) =>
+        quote.text.toLowerCase().includes(q) ||
+        (quote.source && quote.source.toLowerCase().includes(q)) ||
+        (quote.context && quote.context.toLowerCase().includes(q))
+    );
+  }, [allQuotes, searchQuery]);
 
   const handleSaveQuote = (quote) => {
     const updated = [...userQuotes, quote];
@@ -207,35 +199,6 @@ export default function QuotesPanel({ onClose }) {
             </div>
           </div>
 
-          {/* Category filter */}
-          <div className="flex gap-2 px-6 py-3 border-b border-gray-100 overflow-x-auto flex-shrink-0">
-            <button
-              onClick={() => setActiveCategoryId(null)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                activeCategoryId === null
-                  ? 'bg-red-700 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              全部 ({allQuotes.length})
-            </button>
-            {QUOTE_CATEGORIES.map((cat) => {
-              const count = allQuotes.filter((q) => q.categoryId === cat.id).length;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategoryId(cat.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                    activeCategoryId === cat.id
-                      ? 'bg-red-700 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {cat.title} ({count})
-                </button>
-              );
-            })}
-          </div>
 
           {/* Quotes list */}
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
@@ -278,7 +241,7 @@ export default function QuotesPanel({ onClose }) {
           {/* Footer */}
           <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
             <span className="text-xs text-gray-400">
-              {searchQuery ? `搜索到 ${filteredQuotes.length} 条` : `共 ${allQuotes.length} 条语录`}
+              共 {filteredQuotes.length} 条语录
             </span>
             <button
               onClick={onClose}
