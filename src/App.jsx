@@ -100,6 +100,16 @@ export default function App() {
 
   const handleAddMarker = (data) => {
     const newId = addMarker(data);
+    // Sync images from marker to gallery
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((img) => {
+        addImage(img, {
+          title: data.name,
+          description: '',
+          relatedMarker: newId,
+        });
+      });
+    }
     setShowAddForm(false);
     setPendingCoords(null);
     setEditingMarker(null);
@@ -114,6 +124,18 @@ export default function App() {
 
   const handleUpdateMarker = (data) => {
     updateMarker(editingMarker.id, data);
+    // Sync new images to gallery
+    if (data.images && data.images.length > 0) {
+      const existingImageCount = editingMarker.images?.length || 0;
+      const newImages = data.images.slice(existingImageCount);
+      newImages.forEach((img) => {
+        addImage(img, {
+          title: data.name,
+          description: '',
+          relatedMarker: editingMarker.id,
+        });
+      });
+    }
     setShowAddForm(false);
     setEditingMarker(null);
   };
