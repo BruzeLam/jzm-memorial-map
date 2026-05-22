@@ -45,12 +45,8 @@ export default function App() {
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(320);
-  const [isResizing, setIsResizing] = useState(false);
 
   const mapRef = useRef(null);
-  const resizeStartXRef = useRef(null);
-  const resizeStartWidthRef = useRef(null);
 
   // Auto-focus on first search result when search query changes
   useEffect(() => {
@@ -66,35 +62,6 @@ export default function App() {
       }
     }
   }, [searchQuery, filteredMarkers, selectMarker]);
-
-  // Handle sidebar resize
-  useEffect(() => {
-    if (!isResizing) return;
-
-    const handleMouseMove = (e) => {
-      const delta = e.clientX - resizeStartXRef.current;
-      const newWidth = Math.max(320, Math.min(resizeStartWidthRef.current + delta, window.innerWidth / 3));
-      setSidebarWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
-
-  const handleResizeStart = (e) => {
-    setIsResizing(true);
-    resizeStartXRef.current = e.clientX;
-    resizeStartWidthRef.current = sidebarWidth;
-  };
 
   const handleMarkerSelect = (id) => {
     selectMarker(id);
@@ -224,37 +191,8 @@ export default function App() {
       {showChangelog && (
         <ChangelogPanel onClose={() => setShowChangelog(false)} />
       )}
-      <div className="flex flex-1 overflow-hidden app-layout relative">
-        <div className="flex-1 map-panel relative">
-          {isAddingMode && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
-              点击地图选择位置
-            </div>
-          )}
-          <MapView
-            mapRef={mapRef}
-            markers={filteredMarkers}
-            selectedMarkerId={selectedMarkerId}
-            onMarkerSelect={handleMarkerSelect}
-            onMapClick={handleMapClick}
-            isAddingMode={isAddingMode}
-          />
-          {mapFloatingCard && (
-            <MapFloatingCard
-              coords={mapFloatingCard.coords}
-              pixelPos={mapFloatingCard.pixelPos}
-              containerSize={{ width: 800, height: 600 }}
-              onQuickSave={handleFloatingQuickSave}
-              onMoreDetails={handleFloatingMoreDetails}
-              onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
-            />
-          )}
-        </div>
-
-        <div
-          className="absolute left-0 top-0 bottom-0 bg-white border-r border-gray-200 z-50 flex flex-col shadow-lg"
-          style={{ width: sidebarWidth }}
-        >
+      <div className="flex flex-1 overflow-hidden app-layout">
+        <div style={{ width: `${100 / 4}%`, flexShrink: 0 }}>
           <Sidebar
             mapRef={mapRef}
             markers={markers}
@@ -289,11 +227,31 @@ export default function App() {
           />
         </div>
 
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors z-50"
-          style={{ left: sidebarWidth }}
-          onMouseDown={handleResizeStart}
-        />
+        <div className="flex-1 map-panel relative">
+          {isAddingMode && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
+              点击地图选择位置
+            </div>
+          )}
+          <MapView
+            mapRef={mapRef}
+            markers={filteredMarkers}
+            selectedMarkerId={selectedMarkerId}
+            onMarkerSelect={handleMarkerSelect}
+            onMapClick={handleMapClick}
+            isAddingMode={isAddingMode}
+          />
+          {mapFloatingCard && (
+            <MapFloatingCard
+              coords={mapFloatingCard.coords}
+              pixelPos={mapFloatingCard.pixelPos}
+              containerSize={{ width: 800, height: 600 }}
+              onQuickSave={handleFloatingQuickSave}
+              onMoreDetails={handleFloatingMoreDetails}
+              onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
