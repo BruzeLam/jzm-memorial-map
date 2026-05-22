@@ -12,6 +12,7 @@ export default function GalleryImageEditor({
     description: image.description || '',
     relatedMarker: image.relatedMarker || null,
   });
+  const [markerSearchQuery, setMarkerSearchQuery] = useState('');
 
   const relatedMarker = form.relatedMarker
     ? markers.find(m => m.id === form.relatedMarker)
@@ -21,7 +22,17 @@ export default function GalleryImageEditor({
 
   const handleSelectMarker = (markerId) => {
     set('relatedMarker', markerId === form.relatedMarker ? null : markerId);
+    setMarkerSearchQuery('');
   };
+
+  // 搜索地点
+  const filteredMarkers = markerSearchQuery.trim()
+    ? markers.filter(m =>
+        m.name.toLowerCase().includes(markerSearchQuery.toLowerCase()) ||
+        m.city?.toLowerCase().includes(markerSearchQuery.toLowerCase()) ||
+        m.province?.toLowerCase().includes(markerSearchQuery.toLowerCase())
+      )
+    : markers;
 
   const inputClass =
     'w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400 bg-white';
@@ -86,40 +97,62 @@ export default function GalleryImageEditor({
 
           {/* 关联地点 */}
           <div>
-            <label className={labelClass}>关联地点</label>
-            <div className="bg-gray-50 rounded-lg p-3 max-h-48 overflow-y-auto border border-gray-200">
+            <label className={labelClass}>关联地点（可选）</label>
+
+            {/* 搜索框 */}
+            <input
+              type="text"
+              className={inputClass + ' mb-2'}
+              placeholder="搜索地点名称或地区..."
+              value={markerSearchQuery}
+              onChange={(e) => setMarkerSearchQuery(e.target.value)}
+            />
+
+            {/* 当前关联 */}
+            {relatedMarker && (
+              <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                <span className="text-sm text-gray-700">
+                  📍 {relatedMarker.icon} {relatedMarker.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => set('relatedMarker', null)}
+                  className="text-red-500 hover:text-red-700 text-xs font-medium"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* 地点列表 */}
+            <div className="bg-gray-50 rounded-lg p-2 max-h-40 overflow-y-auto border border-gray-200">
               {markers.length === 0 ? (
                 <div className="text-sm text-gray-400 text-center py-4">
                   暂无地点
                 </div>
+              ) : filteredMarkers.length === 0 ? (
+                <div className="text-sm text-gray-400 text-center py-4">
+                  没有匹配的地点
+                </div>
               ) : (
                 <div className="space-y-1">
-                  {markers.map((marker) => (
+                  {filteredMarkers.map((marker) => (
                     <button
                       key={marker.id}
                       type="button"
                       onClick={() => handleSelectMarker(marker.id)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                         form.relatedMarker === marker.id
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-blue-500 text-white font-medium'
                           : 'bg-white border border-gray-200 hover:bg-blue-50 text-gray-700'
                       }`}
                     >
-                      {marker.icon} {marker.name}
+                      {marker.icon} {marker.name}{marker.city ? ` (${marker.city})` : ''}
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            {form.relatedMarker && (
-              <button
-                type="button"
-                onClick={() => set('relatedMarker', null)}
-                className="mt-2 text-xs text-red-500 hover:text-red-700"
-              >
-                ✕ 取消关联
-              </button>
-            )}
           </div>
         </div>
 
