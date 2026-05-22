@@ -7,7 +7,6 @@ import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
-import ChangelogPanel from './components/ChangelogPanel';
 
 export default function App() {
   const {
@@ -44,7 +43,6 @@ export default function App() {
 
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
-  const [showChangelog, setShowChangelog] = useState(false);
 
   const mapRef = useRef(null);
 
@@ -179,7 +177,6 @@ export default function App() {
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
-        onOpenChangelog={() => setShowChangelog(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
       {showDetailPanel && (
@@ -187,9 +184,6 @@ export default function App() {
           marker={selectedMarker}
           onClose={() => setShowDetailPanel(false)}
         />
-      )}
-      {showChangelog && (
-        <ChangelogPanel onClose={() => setShowChangelog(false)} />
       )}
       <div className="flex flex-1 overflow-hidden app-layout">
         <div style={{ width: `${100 / 4}%`, flexShrink: 0 }}>
@@ -223,7 +217,6 @@ export default function App() {
             onResetToSample={resetToSample}
             onClearAll={clearAll}
             onOpenDetail={() => setShowDetailPanel(true)}
-            onShowChangelog={() => setShowChangelog(true)}
           />
         </div>
 
