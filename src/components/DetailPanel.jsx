@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
+import ImageViewer from './ImageViewer';
 
 export default function DetailPanel({ marker, onClose }) {
+  const [viewingImageIndex, setViewingImageIndex] = useState(null);
+
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
@@ -107,21 +110,37 @@ export default function DetailPanel({ marker, onClose }) {
             </div>
           )}
 
-          {/* Images placeholder */}
+          {/* Images */}
           {marker.images && marker.images.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">图片</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">📸 图片库 ({marker.images.length})</h4>
               <div className="grid grid-cols-2 gap-2">
                 {marker.images.map((img, i) => (
-                  <img
+                  <button
                     key={i}
-                    src={img}
-                    alt={`${marker.name}-${i}`}
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
+                    type="button"
+                    onClick={() => setViewingImageIndex(i)}
+                    className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors bg-gray-100 group"
+                  >
+                    <img
+                      src={img.data}
+                      alt={`${marker.name}-${i}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity">🔍</span>
+                    </div>
+                  </button>
                 ))}
               </div>
             </div>
+          )}
+          {viewingImageIndex !== null && marker.images && (
+            <ImageViewer
+              images={marker.images}
+              initialIndex={viewingImageIndex}
+              onClose={() => setViewingImageIndex(null)}
+            />
           )}
         </div>
 
