@@ -162,7 +162,10 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <Header onOpenQuotes={() => setShowQuotes(true)} />
+      <Header
+        onOpenQuotes={() => setShowQuotes(true)}
+        onOpenChangelog={() => setShowChangelog(true)}
+      />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
       {showDetailPanel && (
         <DetailPanel
