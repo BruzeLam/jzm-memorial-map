@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
-import { useGallery } from './hooks/useGallery';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
@@ -9,7 +8,6 @@ import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
 import ChangelogPanel from './components/ChangelogPanel';
-import GalleryPanel from './components/GalleryPanel';
 
 export default function App() {
   const {
@@ -47,9 +45,6 @@ export default function App() {
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
-
-  const { gallery, addGalleryItem, deleteGalleryItem } = useGallery();
 
   const mapRef = useRef(null);
 
@@ -100,15 +95,6 @@ export default function App() {
 
   const handleAddMarker = (data) => {
     const newId = addMarker(data);
-
-    // 如果有图片，自动提交到影像馆
-    if (data.images && data.images.length > 0) {
-      addGalleryItem({
-        images: data.images,
-        relatedMarkerId: newId,
-      });
-    }
-
     setShowAddForm(false);
     setPendingCoords(null);
     setEditingMarker(null);
@@ -122,22 +108,6 @@ export default function App() {
   };
 
   const handleUpdateMarker = (data) => {
-    const oldImages = editingMarker?.images || [];
-    const newImages = data.images || [];
-
-    // 找出新增的图片
-    const addedImages = newImages.filter(
-      (newImg) => !oldImages.some((oldImg) => oldImg.url === newImg.url)
-    );
-
-    // 如果有新增图片，提交到影像馆
-    if (addedImages.length > 0) {
-      addGalleryItem({
-        images: addedImages,
-        relatedMarkerId: editingMarker.id,
-      });
-    }
-
     updateMarker(editingMarker.id, data);
     setShowAddForm(false);
     setEditingMarker(null);
@@ -210,17 +180,8 @@ export default function App() {
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
         onOpenChangelog={() => setShowChangelog(true)}
-        onOpenGallery={() => setShowGallery(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
-      {showGallery && (
-        <GalleryPanel
-          gallery={gallery}
-          onAddGalleryItem={addGalleryItem}
-          onDeleteGalleryItem={deleteGalleryItem}
-          onClose={() => setShowGallery(false)}
-        />
-      )}
       {showDetailPanel && (
         <DetailPanel
           marker={selectedMarker}

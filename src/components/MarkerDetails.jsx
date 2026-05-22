@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MARKER_TYPES } from '../utils/constants';
-import ImageViewer from './ImageViewer';
 
 export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpenDetail }) {
-  const [showImageViewer, setShowImageViewer] = useState(false);
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
-  const hasImages = marker.images && marker.images.length > 0;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -26,19 +23,6 @@ export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpe
 
       <div className="px-3 py-3">
         <h3 className="font-bold text-gray-900 text-base mb-1">{marker.name}</h3>
-        {hasImages && (
-          <div className="relative mb-3 rounded-lg overflow-hidden group cursor-pointer" onClick={() => setShowImageViewer(true)}>
-            <img src={marker.images[0].url} alt="头图" className="w-full h-40 object-cover" />
-            {marker.images.length > 1 && (
-              <div className="absolute right-2 bottom-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                +{marker.images.length - 1}
-              </div>
-            )}
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-              <span className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity">👉</span>
-            </div>
-          </div>
-        )}
         {marker.title && (
           <p className="text-sm font-medium text-gray-600 mb-2">{marker.title}</p>
         )}
@@ -88,14 +72,6 @@ export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpe
           </button>
         </div>
       </div>
-
-      {showImageViewer && hasImages && (
-        <ImageViewer
-          images={marker.images}
-          initialIndex={0}
-          onClose={() => setShowImageViewer(false)}
-        />
-      )}
     </div>
   );
 }
