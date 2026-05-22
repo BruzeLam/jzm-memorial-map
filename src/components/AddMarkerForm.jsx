@@ -36,44 +36,41 @@ function useReverseGeocoding(lat, lng) {
 }
 
 // ─── Extract administrative info ─────────────────────────────────────────────
+const DIRECT_MUNICIPALITIES = new Set(['北京市', '上海市', '天津市', '重庆市']);
+
 function extractAdminInfo(address) {
   if (!address) return { country: '', province: '', city: '' };
 
-  let country = address.country || '';
-  let province = address.state || address.province || '';
-  let city = '';
+  const country = address.country || '';
+  const state = address.state || address.province || '';
 
-  // 对于中国行政区，需要更精确的识别
-  // 优先级：city > municipality > county > suburb > town > village
-  if (address.city) {
-    city = address.city;
+  // 直辖市：state 本身就是市（北京市/上海市等），city 取区级
+  if (DIRECT_MUNICIPALITIES.has(state)) {
+    const city = address.city || address.city_district || address.suburb || address.county || '';
+    return { country, province: state, city };
   }
 
-  // 如果city看起来像是区级（包含"区"），尝试找市级信息
-  if (city && city.includes('区')) {
-    // 检查其他可能的市级字段
-    if (address.municipality) {
-      city = address.municipality;
-    } else if (address.county && !address.county.includes('县')) {
-      // county可能是市级
-      city = address.county;
-    }
-  } else if (!city) {
-    // 如果没有city，尝试其他字段
-    if (address.municipality) {
-      city = address.municipality;
-    } else if (address.county) {
-      city = address.county;
-    } else if (address.suburb) {
-      city = address.suburb;
-    } else if (address.town) {
-      city = address.town;
-    } else if (address.village) {
-      city = address.village;
-    }
+  // 普通省份：目标是国家/省/市，跳过区县级
+  // Nominatim 有时将区（如"槐荫区"）放在 city 字段，需要优先找以"市"结尾的值
+  const candidates = [
+    address.city,
+    address.municipality,
+    address.county,
+    address.town,
+  ].filter(Boolean);
+
+  // 优先：以"市"结尾的字段（市级）
+  let city = candidates.find(c => c.endsWith('市')) || '';
+
+  // 其次：不以区/县/旗结尾的字段
+  if (!city) {
+    city = candidates.find(c => !c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')) || '';
   }
 
-  return { country, province, city };
+  // 兜底：任意候选值
+  if (!city) city = candidates[0] || '';
+
+  return { country, province: state, city };
 }
 
 // ─── Location search hook ───────────────────────────────────────────────────
