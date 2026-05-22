@@ -35,6 +35,7 @@ export default function Sidebar({
   onResetToSample,
   onClearAll,
   onOpenDetail,
+  onShowChangelog,
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -248,6 +249,12 @@ export default function Sidebar({
           </button>
           {showSettings && (
             <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-40">
+              <button
+                onClick={() => { onShowChangelog(); setShowSettings(false); }}
+                className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
+              >
+                📝 更新日志
+              </button>
               <button
                 onClick={() => { onResetToSample(); setShowSettings(false); }}
                 className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"

@@ -7,6 +7,7 @@ import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
+import ChangelogPanel from './components/ChangelogPanel';
 
 export default function App() {
   const {
@@ -43,6 +44,7 @@ export default function App() {
 
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
 
   const mapRef = useRef(null);
 
@@ -168,6 +170,9 @@ export default function App() {
           onClose={() => setShowDetailPanel(false)}
         />
       )}
+      {showChangelog && (
+        <ChangelogPanel onClose={() => setShowChangelog(false)} />
+      )}
       <div className="flex flex-1 overflow-hidden app-layout">
         <Sidebar
           markers={markers}
@@ -198,6 +203,7 @@ export default function App() {
           onResetToSample={resetToSample}
           onClearAll={clearAll}
           onOpenDetail={() => setShowDetailPanel(true)}
+          onShowChangelog={() => setShowChangelog(true)}
         />
 
         <div className="flex-1 map-panel relative">
