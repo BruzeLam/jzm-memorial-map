@@ -1,3 +1,4 @@
 {
-  "previewUrl": "http://localhost:3000"
+  "previewUrl": "http://localhost:3000",
+  "language": "chinese"
 }
