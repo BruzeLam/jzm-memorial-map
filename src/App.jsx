@@ -45,8 +45,12 @@ export default function App() {
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [isResizing, setIsResizing] = useState(false);
 
   const mapRef = useRef(null);
+  const resizeStartXRef = useRef(null);
+  const resizeStartWidthRef = useRef(null);
 
   // Auto-focus on first search result when search query changes
   useEffect(() => {
@@ -62,6 +66,35 @@ export default function App() {
       }
     }
   }, [searchQuery, filteredMarkers, selectMarker]);
+
+  // Handle sidebar resize
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e) => {
+      const delta = e.clientX - resizeStartXRef.current;
+      const newWidth = Math.max(320, Math.min(resizeStartWidthRef.current + delta, window.innerWidth / 3));
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  const handleResizeStart = (e) => {
+    setIsResizing(true);
+    resizeStartXRef.current = e.clientX;
+    resizeStartWidthRef.current = sidebarWidth;
+  };
 
   const handleMarkerSelect = (id) => {
     selectMarker(id);
@@ -192,37 +225,44 @@ export default function App() {
         <ChangelogPanel onClose={() => setShowChangelog(false)} />
       )}
       <div className="flex flex-1 overflow-hidden app-layout">
-        <Sidebar
-          mapRef={mapRef}
-          markers={markers}
-          filteredMarkers={filteredMarkers}
-          selectedMarkerId={selectedMarkerId}
-          selectedMarker={selectedMarker}
-          stats={stats}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          activeFilters={activeFilters}
-          toggleFilter={toggleFilter}
-          clearSearch={clearSearch}
-          onMarkerSelect={handleMarkerSelect}
-          onEditMarker={handleEditMarker}
-          onDeleteMarker={handleDeleteMarker}
-          onStartAddMode={handleStartAddMode}
-          isAddingMode={isAddingMode}
-          showAddForm={showAddForm}
-          showModePicker={showModePicker}
-          editingMarker={editingMarker}
-          pendingCoords={pendingCoords}
-          formPrefill={formPrefill}
-          onAddMarker={handleAddMarker}
-          onUpdateMarker={handleUpdateMarker}
-          onCancelAdd={handleCancelAdd}
-          onPickMapMode={handlePickMapMode}
-          onPickManualMode={handlePickManualMode}
-          onResetToSample={resetToSample}
-          onClearAll={clearAll}
-          onOpenDetail={() => setShowDetailPanel(true)}
-          onShowChangelog={() => setShowChangelog(true)}
+        <div style={{ width: sidebarWidth, flexShrink: 0 }}>
+          <Sidebar
+            mapRef={mapRef}
+            markers={markers}
+            filteredMarkers={filteredMarkers}
+            selectedMarkerId={selectedMarkerId}
+            selectedMarker={selectedMarker}
+            stats={stats}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeFilters={activeFilters}
+            toggleFilter={toggleFilter}
+            clearSearch={clearSearch}
+            onMarkerSelect={handleMarkerSelect}
+            onEditMarker={handleEditMarker}
+            onDeleteMarker={handleDeleteMarker}
+            onStartAddMode={handleStartAddMode}
+            isAddingMode={isAddingMode}
+            showAddForm={showAddForm}
+            showModePicker={showModePicker}
+            editingMarker={editingMarker}
+            pendingCoords={pendingCoords}
+            formPrefill={formPrefill}
+            onAddMarker={handleAddMarker}
+            onUpdateMarker={handleUpdateMarker}
+            onCancelAdd={handleCancelAdd}
+            onPickMapMode={handlePickMapMode}
+            onPickManualMode={handlePickManualMode}
+            onResetToSample={resetToSample}
+            onClearAll={clearAll}
+            onOpenDetail={() => setShowDetailPanel(true)}
+            onShowChangelog={() => setShowChangelog(true)}
+          />
+        </div>
+
+        <div
+          className="w-1 bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors flex-shrink-0"
+          onMouseDown={handleResizeStart}
         />
 
         <div className="flex-1 map-panel relative">

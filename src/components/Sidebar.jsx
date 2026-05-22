@@ -63,8 +63,7 @@ export default function Sidebar({
 
   return (
     <div
-      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0"
-      style={{ width: 320 }}
+      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 w-full h-full"
     >
       <div className="px-3 pt-3 pb-2 border-b border-gray-100">
         <SearchBar
