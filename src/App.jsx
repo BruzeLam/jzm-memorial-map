@@ -100,6 +100,15 @@ export default function App() {
 
   const handleAddMarker = (data) => {
     const newId = addMarker(data);
+
+    // 如果有图片，自动提交到影像馆
+    if (data.images && data.images.length > 0) {
+      addGalleryItem({
+        images: data.images,
+        relatedMarkerId: newId,
+      });
+    }
+
     setShowAddForm(false);
     setPendingCoords(null);
     setEditingMarker(null);
@@ -113,6 +122,22 @@ export default function App() {
   };
 
   const handleUpdateMarker = (data) => {
+    const oldImages = editingMarker?.images || [];
+    const newImages = data.images || [];
+
+    // 找出新增的图片
+    const addedImages = newImages.filter(
+      (newImg) => !oldImages.some((oldImg) => oldImg.url === newImg.url)
+    );
+
+    // 如果有新增图片，提交到影像馆
+    if (addedImages.length > 0) {
+      addGalleryItem({
+        images: addedImages,
+        relatedMarkerId: editingMarker.id,
+      });
+    }
+
     updateMarker(editingMarker.id, data);
     setShowAddForm(false);
     setEditingMarker(null);
