@@ -36,6 +36,7 @@ export default function Sidebar({
   onResetToSample,
   onClearAll,
   onOpenDetail,
+  onViewImage,
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -154,6 +155,7 @@ export default function Sidebar({
               onDelete={onDeleteMarker}
               onClose={() => onMarkerSelect(selectedMarkerId)}
               onOpenDetail={onOpenDetail}
+              onViewImage={onViewImage}
             />
           </div>
         ) : (

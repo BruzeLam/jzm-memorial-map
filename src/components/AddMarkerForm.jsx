@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { getRegionSuggestions } from '../utils/regionNormalization';
+import { compressImage } from '../utils/imageCompression';
 import DatePicker from './DatePicker';
 
 // ─── Reverse geocoding hook ─────────────────────────────────────────────────
@@ -205,6 +206,7 @@ const emptyForm = {
   title: '',
   description: '',
   sources: [{ title: '', note: '' }],
+  images: [],
 };
 
 export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
@@ -214,6 +216,8 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
   const isEditing = !!editingMarker;
 
   const { address } = useReverseGeocoding(form.latitude, form.longitude);
@@ -233,6 +237,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
         title: editingMarker.title || '',
         description: editingMarker.description || '',
         sources: editingMarker.sources?.length > 0 ? editingMarker.sources : [{ title: '', note: '' }],
+        images: editingMarker.images || [],
       });
     } else if (prefillData) {
       setForm((prev) => ({
@@ -317,6 +322,28 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
 
   const removeSource = (i) =>
     setForm((prev) => ({ ...prev, sources: prev.sources.filter((_, idx) => idx !== i) }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const compressed = await compressImage(file);
+      setForm((prev) => ({
+        ...prev,
+        images: [...prev.images, { data: compressed.data, name: compressed.name }],
+      }));
+    } catch (error) {
+      alert(`上传失败: ${error.message}`);
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeImage = (i) =>
+    setForm((prev) => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -542,6 +569,59 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
             onChange={(e) => set('description', e.target.value)}
             placeholder="详细说明..."
           />
+        </div>
+
+        {/* 图片上传部分 */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className={labelClass + ' mb-0'}>📸 图片</label>
+            <span className="text-xs text-gray-400">{form.images.length} 张</span>
+          </div>
+
+          {/* 上传按钮 */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.webp"
+            onChange={handleImageUpload}
+            disabled={uploadingImage}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingImage}
+            className={`w-full py-1.5 px-3 rounded-lg border text-sm font-medium transition-colors ${
+              uploadingImage
+                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+            }`}
+          >
+            {uploadingImage ? '上传中...' : '+ 添加图片'}
+          </button>
+
+          {/* 最新上传的图片预览 */}
+          {form.images.length > 0 && (
+            <div className="mt-2">
+              <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square border border-gray-200">
+                <img
+                  src={form.images[form.images.length - 1].data}
+                  alt="preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(form.images.length - 1)}
+                  className="absolute top-1 right-1 w-6 h-6 rounded bg-red-500 hover:bg-red-600 text-white flex items-center justify-center text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                最新 (共 {form.images.length} 张)
+              </div>
+            </div>
+          )}
         </div>
 
         <div>

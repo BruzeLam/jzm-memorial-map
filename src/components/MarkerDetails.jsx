@@ -1,10 +1,11 @@
 import React from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 
-export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpenDetail }) {
+export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpenDetail, onViewImage }) {
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
+  const hasImages = marker.images && marker.images.length > 0;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -37,6 +38,28 @@ export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpe
         <p className="text-xs text-gray-400 mb-3">
           📍 {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
         </p>
+
+        {hasImages && (
+          <div className="mb-3">
+            <p className="text-xs font-medium text-gray-500 mb-2">📸 图片库 ({marker.images.length})</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {marker.images.map((img, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onViewImage?.(i)}
+                  className="aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors bg-gray-100"
+                >
+                  <img
+                    src={img.data}
+                    alt={`${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {marker.sources && marker.sources.length > 0 && (
           <div className="mb-3">

@@ -7,6 +7,7 @@ import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
+import ImageViewer from './components/ImageViewer';
 
 export default function App() {
   const {
@@ -43,6 +44,7 @@ export default function App() {
 
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const [viewingImageIndex, setViewingImageIndex] = useState(null);
 
   const mapRef = useRef(null);
 
@@ -185,6 +187,13 @@ export default function App() {
           onClose={() => setShowDetailPanel(false)}
         />
       )}
+      {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (
+        <ImageViewer
+          images={selectedMarker.images}
+          initialIndex={viewingImageIndex}
+          onClose={() => setViewingImageIndex(null)}
+        />
+      )}
       <div className="flex flex-1 overflow-hidden app-layout">
         <div style={{ width: `${100 / 4}%`, flexShrink: 0 }}>
           <Sidebar
@@ -217,6 +226,7 @@ export default function App() {
             onResetToSample={resetToSample}
             onClearAll={clearAll}
             onOpenDetail={() => setShowDetailPanel(true)}
+            onViewImage={(index) => setViewingImageIndex(index)}
           />
         </div>
 
