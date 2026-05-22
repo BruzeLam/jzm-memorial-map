@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
+import { useGallery } from './hooks/useGallery';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
@@ -8,6 +9,7 @@ import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
 import ChangelogPanel from './components/ChangelogPanel';
+import GalleryPanel from './components/GalleryPanel';
 
 export default function App() {
   const {
@@ -45,6 +47,9 @@ export default function App() {
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
+
+  const { gallery, addGalleryItem, deleteGalleryItem } = useGallery();
 
   const mapRef = useRef(null);
 
@@ -180,8 +185,17 @@ export default function App() {
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
         onOpenChangelog={() => setShowChangelog(true)}
+        onOpenGallery={() => setShowGallery(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
+      {showGallery && (
+        <GalleryPanel
+          gallery={gallery}
+          onAddGalleryItem={addGalleryItem}
+          onDeleteGalleryItem={deleteGalleryItem}
+          onClose={() => setShowGallery(false)}
+        />
+      )}
       {showDetailPanel && (
         <DetailPanel
           marker={selectedMarker}
