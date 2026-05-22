@@ -11,7 +11,7 @@ export default function ChangelogPanel({ onClose }) {
       .then(data => {
         setChangelog(data);
         setLoading(false);
-        // 默认展开所有日期
+        // 默认全部展开
         const expanded = {};
         data.forEach(log => {
           expanded[log.date] = true;
@@ -36,11 +36,15 @@ export default function ChangelogPanel({ onClose }) {
     return dateStr === today;
   };
 
-  const getDateLabel = (dateStr, index) => {
+  const getDateLabel = (dateStr) => {
     if (isToday(dateStr)) {
-      return '今日更新';
+      return '✨ 今日更新';
     }
-    return dateStr;
+    // 格式化日期为"5月22日"这样的格式
+    const [year, month, day] = dateStr.split('-');
+    const monthNum = parseInt(month);
+    const dayNum = parseInt(day);
+    return `📅 ${monthNum}月${dayNum}日`;
   };
 
   const getTotalCount = (log) => {
@@ -76,41 +80,44 @@ export default function ChangelogPanel({ onClose }) {
           ) : changelog.length === 0 ? (
             <div className="text-center py-8 text-gray-400">暂无更新日志</div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {changelog.map((log) => {
                 const isExpanded = expandedDates[log.date];
                 const count = getTotalCount(log);
-                const label = getDateLabel(log.date, changelog.indexOf(log));
+                const label = getDateLabel(log.date);
 
                 return (
-                  <div key={log.date} className="border border-gray-200 rounded-lg overflow-hidden">
-                    {/* 抽屉头 */}
+                  <div key={log.date} className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                    {/* 日期按钮 */}
                     <button
                       onClick={() => toggleDate(log.date)}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-transparent hover:from-blue-100 flex items-center justify-between transition-colors"
+                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-50 to-transparent hover:from-blue-100 flex items-center justify-between transition-colors text-left"
                     >
-                      <span className="font-medium text-gray-800">
-                        {isToday(log.date) ? '✨ ' : '📅 '}{label}
+                      <span className="font-semibold text-gray-800 text-base">
+                        {label}
                       </span>
                       <div className="flex items-center gap-3">
-                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                          {count}
+                        <span className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+                          {count} 项更新
                         </span>
-                        <span className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                        <span className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}>
                           ▼
                         </span>
                       </div>
                     </button>
 
-                    {/* 抽屉内容 */}
+                    {/* 内容 */}
                     {isExpanded && (
-                      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 space-y-3">
+                      <div className="px-4 py-3 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 space-y-4">
                         {log.entries.map((entry, idx) => (
                           <div key={idx}>
                             <h4 className="text-sm font-semibold text-blue-600 mb-2">{entry.category}</h4>
-                            <ul className="text-sm text-gray-600 space-y-1 ml-4">
+                            <ul className="text-sm text-gray-700 space-y-1.5 ml-2">
                               {entry.items.map((item, itemIdx) => (
-                                <li key={itemIdx}>• {item}</li>
+                                <li key={itemIdx} className="flex gap-2">
+                                  <span className="text-blue-400 flex-shrink-0">•</span>
+                                  <span>{item}</span>
+                                </li>
                               ))}
                             </ul>
                           </div>
@@ -125,10 +132,10 @@ export default function ChangelogPanel({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0">
+        <div className="px-6 py-3 border-t border-gray-100 flex justify-end flex-shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="px-5 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             关闭
           </button>
