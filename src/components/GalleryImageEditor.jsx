@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getRegionSuggestions } from '../utils/regionNormalization';
-import LocationInput from './LocationInput';
+import React, { useState } from 'react';
 
 export default function GalleryImageEditor({
   image,
@@ -12,60 +10,14 @@ export default function GalleryImageEditor({
   const [form, setForm] = useState({
     title: image.title || '',
     description: image.description || '',
-    location: { ...image.location },
     relatedMarker: image.relatedMarker || null,
   });
-
-  const [provinceSuggestions, setProvinceSuggestions] = useState([]);
-  const [citySuggestions, setCitySuggestions] = useState([]);
-  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
-  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
   const relatedMarker = form.relatedMarker
     ? markers.find(m => m.id === form.relatedMarker)
     : null;
 
   const set = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
-  const setLocation = (field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      location: { ...prev.location, [field]: value },
-    }));
-  };
-
-  const handleProvinceChange = (value) => {
-    setLocation('province', value);
-    if (value.trim()) {
-      const suggestions = getRegionSuggestions(value);
-      setProvinceSuggestions(suggestions);
-      setShowProvinceSuggestions(suggestions.length > 0);
-    } else {
-      setProvinceSuggestions([]);
-      setShowProvinceSuggestions(false);
-    }
-  };
-
-  const handleCityChange = (value) => {
-    setLocation('city', value);
-    if (value.trim()) {
-      const suggestions = getRegionSuggestions(value);
-      setCitySuggestions(suggestions);
-      setShowCitySuggestions(suggestions.length > 0);
-    } else {
-      setCitySuggestions([]);
-      setShowCitySuggestions(false);
-    }
-  };
-
-  const selectProvince = (suggestion) => {
-    setLocation('province', suggestion);
-    setShowProvinceSuggestions(false);
-  };
-
-  const selectCity = (suggestion) => {
-    setLocation('city', suggestion);
-    setShowCitySuggestions(false);
-  };
 
   const handleSelectMarker = (markerId) => {
     set('relatedMarker', markerId === form.relatedMarker ? null : markerId);
@@ -130,121 +82,6 @@ export default function GalleryImageEditor({
               onChange={(e) => set('description', e.target.value)}
               placeholder="输入描述"
             />
-          </div>
-
-          {/* 地址信息 */}
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <label className={labelClass}>地址信息</label>
-
-            {/* 国家 */}
-            <div className="mb-2">
-              <label className="text-xs text-gray-600 block mb-1">国家</label>
-              <input
-                type="text"
-                className={`${inputClass} text-xs`}
-                value={form.location.country}
-                onChange={(e) => setLocation('country', e.target.value)}
-                placeholder="如：中国"
-              />
-            </div>
-
-            {/* 省份 */}
-            <div className="relative mb-2">
-              <label className="text-xs text-gray-600 block mb-1">省份</label>
-              <input
-                type="text"
-                className={`${inputClass} text-xs`}
-                value={form.location.province}
-                onChange={(e) => handleProvinceChange(e.target.value)}
-                onFocus={() =>
-                  form.location.province && setShowProvinceSuggestions(provinceSuggestions.length > 0)
-                }
-                onBlur={() => setTimeout(() => setShowProvinceSuggestions(false), 180)}
-                placeholder="省份"
-              />
-              {showProvinceSuggestions && (
-                <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                  {provinceSuggestions.map((suggestion, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onMouseDown={() => selectProvince(suggestion)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 城市 */}
-            <div className="relative mb-2">
-              <label className="text-xs text-gray-600 block mb-1">城市</label>
-              <input
-                type="text"
-                className={`${inputClass} text-xs`}
-                value={form.location.city}
-                onChange={(e) => handleCityChange(e.target.value)}
-                onFocus={() =>
-                  form.location.city && setShowCitySuggestions(citySuggestions.length > 0)
-                }
-                onBlur={() => setTimeout(() => setShowCitySuggestions(false), 180)}
-                placeholder="城市"
-              />
-              {showCitySuggestions && (
-                <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                  {citySuggestions.map((suggestion, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onMouseDown={() => selectCity(suggestion)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 地址 */}
-            <div className="mb-2">
-              <label className="text-xs text-gray-600 block mb-1">具体地址</label>
-              <input
-                type="text"
-                className={`${inputClass} text-xs`}
-                value={form.location.address}
-                onChange={(e) => setLocation('address', e.target.value)}
-                placeholder="如：市中心广场"
-              />
-            </div>
-
-            {/* 坐标 */}
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-xs text-gray-600 block mb-1">纬度</label>
-                <input
-                  type="number"
-                  step="any"
-                  className={`${inputClass} text-xs`}
-                  value={form.location.latitude}
-                  onChange={(e) => setLocation('latitude', e.target.value)}
-                  placeholder="39.9042"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-600 block mb-1">经度</label>
-                <input
-                  type="number"
-                  step="any"
-                  className={`${inputClass} text-xs`}
-                  value={form.location.longitude}
-                  onChange={(e) => setLocation('longitude', e.target.value)}
-                  placeholder="116.4074"
-                />
-              </div>
-            </div>
           </div>
 
           {/* 关联地点 */}
