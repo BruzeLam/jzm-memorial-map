@@ -6,6 +6,7 @@ export default function GalleryImageEditor({
   onSave,
   onCancel,
   onDelete,
+  isNew = false,
 }) {
   const [form, setForm] = useState({
     title: image.title || '',
@@ -51,7 +52,9 @@ export default function GalleryImageEditor({
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-800">编辑图片信息</h2>
+          <h2 className="text-xl font-bold text-gray-800">
+            {isNew ? '新图片信息' : '编辑图片信息'}
+          </h2>
           <button
             onClick={onCancel}
             className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
@@ -158,29 +161,31 @@ export default function GalleryImageEditor({
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-gray-100 flex gap-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm('确定要删除这个图片吗？')) {
-                onDelete();
-              }
-            }}
-            className="px-4 py-2 text-sm font-medium border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            🗑️ 删除
-          </button>
+          {!isNew && (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('确定要删除这个图片吗？')) {
+                  onDelete();
+                }
+              }}
+              className="px-4 py-2 text-sm font-medium border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              🗑️ 删除
+            </button>
+          )}
           <div className="flex-1" />
           <button
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
           >
-            取消
+            {isNew ? '取消上传' : '取消'}
           </button>
           <button
             onClick={() => onSave(form)}
             className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
-            保存
+            {isNew ? '上传' : '保存'}
           </button>
         </div>
       </div>

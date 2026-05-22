@@ -15,6 +15,7 @@ export default function GalleryPanel({
   const [editingImageId, setEditingImageId] = useState(null);
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [newImageToEdit, setNewImageToEdit] = useState(null);
   const fileInputRef = useRef(null);
 
   // 搜索过滤
@@ -43,7 +44,14 @@ export default function GalleryPanel({
     setUploading(true);
     try {
       const compressed = await compressImage(file);
-      onAddImage(compressed, { title: '', description: '', relatedMarker: null });
+      // 创建临时图片对象，等待编辑
+      setNewImageToEdit({
+        data: compressed.data,
+        name: compressed.name,
+        title: '',
+        description: '',
+        relatedMarker: null,
+      });
     } catch (error) {
       alert(`上传失败: ${error.message}`);
     } finally {
@@ -51,6 +59,23 @@ export default function GalleryPanel({
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  // 编辑新上传的图片
+  if (newImageToEdit) {
+    return (
+      <GalleryImageEditor
+        image={newImageToEdit}
+        markers={markers}
+        isNew={true}
+        onSave={(updates) => {
+          onAddImage(newImageToEdit, updates);
+          setNewImageToEdit(null);
+        }}
+        onCancel={() => setNewImageToEdit(null)}
+        onDelete={() => setNewImageToEdit(null)}
+      />
+    );
+  }
 
   if (editingImage) {
     return (
