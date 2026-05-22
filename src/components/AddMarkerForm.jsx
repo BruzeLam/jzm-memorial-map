@@ -205,6 +205,7 @@ const emptyForm = {
   title: '',
   description: '',
   sources: [{ title: '', note: '' }],
+  images: [],
 };
 
 export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
@@ -214,6 +215,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const fileInputRef = useRef(null);
   const isEditing = !!editingMarker;
 
   const { address } = useReverseGeocoding(form.latitude, form.longitude);
@@ -233,6 +235,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
         title: editingMarker.title || '',
         description: editingMarker.description || '',
         sources: editingMarker.sources?.length > 0 ? editingMarker.sources : [{ title: '', note: '' }],
+        images: editingMarker.images || [],
       });
     } else if (prefillData) {
       setForm((prev) => ({
@@ -318,6 +321,27 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
   const removeSource = (i) =>
     setForm((prev) => ({ ...prev, sources: prev.sources.filter((_, idx) => idx !== i) }));
 
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setForm((prev) => ({
+          ...prev,
+          images: [...prev.images, { url: event.target.result, uploadedAt: new Date().toISOString().split('T')[0] }],
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const typeInfo = MARKER_TYPES[form.type];
@@ -327,7 +351,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
       longitude: parseFloat(form.longitude),
       color: typeInfo.color,
       icon: typeInfo.icon,
-      images: editingMarker?.images || [],
+      images: form.images,
       sources: form.sources.filter((s) => s.title.trim()),
     };
     onSubmit(data);
@@ -569,6 +593,41 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
               )}
             </div>
           ))}
+        </div>
+
+        <div>
+          <label className={labelClass}>图片</label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full text-sm py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+          >
+            📁 选择图片
+          </button>
+          {form.images.length > 0 && (
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {form.images.map((img, idx) => (
+                <div key={idx} className="relative aspect-square rounded overflow-hidden border border-gray-200">
+                  <img src={img.url} alt="缩略图" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-0 right-0 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
