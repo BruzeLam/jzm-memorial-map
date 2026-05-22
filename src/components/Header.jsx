@@ -58,8 +58,15 @@ export default function Header({ onOpenQuotes }) {
           <div className="w-8 h-8 rounded-full bg-red-700 flex items-center justify-center text-white text-sm font-bold">
             纪
           </div>
-          <h1 className="text-lg font-serif font-bold text-gray-800 leading-tight">
-            江泽民同志生平纪念地图
+          <h1 className="text-lg font-serif font-bold leading-tight">
+            <a
+              href="https://www.news.cn/politics/2022-12/02/c_1129179786.htm"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-800 hover:text-blue-600 transition-colors"
+            >
+              江泽民同志生平纪念地图
+            </a>
           </h1>
         </div>
 
