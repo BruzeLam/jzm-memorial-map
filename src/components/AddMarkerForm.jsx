@@ -180,7 +180,7 @@ const emptyForm = {
   sources: [{ title: '', note: '' }],
 };
 
-export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
+export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
   const [form, setForm] = useState(emptyForm);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [provinceSuggestions, setProvinceSuggestions] = useState([]);
@@ -354,6 +354,10 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
                 province: province || prev.province,
                 city: city || prev.city,
               }));
+              // 自动跳转到选中的位置
+              if (mapRef?.current) {
+                mapRef.current.flyTo([lat, lng], 11, { duration: 1 });
+              }
             }}
             placeholder="如：北京、虎门大桥"
             inputClass={inputClass}

@@ -7,6 +7,7 @@ import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
 
 export default function Sidebar({
+  mapRef,
   markers,
   filteredMarkers,
   selectedMarkerId,
@@ -138,6 +139,7 @@ export default function Sidebar({
           /* ── Add / Edit Form ─────────────────────────────────── */
           <div className="p-3">
             <AddMarkerForm
+              mapRef={mapRef}
               onSubmit={editingMarker ? onUpdateMarker : onAddMarker}
               onCancel={onCancelAdd}
               initialCoords={pendingCoords}

@@ -193,6 +193,7 @@ export default function App() {
       )}
       <div className="flex flex-1 overflow-hidden app-layout">
         <Sidebar
+          mapRef={mapRef}
           markers={markers}
           filteredMarkers={filteredMarkers}
           selectedMarkerId={selectedMarkerId}
