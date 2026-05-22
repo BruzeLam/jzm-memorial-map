@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
+import { useGallery } from './hooks/useGallery';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
@@ -8,6 +9,7 @@ import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
 import ImageViewer from './components/ImageViewer';
+import GalleryPanel from './components/GalleryPanel';
 
 export default function App() {
   const {
@@ -27,6 +29,8 @@ export default function App() {
   const { searchQuery, setSearchQuery, activeFilters, toggleFilter, clearSearch, filteredMarkers } =
     useSearch(markers);
 
+  const { gallery, addImage, updateImage, deleteImage, removeMarkerRelation } = useGallery(markers);
+
   const [isAddingMode, setIsAddingMode] = useState(false);
   // 'map' | 'manual' | null
   const [addInputMode, setAddInputMode] = useState(null);
@@ -45,6 +49,7 @@ export default function App() {
   const [showQuotes, setShowQuotes] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
+  const [showGallery, setShowGallery] = useState(false);
 
   const mapRef = useRef(null);
 
@@ -116,6 +121,7 @@ export default function App() {
   const handleDeleteMarker = (id) => {
     if (window.confirm('确定要删除这个标记吗？')) {
       deleteMarker(id);
+      removeMarkerRelation(id);
     }
   };
 
@@ -179,8 +185,19 @@ export default function App() {
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
+        onOpenGallery={() => setShowGallery(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
+      {showGallery && (
+        <GalleryPanel
+          gallery={gallery}
+          markers={markers}
+          onAddImage={addImage}
+          onUpdateImage={updateImage}
+          onDeleteImage={deleteImage}
+          onClose={() => setShowGallery(false)}
+        />
+      )}
       {showDetailPanel && (
         <DetailPanel
           marker={selectedMarker}
