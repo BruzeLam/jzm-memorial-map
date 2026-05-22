@@ -11,10 +11,12 @@ export default function ChangelogPanel({ onClose }) {
       .then(data => {
         setChangelog(data);
         setLoading(false);
-        // 默认展开今日更新
-        if (data.length > 0) {
-          setExpandedDates({ [data[0].date]: true });
-        }
+        // 默认展开所有日期
+        const expanded = {};
+        data.forEach(log => {
+          expanded[log.date] = true;
+        });
+        setExpandedDates(expanded);
       })
       .catch(() => {
         setChangelog([]);
