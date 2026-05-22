@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
 import Header from './components/Header';
@@ -47,6 +47,21 @@ export default function App() {
   const [showChangelog, setShowChangelog] = useState(false);
 
   const mapRef = useRef(null);
+
+  // Auto-focus on first search result when search query changes
+  useEffect(() => {
+    if (searchQuery && filteredMarkers.length > 0) {
+      const firstResult = filteredMarkers[0];
+      selectMarker(firstResult.id);
+      if (mapRef.current) {
+        mapRef.current.flyTo(
+          [firstResult.latitude, firstResult.longitude],
+          8,
+          { duration: 1 }
+        );
+      }
+    }
+  }, [searchQuery, filteredMarkers, selectMarker]);
 
   const handleMarkerSelect = (id) => {
     selectMarker(id);
