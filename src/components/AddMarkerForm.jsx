@@ -2,197 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { getRegionSuggestions } from '../utils/regionNormalization';
 import { compressImage } from '../utils/imageCompression';
+import { useReverseGeocoding, extractAdminInfo } from '../hooks/useNominatim';
+import LocationInput from './LocationInput';
 import DatePicker from './DatePicker';
 
-// ─── Reverse geocoding hook ─────────────────────────────────────────────────
-function useReverseGeocoding(lat, lng) {
-  const [address, setAddress] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!lat || !lng) {
-      setAddress(null);
-      return;
-    }
-
-    setLoading(true);
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=zh-CN`,
-          { headers: { 'Accept-Language': 'zh-CN,zh;q=0.9' } }
-        );
-        const data = await res.json();
-        setAddress(data.address || null);
-      } catch (e) {
-        setAddress(null);
-      } finally {
-        setLoading(false);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [lat, lng]);
-
-  return { address, loading };
-}
-
-// ─── Extract administrative info ─────────────────────────────────────────────
-const DIRECT_MUNICIPALITIES = new Set(['北京市', '上海市', '天津市', '重庆市']);
-
-function extractAdminInfo(address) {
-  if (!address) return { country: '', province: '', city: '' };
-
-  const country = address.country || '';
-  const state = address.state || address.province || '';
-
-  // 直辖市：state 本身就是市（北京市/上海市等），city 取区级
-  if (DIRECT_MUNICIPALITIES.has(state)) {
-    const city = address.city || address.city_district || address.suburb || address.county || '';
-    return { country, province: state, city };
-  }
-
-  // 普通省份：目标是国家/省/市，跳过区县级
-  // Nominatim 有时将区（如"槐荫区"）放在 city 字段，需要优先找以"市"结尾的值
-  const candidates = [
-    address.city,
-    address.municipality,
-    address.county,
-    address.town,
-  ].filter(Boolean);
-
-  // 优先：以"市"结尾的字段（市级）
-  let city = candidates.find(c => c.endsWith('市')) || '';
-
-  // 其次：不以区/县/旗结尾的字段
-  if (!city) {
-    city = candidates.find(c => !c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')) || '';
-  }
-
-  // 兜底：任意候选值
-  if (!city) city = candidates[0] || '';
-
-  return { country, province: state, city };
-}
-
-// ─── Location search hook ───────────────────────────────────────────────────
-function useLocationSearch(query) {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!query || query.length < 2) {
-      setResults([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1&accept-language=zh-CN`,
-          { headers: { 'Accept-Language': 'zh-CN,zh;q=0.9' } }
-        );
-        const data = await res.json();
-        setResults(data);
-      } catch (e) {
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  return { results, loading };
-}
-
-function formatRegion(address) {
-  if (!address) return '';
-  const parts = [];
-  if (address.country) parts.push(address.country);
-  if (address.state || address.province) parts.push(address.state || address.province);
-  if (address.city || address.county || address.town)
-    parts.push(address.city || address.county || address.town);
-  return parts.slice(0, 3).join(' / ');
-}
-
-// ─── LocationInput component ─────────────────────────────────────────────────
-export function LocationInput({ value, onChange, onSelect, placeholder, inputClass }) {
-  const [focused, setFocused] = useState(false);
-  const [query, setQuery] = useState(value || '');
-  const { results, loading } = useLocationSearch(focused ? query : '');
-  const containerRef = useRef(null);
-
-  // Keep query in sync when value is set externally (e.g. coord pre-fill resets name)
-  useEffect(() => {
-    setQuery(value || '');
-  }, [value]);
-
-  const handleChange = (e) => {
-    const v = e.target.value;
-    setQuery(v);
-    onChange(v);
-  };
-
-  const handleSelect = (item) => {
-    const name = item.name || item.display_name.split(',')[0].trim();
-    const adminInfo = extractAdminInfo(item.address);
-    setQuery(name);
-    onChange(name);
-    onSelect({
-      name,
-      lat: parseFloat(item.lat),
-      lng: parseFloat(item.lon),
-      country: adminInfo.country,
-      province: adminInfo.province,
-      city: adminInfo.city,
-    });
-    setFocused(false);
-  };
-
-  const showDropdown = focused && (results.length > 0 || loading);
-
-  return (
-    <div className="relative" ref={containerRef}>
-      <input
-        className={inputClass}
-        value={query}
-        onChange={handleChange}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setTimeout(() => setFocused(false), 180)}
-        placeholder={placeholder || '如：北京、虎门大桥'}
-      />
-      {showDropdown && (
-        <div className="absolute z-[10000] left-0 right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-xl max-h-52 overflow-y-auto">
-          {loading && (
-            <div className="px-3 py-2 text-xs text-gray-400 flex items-center gap-2">
-              <span className="inline-block w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-              搜索中…
-            </div>
-          )}
-          {!loading && results.map((item, i) => {
-            const shortName = (item.name || item.display_name.split(',')[0].trim()).slice(0, 22);
-            const region = formatRegion(item.address);
-            return (
-              <button
-                key={i}
-                type="button"
-                onMouseDown={() => handleSelect(item)}
-                className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-0"
-              >
-                <div className="text-sm font-medium text-gray-800 truncate">{shortName}</div>
-                {region && (
-                  <div className="text-xs text-gray-400 truncate">{region}</div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Main form ───────────────────────────────────────────────────────────────
 const emptyForm = {
   type: 'spot',
   name: '',
@@ -261,7 +74,6 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
     }
   }, [editingMarker, initialCoords, prefillData]);
 
-  // Auto-fill admin info when reverse geocoding completes
   useEffect(() => {
     if (address && form.latitude && form.longitude) {
       const adminInfo = extractAdminInfo(address);
@@ -407,7 +219,6 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
                 province: province || prev.province,
                 city: city || prev.city,
               }));
-              // 自动跳转到选中的位置
               if (mapRef?.current) {
                 mapRef.current.flyTo([lat, lng], 11, { duration: 1 });
               }
@@ -571,14 +382,11 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
           />
         </div>
 
-        {/* 图片上传部分 */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className={labelClass + ' mb-0'}>📸 图片</label>
             <span className="text-xs text-gray-400">{form.images.length} 张</span>
           </div>
-
-          {/* 上传按钮 */}
           <input
             ref={fileInputRef}
             type="file"
@@ -599,8 +407,6 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
           >
             {uploadingImage ? '上传中...' : '+ 添加图片'}
           </button>
-
-          {/* 最新上传的图片预览 */}
           {form.images.length > 0 && (
             <div className="mt-2">
               <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square border border-gray-200">

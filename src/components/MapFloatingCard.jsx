@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
-import { LocationInput } from './AddMarkerForm';
+import LocationInput from './LocationInput';
 import DatePicker from './DatePicker';
 
 export default function MapFloatingCard({ coords, pixelPos, containerSize, onQuickSave, onMoreDetails, onCancel }) {
