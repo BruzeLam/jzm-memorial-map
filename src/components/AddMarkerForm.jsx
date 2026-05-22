@@ -39,11 +39,41 @@ function useReverseGeocoding(lat, lng) {
 function extractAdminInfo(address) {
   if (!address) return { country: '', province: '', city: '' };
 
-  return {
-    country: address.country || '',
-    province: address.state || address.province || '',
-    city: address.city || address.county || address.town || '',
-  };
+  let country = address.country || '';
+  let province = address.state || address.province || '';
+  let city = '';
+
+  // 对于中国行政区，需要更精确的识别
+  // 优先级：city > municipality > county > suburb > town > village
+  if (address.city) {
+    city = address.city;
+  }
+
+  // 如果city看起来像是区级（包含"区"），尝试找市级信息
+  if (city && city.includes('区')) {
+    // 检查其他可能的市级字段
+    if (address.municipality) {
+      city = address.municipality;
+    } else if (address.county && !address.county.includes('县')) {
+      // county可能是市级
+      city = address.county;
+    }
+  } else if (!city) {
+    // 如果没有city，尝试其他字段
+    if (address.municipality) {
+      city = address.municipality;
+    } else if (address.county) {
+      city = address.county;
+    } else if (address.suburb) {
+      city = address.suburb;
+    } else if (address.town) {
+      city = address.town;
+    } else if (address.village) {
+      city = address.village;
+    }
+  }
+
+  return { country, province, city };
 }
 
 // ─── Location search hook ───────────────────────────────────────────────────
