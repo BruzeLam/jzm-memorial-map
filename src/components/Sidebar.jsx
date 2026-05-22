@@ -162,7 +162,15 @@ export default function Sidebar({
           /* ── Marker List ─────────────────────────────────────── */
           <ul className="py-1">
             {sortedMarkers.length === 0 ? (
-              <li className="px-4 py-6 text-center text-sm text-gray-400">没有找到相关标记</li>
+              <li className="px-4 py-6 text-center">
+                <div className="text-sm text-gray-400 mb-3">没有找到相关标记</div>
+                <button
+                  onClick={onStartAddMode}
+                  className="text-sm text-blue-500 hover:text-blue-700 underline transition-colors"
+                >
+                  添加标记
+                </button>
+              </li>
             ) : (
               sortedMarkers.map((m) => {
                 const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
