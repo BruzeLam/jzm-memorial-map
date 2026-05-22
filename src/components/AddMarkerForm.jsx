@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
+import { getRegionSuggestions } from '../utils/regionNormalization';
 import DatePicker from './DatePicker';
 
 // ─── Reverse geocoding hook ─────────────────────────────────────────────────
@@ -182,6 +183,10 @@ const emptyForm = {
 export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
   const [form, setForm] = useState(emptyForm);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [provinceSuggestions, setProvinceSuggestions] = useState([]);
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const isEditing = !!editingMarker;
 
   const { address } = useReverseGeocoding(form.latitude, form.longitude);
@@ -239,6 +244,42 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
   }, [address]);
 
   const set = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleProvinceChange = (value) => {
+    set('province', value);
+    if (value.trim()) {
+      const suggestions = getRegionSuggestions(value);
+      setProvinceSuggestions(suggestions);
+      setShowProvinceSuggestions(suggestions.length > 0);
+    } else {
+      setProvinceSuggestions([]);
+      setShowProvinceSuggestions(false);
+    }
+  };
+
+  const handleCityChange = (value) => {
+    set('city', value);
+    if (value.trim()) {
+      const suggestions = getRegionSuggestions(value);
+      setCitySuggestions(suggestions);
+      setShowCitySuggestions(suggestions.length > 0);
+    } else {
+      setCitySuggestions([]);
+      setShowCitySuggestions(false);
+    }
+  };
+
+  const selectProvince = (suggestion) => {
+    set('province', suggestion);
+    setShowProvinceSuggestions(false);
+    setProvinceSuggestions([]);
+  };
+
+  const selectCity = (suggestion) => {
+    set('city', suggestion);
+    setShowCitySuggestions(false);
+    setCitySuggestions([]);
+  };
 
   const setSource = (i, field, value) => {
     const sources = form.sources.map((s, idx) => (idx === i ? { ...s, [field]: value } : s));
@@ -332,25 +373,61 @@ export default function AddMarkerForm({ onSubmit, onCancel, initialCoords, editi
                 placeholder="自动识别或手动输入"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 min-w-12">省份:</span>
-              <input
-                type="text"
-                className={inputClass + ' text-xs'}
-                value={form.province}
-                onChange={(e) => set('province', e.target.value)}
-                placeholder="自动识别或手动输入"
-              />
+            <div className="relative">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 min-w-12">省份:</span>
+                <input
+                  type="text"
+                  className={inputClass + ' text-xs'}
+                  value={form.province}
+                  onChange={(e) => handleProvinceChange(e.target.value)}
+                  onFocus={() => form.province && setShowProvinceSuggestions(provinceSuggestions.length > 0)}
+                  onBlur={() => setTimeout(() => setShowProvinceSuggestions(false), 180)}
+                  placeholder="自动识别或手动输入"
+                />
+              </div>
+              {showProvinceSuggestions && provinceSuggestions.length > 0 && (
+                <div className="absolute z-[10000] left-14 right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                  {provinceSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onMouseDown={() => selectProvince(suggestion)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 min-w-12">城市:</span>
-              <input
-                type="text"
-                className={inputClass + ' text-xs'}
-                value={form.city}
-                onChange={(e) => set('city', e.target.value)}
-                placeholder="自动识别或手动输入"
-              />
+            <div className="relative">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 min-w-12">城市:</span>
+                <input
+                  type="text"
+                  className={inputClass + ' text-xs'}
+                  value={form.city}
+                  onChange={(e) => handleCityChange(e.target.value)}
+                  onFocus={() => form.city && setShowCitySuggestions(citySuggestions.length > 0)}
+                  onBlur={() => setTimeout(() => setShowCitySuggestions(false), 180)}
+                  placeholder="自动识别或手动输入"
+                />
+              </div>
+              {showCitySuggestions && citySuggestions.length > 0 && (
+                <div className="absolute z-[10000] left-14 right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                  {citySuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onMouseDown={() => selectCity(suggestion)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
