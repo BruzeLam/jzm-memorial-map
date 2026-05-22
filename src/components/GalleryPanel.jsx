@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { compressImage } from '../utils/imageCompression';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
 
@@ -13,6 +14,8 @@ export default function GalleryPanel({
   const [searchQuery, setSearchQuery] = useState('');
   const [editingImageId, setEditingImageId] = useState(null);
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // 搜索过滤
   const filteredGallery = searchQuery.trim()
@@ -32,6 +35,22 @@ export default function GalleryPanel({
   const editingImage = editingImageId
     ? gallery.find(img => img.id === editingImageId)
     : null;
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      onAddImage(compressed, { title: '', description: '', relatedMarker: null });
+    } catch (error) {
+      alert(`上传失败: ${error.message}`);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   if (editingImage) {
     return (
@@ -73,8 +92,8 @@ export default function GalleryPanel({
           </button>
         </div>
 
-        {/* Search */}
-        <div className="px-6 py-3 border-b border-gray-100 flex-shrink-0">
+        {/* Search & Upload */}
+        <div className="px-6 py-3 border-b border-gray-100 flex-shrink-0 space-y-2">
           <input
             type="text"
             placeholder="搜索标题、地址、描述..."
@@ -82,6 +101,23 @@ export default function GalleryPanel({
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
           />
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              {uploading ? '上传中...' : '📸 上传图片'}
+            </button>
+          </div>
         </div>
 
         {/* Content */}
