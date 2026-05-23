@@ -17,6 +17,7 @@ export default function GalleryPanel({
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [newImageToEdit, setNewImageToEdit] = useState(null);
+  const [showUploadArea, setShowUploadArea] = useState(false);
 
   // 搜索过滤
   const filteredGallery = searchQuery.trim()
@@ -69,6 +70,7 @@ export default function GalleryPanel({
         onSave={(updates) => {
           onAddImage(newImageToEdit, updates);
           setNewImageToEdit(null);
+          setShowUploadArea(false);
         }}
         onCancel={() => setNewImageToEdit(null)}
         onDelete={() => setNewImageToEdit(null)}
@@ -118,18 +120,38 @@ export default function GalleryPanel({
 
         {/* Search & Upload */}
         <div className="px-6 py-3 border-b border-gray-100 flex-shrink-0 space-y-2">
-          <input
-            type="text"
-            placeholder="搜索标题、地址、描述..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
-          />
-          <ImageUploadInput
-            onUpload={handleImageUpload}
-            disabled={uploading}
-            label="📸 上传图片"
-          />
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="搜索标题、地址、描述..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
+            />
+            {!showUploadArea && (
+              <button
+                onClick={() => setShowUploadArea(true)}
+                disabled={uploading}
+                className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                📸 上传
+              </button>
+            )}
+          </div>
+          {showUploadArea && (
+            <div className="space-y-2">
+              <ImageUploadInput
+                onUpload={handleImageUpload}
+                disabled={uploading}
+              />
+              <button
+                onClick={() => setShowUploadArea(false)}
+                className="text-xs text-gray-500 hover:text-gray-700"
+              >
+                ✕ 关闭
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Content */}
