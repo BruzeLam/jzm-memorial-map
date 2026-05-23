@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { getRegionSuggestions } from '../utils/regionNormalization';
 import { compressImage } from '../utils/imageCompression';
