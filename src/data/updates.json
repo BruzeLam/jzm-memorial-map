@@ -60,33 +60,45 @@
   "2026-5-21": [
     {
       "type": "feature",
-      "emoji": "♾️",
-      "title": "黑框眼镜无尽符号",
-      "description": "百岁诞辰倒计时悬浮框设计，鼠标悬停显示黑框眼镜 SVG"
-    },
-    {
-      "type": "optimize",
-      "emoji": "💬",
-      "title": "倒计时悬浮框重新设计",
-      "description": "位置改下方、白色半透明毛玻璃效果、眼镜色改红色"
+      "emoji": "🚀",
+      "title": "应用上线到生产",
+      "description": "部署到 Vercel，Status Ready。地图显示 8 个标记，侧边栏完整，Production Checklist 5/5 完成"
     },
     {
       "type": "feature",
-      "emoji": "📍",
-      "title": "地点添加双模式",
-      "description": "支持地图标点和手动输入两种快速方式"
+      "emoji": "💾",
+      "title": "数据版本号自动合并",
+      "description": "解决 localStorage 缓存问题。每次更新数据时升级版本号，自动合并新数据，无需清除缓存"
+    },
+    {
+      "type": "feature",
+      "emoji": "📊",
+      "title": "扩展标记数据系统",
+      "description": "完整的足迹类和历史事件类数据。包含城市、日期、说明、坐标等完整信息"
     },
     {
       "type": "feature",
       "emoji": "📅",
       "title": "日期体系完善",
-      "description": "支持时间点和时间段选择，智能识别"
+      "description": "支持时间点和时间段选择，智能识别。支持多种格式自动转换"
     },
     {
       "type": "feature",
-      "emoji": "🚀",
-      "title": "应用上线到生产",
-      "description": "部署到 Vercel，正式对外发布"
+      "emoji": "📍",
+      "title": "地点添加双模式",
+      "description": "支持地图标点和手动输入两种快速方式。地图点击弹出浮选框，手动输入可继承设置"
+    },
+    {
+      "type": "optimize",
+      "emoji": "💬",
+      "title": "倒计时悬浮框重新设计",
+      "description": "位置改下方、白色半透明毛玻璃效果、眼镜色改红色。更醒目易识别"
+    },
+    {
+      "type": "optimize",
+      "emoji": "♾️",
+      "title": "黑框眼镜无尽符号",
+      "description": "百岁诞辰倒计时悬浮框，鼠标悬停弹出深色小气泡显示黑框眼镜 SVG 和无尽符号"
     }
   ]
 }
