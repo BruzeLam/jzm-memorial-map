@@ -47,7 +47,7 @@ export default function ChangeLog() {
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.3)' }}
+      style={{ background: 'rgba(255,255,255,0.5)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           // 点击背景关闭（由父组件处理）
