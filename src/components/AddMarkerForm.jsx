@@ -5,6 +5,7 @@ import { compressImage } from '../utils/imageCompression';
 import { useReverseGeocoding, extractAdminInfo } from '../hooks/useNominatim';
 import LocationInput from './LocationInput';
 import DatePicker from './DatePicker';
+import ImageUploadInput from './ImageUploadInput';
 
 const emptyForm = {
   type: 'spot',
@@ -30,7 +31,6 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const fileInputRef = useRef(null);
   const isEditing = !!editingMarker;
 
   const { address } = useReverseGeocoding(form.latitude, form.longitude);
@@ -150,7 +150,6 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
       alert(`上传失败: ${error.message}`);
     } finally {
       setUploadingImage(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -387,26 +386,11 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
             <label className={labelClass + ' mb-0'}>📸 图片</label>
             <span className="text-xs text-gray-400">{form.images.length} 张</span>
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".jpg,.jpeg,.png,.webp"
-            onChange={handleImageUpload}
+          <ImageUploadInput
+            onUpload={handleImageUpload}
             disabled={uploadingImage}
-            className="hidden"
+            label="+ 添加图片"
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadingImage}
-            className={`w-full py-1.5 px-3 rounded-lg border text-sm font-medium transition-colors ${
-              uploadingImage
-                ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-            }`}
-          >
-            {uploadingImage ? '上传中...' : '+ 添加图片'}
-          </button>
           {form.images.length > 0 && (
             <div className="mt-2">
               <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square border border-gray-200">

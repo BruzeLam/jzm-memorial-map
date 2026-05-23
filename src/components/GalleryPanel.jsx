@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { compressImage } from '../utils/imageCompression';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
+import ImageUploadInput from './ImageUploadInput';
 
 export default function GalleryPanel({
   gallery,
@@ -16,7 +17,6 @@ export default function GalleryPanel({
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [newImageToEdit, setNewImageToEdit] = useState(null);
-  const fileInputRef = useRef(null);
 
   // 搜索过滤
   const filteredGallery = searchQuery.trim()
@@ -56,7 +56,6 @@ export default function GalleryPanel({
       alert(`上传失败: ${error.message}`);
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -126,23 +125,11 @@ export default function GalleryPanel({
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
           />
-          <div className="flex gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              onChange={handleImageUpload}
-              disabled={uploading}
-              className="hidden"
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              {uploading ? '上传中...' : '📸 上传图片'}
-            </button>
-          </div>
+          <ImageUploadInput
+            onUpload={handleImageUpload}
+            disabled={uploading}
+            label="📸 上传图片"
+          />
         </div>
 
         {/* Content */}
