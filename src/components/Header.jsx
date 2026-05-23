@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import RandomQuoteDisplay from './RandomQuoteDisplay';
 
 const CENTENARY = new Date('2026-08-17T00:00:00');
 
@@ -69,6 +70,8 @@ export default function Header({ onOpenQuotes, onOpenGallery }) {
             </a>
           </h1>
         </div>
+
+        <RandomQuoteDisplay />
 
         <div className="flex items-center gap-3 ml-auto">
           <button
