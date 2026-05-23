@@ -4,6 +4,7 @@ import { QUOTES } from '../data/quotes';
 export default function RandomQuoteDisplay() {
   const [currentQuote, setCurrentQuote] = useState(null);
   const [usedIndices, setUsedIndices] = useState(new Set());
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // 初始化：加载第一条随机语录
   useEffect(() => {
@@ -11,25 +12,32 @@ export default function RandomQuoteDisplay() {
   }, []);
 
   const selectNewQuote = (used) => {
-    const available = Array.from({ length: QUOTES.length }, (_, i) => i).filter(
-      (i) => !used.has(i)
-    );
+    setIsTransitioning(true);
 
-    if (available.length === 0) {
-      // 如果所有语录都用过，重置
-      used.clear();
-      available.push(...Array.from({ length: QUOTES.length }, (_, i) => i));
-    }
+    setTimeout(() => {
+      const available = Array.from({ length: QUOTES.length }, (_, i) => i).filter(
+        (i) => !used.has(i)
+      );
 
-    const randomIdx = available[Math.floor(Math.random() * available.length)];
-    const newUsed = new Set(used);
-    newUsed.add(randomIdx);
-    setUsedIndices(newUsed);
-    setCurrentQuote(QUOTES[randomIdx]);
+      if (available.length === 0) {
+        // 如果所有语录都用过，重置
+        used.clear();
+        available.push(...Array.from({ length: QUOTES.length }, (_, i) => i));
+      }
+
+      const randomIdx = available[Math.floor(Math.random() * available.length)];
+      const newUsed = new Set(used);
+      newUsed.add(randomIdx);
+      setUsedIndices(newUsed);
+      setCurrentQuote(QUOTES[randomIdx]);
+      setIsTransitioning(false);
+    }, 200);
   };
 
   const handleClick = () => {
-    selectNewQuote(usedIndices);
+    if (!isTransitioning) {
+      selectNewQuote(usedIndices);
+    }
   };
 
   if (!currentQuote) return null;
@@ -37,9 +45,10 @@ export default function RandomQuoteDisplay() {
   return (
     <div
       onClick={handleClick}
-      className="flex-1 mx-4 px-4 py-2 text-center cursor-pointer transition-opacity hover:opacity-70"
+      className="flex-1 mx-4 px-4 py-2 text-center cursor-pointer transition-opacity hover:opacity-60"
+      style={{ opacity: isTransitioning ? 0.3 : 1 }}
     >
-      <p className="text-sm text-gray-500 font-light leading-relaxed truncate">
+      <p className="text-sm text-gray-500 font-light leading-relaxed line-clamp-2 max-w-md transition-opacity duration-200">
         {currentQuote.text}
       </p>
     </div>
