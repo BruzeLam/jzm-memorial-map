@@ -15,21 +15,23 @@ export default function RandomQuoteDisplay() {
     setIsTransitioning(true);
 
     setTimeout(() => {
-      const available = Array.from({ length: QUOTES.length }, (_, i) => i).filter(
+      // 过滤：只显示文本长度 < 50 的语录
+      const filtered = QUOTES.filter((q) => q.text.length < 50);
+      const available = Array.from({ length: filtered.length }, (_, i) => i).filter(
         (i) => !used.has(i)
       );
 
       if (available.length === 0) {
         // 如果所有语录都用过，重置
         used.clear();
-        available.push(...Array.from({ length: QUOTES.length }, (_, i) => i));
+        available.push(...Array.from({ length: filtered.length }, (_, i) => i));
       }
 
       const randomIdx = available[Math.floor(Math.random() * available.length)];
       const newUsed = new Set(used);
       newUsed.add(randomIdx);
       setUsedIndices(newUsed);
-      setCurrentQuote(QUOTES[randomIdx]);
+      setCurrentQuote(filtered[randomIdx]);
       setIsTransitioning(false);
     }, 200);
   };
@@ -45,10 +47,10 @@ export default function RandomQuoteDisplay() {
   return (
     <div
       onClick={handleClick}
-      className="flex-1 mx-4 px-4 py-2 text-center cursor-pointer transition-opacity hover:opacity-60"
+      className="flex-1 mx-4 px-4 py-1 text-center cursor-pointer transition-opacity hover:opacity-60 flex items-center justify-center"
       style={{ opacity: isTransitioning ? 0.3 : 1 }}
     >
-      <p className="text-sm text-gray-500 font-light leading-relaxed line-clamp-2 max-w-md transition-opacity duration-200">
+      <p className="text-xs text-gray-500 font-light leading-tight line-clamp-2 max-w-md transition-opacity duration-200">
         {currentQuote.text}
       </p>
     </div>
