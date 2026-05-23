@@ -55,16 +55,22 @@ export default function ImageUploadInput({ onUpload, disabled, label = '📸 上
         onDrop={handleDrop}
         onPaste={handlePaste}
         tabIndex={0}
-        className={`w-full py-1.5 px-3 rounded-lg border text-sm font-medium transition-colors cursor-pointer ${
+        className={`w-full py-8 px-4 rounded-lg border-2 border-dashed text-center transition-colors cursor-pointer ${
           isDragging
-            ? 'bg-blue-100 border-blue-400 text-blue-600'
+            ? 'bg-blue-50 border-blue-400'
             : disabled
-            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+            ? 'bg-gray-50 border-gray-200 cursor-not-allowed'
+            : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50'
         }`}
         onClick={() => !disabled && fileInputRef.current?.click()}
       >
-        {disabled ? '上传中...' : `${label} (或粘贴/拖拽)`}
+        <div className="text-3xl mb-2">📸</div>
+        <div className={`font-medium ${disabled ? 'text-gray-400' : 'text-gray-700'}`}>
+          {disabled ? '上传中...' : '拖拽图片到此处'}
+        </div>
+        <div className={`text-xs mt-2 ${disabled ? 'text-gray-300' : 'text-gray-500'}`}>
+          或点击选择 / Ctrl+V 粘贴
+        </div>
       </div>
     </div>
   );
