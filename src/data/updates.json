@@ -1,64 +1,86 @@
 {
   "2026-5-23": [
     {
+      "type": "feature",
+      "emoji": "📸",
       "title": "图片上传全面升级",
-      "description": "支持拖拽、粘贴、点击三合一上传。影像馆上传框可收起，保持界面简洁"
+      "description": "支持拖拽、粘贴、点击。影像馆上传框可收起"
     },
     {
-      "title": "地图缩放和拖拽优化",
-      "description": "取消缩放上限，支持自由缩放。限制拖拽范围防止标记离开视图"
-    },
-    {
+      "type": "feature",
+      "emoji": "💬",
       "title": "随机语录彩蛋",
-      "description": "Header 中间显示随机语录，点击切换到下一条。自动过滤长语录，仅显示 <50 字的精选"
+      "description": "Header 中显示随机语录，点击切换。自动过滤精选内容"
     },
     {
-      "title": "长者语录优化",
-      "description": "上传时限制 200 字以内。显示改为双行紧凑风格，淡出淡入过渡动画更丝滑"
-    },
-    {
-      "title": "档案馆占位按钮",
-      "description": "在 Header 预留位置，敬请期待功能实现"
-    },
-    {
+      "type": "feature",
+      "emoji": "📅",
       "title": "日期输入更灵活",
       "description": "支持多种格式自动识别：YYYY-MM-DD、YYYYMMDD、YYYYMDD、YYYYMM"
+    },
+    {
+      "type": "optimize",
+      "emoji": "🗺️",
+      "title": "地图体验优化",
+      "description": "取消缩放上限，自由缩放。限制拖拽范围"
+    },
+    {
+      "type": "optimize",
+      "emoji": "✨",
+      "title": "交互细节润色",
+      "description": "语录双行显示、淡出淡入动画、新增档案馆占位"
     }
   ],
   "2026-5-22": [
     {
+      "type": "feature",
+      "emoji": "🖼️",
       "title": "影像馆完整实现",
-      "description": "独立影像库、图片搜索、编辑、删除。支持与地点关联"
+      "description": "独立影像库、图片搜索、编辑删除。支持与地点关联"
     },
     {
-      "title": "图片上传和压缩",
-      "description": "自动压缩为 WebP 格式，最大 1200×1200，支持拖拽编辑"
+      "type": "feature",
+      "emoji": "🎨",
+      "title": "图片处理系统",
+      "description": "自动压缩为 WebP 格式，最大 1200×1200，拖拽编辑"
     },
     {
+      "type": "optimize",
+      "emoji": "⚡",
       "title": "表单和交互优化",
-      "description": "改进地点选择、详情页面显示、搜索跳转等多项 UX 细节"
+      "description": "地点选择、详情页面、搜索跳转等多项 UX 细节"
     },
     {
+      "type": "refactor",
+      "emoji": "🔧",
       "title": "代码重构",
-      "description": "拆分 AddMarkerForm 提取独立模块，提高代码复用性"
+      "description": "拆分 AddMarkerForm，提高代码复用性"
     }
   ],
   "2026-5-21": [
     {
+      "type": "feature",
+      "emoji": "📚",
       "title": "长者语录功能",
       "description": "15 条官方语录库，支持用户上传、搜索、删除"
     },
     {
+      "type": "feature",
+      "emoji": "⏳",
       "title": "百岁诞辰倒计时",
-      "description": "Header 右上角显示距 2026-08-17 的实时秒数计数"
+      "description": "Header 右上实时秒数计数，距 2026-08-17"
     },
     {
-      "title": "日期系统重构",
-      "description": "支持时间点和时间段选择，智能识别单点或范围"
+      "type": "feature",
+      "emoji": "📍",
+      "title": "地点双模式添加",
+      "description": "支持地图标点和搜索选择两种快速添加方式"
     },
     {
-      "title": "地点添加双模式",
-      "description": "支持地图标点浮动卡片和手动搜索两种方式快速添加"
+      "type": "optimize",
+      "emoji": "📅",
+      "title": "日期系统优化",
+      "description": "支持时间点和时间段选择，智能识别"
     }
   ]
 }
