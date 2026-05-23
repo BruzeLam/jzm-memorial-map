@@ -50,6 +50,7 @@ export function useMarkers() {
       id: `${markerData.type}_${Date.now()}`,
       images: markerData.images || [],
       sources: markerData.sources || [],
+      visits: markerData.visits || [],
     };
     setMarkers((prev) => [...prev, newMarker]);
     return newMarker.id;
@@ -86,6 +87,54 @@ export function useMarkers() {
     setSelectedMarkerId(null);
   }, []);
 
+  const addVisit = useCallback((markerId, visitData) => {
+    setMarkers((prev) =>
+      prev.map((m) => {
+        if (m.id === markerId) {
+          const newVisit = {
+            ...visitData,
+            id: `visit_${Date.now()}`,
+          };
+          return {
+            ...m,
+            visits: [...(m.visits || []), newVisit],
+          };
+        }
+        return m;
+      })
+    );
+  }, []);
+
+  const updateVisit = useCallback((markerId, visitId, updates) => {
+    setMarkers((prev) =>
+      prev.map((m) => {
+        if (m.id === markerId) {
+          return {
+            ...m,
+            visits: (m.visits || []).map((v) =>
+              v.id === visitId ? { ...v, ...updates } : v
+            ),
+          };
+        }
+        return m;
+      })
+    );
+  }, []);
+
+  const deleteVisit = useCallback((markerId, visitId) => {
+    setMarkers((prev) =>
+      prev.map((m) => {
+        if (m.id === markerId) {
+          return {
+            ...m,
+            visits: (m.visits || []).filter((v) => v.id !== visitId),
+          };
+        }
+        return m;
+      })
+    );
+  }, []);
+
   const stats = {
     total: markers.length,
     spot: markers.filter((m) => m.type === 'spot').length,
@@ -103,6 +152,9 @@ export function useMarkers() {
     deleteMarker,
     selectMarker,
     deselectMarker,
+    addVisit,
+    updateVisit,
+    deleteVisit,
     resetToSample,
     clearAll,
   };

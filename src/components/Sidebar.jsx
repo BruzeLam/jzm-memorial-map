@@ -225,7 +225,7 @@ export default function Sidebar({
               : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
-          {inActiveAddFlow ? '✕ 取消' : '➕ 添加'}
+          {inActiveAddFlow ? '✕ 取消' : '➕ 添加新标记'}
         </button>
 
         <div className="relative">

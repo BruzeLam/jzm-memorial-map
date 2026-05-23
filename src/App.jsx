@@ -23,6 +23,9 @@ export default function App() {
     deleteMarker,
     selectMarker,
     deselectMarker,
+    addVisit,
+    updateVisit,
+    deleteVisit,
     resetToSample,
     clearAll,
   } = useMarkers();
@@ -228,6 +231,11 @@ export default function App() {
         <DetailPanel
           marker={selectedMarker}
           onClose={() => setShowDetailPanel(false)}
+          onAddVisit={(markerId) => {
+            // TODO: 打开添加访问记录的表单
+            // 预填充标记的地理位置信息
+            console.log('Add visit for marker:', markerId);
+          }}
         />
       )}
       {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (

@@ -2,12 +2,22 @@ import React, { useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import ImageViewer from './ImageViewer';
 
-export default function DetailPanel({ marker, onClose }) {
+export default function DetailPanel({ marker, onClose, onAddVisit }) {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
 
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
+  const visits = marker.visits && marker.visits.length > 0
+    ? marker.visits
+    : [{
+        id: 'default',
+        date: marker.date,
+        endDate: marker.endDate,
+        title: marker.title,
+        description: marker.description,
+        sources: marker.sources,
+      }];
 
   return (
     <div
@@ -47,72 +57,89 @@ export default function DetailPanel({ marker, onClose }) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* Title */}
-          {marker.title && (
-            <div className="mb-4">
-              <h3 className="font-bold text-lg text-gray-800 mb-1">{marker.title}</h3>
-            </div>
-          )}
+          {/* 访问卡片列表 */}
+          <div className="space-y-4">
+            {visits.map((visit, idx) => (
+              <div key={visit.id || idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                {/* Visit Title */}
+                {visit.title && (
+                  <h3 className="font-bold text-lg text-gray-800 mb-3">{visit.title}</h3>
+                )}
 
-          {/* Basic Info */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
-            {marker.date && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-600 min-w-16">📅 时间:</span>
-                <span className="text-gray-800 font-medium">
-                  {marker.date}{marker.endDate ? ` — ${marker.endDate}` : ''}
-                </span>
+                {/* Visit Info */}
+                <div className="space-y-2 mb-3">
+                  {visit.date && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-600 min-w-16">📅 时间:</span>
+                      <span className="text-gray-800 font-medium">
+                        {visit.date}{visit.endDate ? ` — ${visit.endDate}` : ''}
+                      </span>
+                    </div>
+                  )}
+                  {(marker.country || marker.province || marker.city) && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-600 min-w-16">🌍 地区:</span>
+                      <span className="text-gray-800">
+                        {marker.country}
+                        {marker.province ? ` / ${marker.province}` : ''}
+                        {marker.city ? ` / ${marker.city}` : ''}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-gray-600 min-w-16">📍 坐标:</span>
+                    <span className="text-gray-800 font-mono">{marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {visit.description && (
+                  <div className="mb-3">
+                    <h4 className="text-xs font-semibold text-gray-700 mb-1">背景说明</h4>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                      {visit.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Sources */}
+                {visit.sources && visit.sources.length > 0 && (
+                  <div className="mb-3">
+                    <h4 className="text-xs font-semibold text-gray-700 mb-1">资料来源</h4>
+                    <ul className="space-y-1">
+                      {visit.sources.map((s, i) => (
+                        <li key={i} className="text-xs text-gray-600">
+                          <div className="flex gap-2">
+                            <span className="text-gray-400">•</span>
+                            <div>
+                              <div className="font-medium text-gray-700">{s.title}</div>
+                              {s.note && <div className="text-xs text-gray-500">{s.note}</div>}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            )}
-            {(marker.country || marker.province || marker.city) && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-600 min-w-16">🌍 地区:</span>
-                <span className="text-gray-800">
-                  {marker.country}
-                  {marker.province ? ` / ${marker.province}` : ''}
-                  {marker.city ? ` / ${marker.city}` : ''}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-600 min-w-16">📍 坐标:</span>
-              <span className="text-gray-800 font-mono">{marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}</span>
-            </div>
+            ))}
           </div>
 
-          {/* Description */}
-          {marker.description && (
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">背景说明</h4>
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                {marker.description}
-              </p>
-            </div>
-          )}
-
-          {/* Sources */}
-          {marker.sources && marker.sources.length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">资料来源</h4>
-              <ul className="space-y-2">
-                {marker.sources.map((s, i) => (
-                  <li key={i} className="text-sm text-gray-600">
-                    <div className="flex gap-2">
-                      <span className="text-gray-400">•</span>
-                      <div>
-                        <div className="font-medium text-gray-700">{s.title}</div>
-                        {s.note && <div className="text-xs text-gray-500 mt-0.5">{s.note}</div>}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+          {/* 添加访问记录槽位 */}
+          {onAddVisit && marker.visits && (
+            <div className="mt-4 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center">
+              <button
+                onClick={() => onAddVisit(marker.id)}
+                className="w-full py-3 text-red-500 font-semibold hover:bg-red-50 rounded transition-colors"
+              >
+                + 添加访问记录
+              </button>
             </div>
           )}
 
           {/* Images */}
           {marker.images && marker.images.length > 0 && (
-            <div className="mb-4">
+            <div className="mt-6 mb-4">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">📸 图片库 ({marker.images.length})</h4>
               <div className="grid grid-cols-2 gap-2">
                 {marker.images.map((img, i) => (
