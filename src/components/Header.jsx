@@ -101,7 +101,7 @@ export default function Header({ onOpenQuotes, onOpenGallery, onOpenChangeLog })
 
           <button
             onClick={onOpenChangeLog}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-xs font-medium rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium rounded-lg transition-colors"
           >
             <span>📋</span>
             <span>更新日志</span>

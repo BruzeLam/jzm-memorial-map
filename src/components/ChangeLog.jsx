@@ -75,21 +75,15 @@ export default function ChangeLog({ onClose }) {
             return (
               <div
                 key={date}
-                className="rounded-xl border-2 overflow-hidden transition-all"
-                style={{
-                  borderImage: isToday
-                    ? 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%) 1'
-                    : 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) 1',
-                  background: 'white',
-                }}
+                className="overflow-hidden transition-all"
               >
                 {/* Date Header */}
                 <button
                   onClick={() => toggleDate(date)}
-                  className={`w-full px-4 py-3 flex items-center justify-between transition-all ${
+                  className={`w-full px-4 py-3 flex items-center justify-between transition-all border-b-2 ${
                     isToday
-                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200'
-                      : 'bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200'
+                      ? 'bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border-blue-200'
+                      : 'bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 border-gray-200'
                   }`}
                 >
                   <span className={`font-semibold text-sm ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
