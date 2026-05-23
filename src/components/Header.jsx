@@ -90,6 +90,15 @@ export default function Header({ onOpenQuotes, onOpenGallery }) {
             <span>长者语录</span>
           </button>
 
+          <button
+            disabled
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-400 text-white text-xs font-medium rounded-lg cursor-not-allowed opacity-60"
+            title="敬请期待"
+          >
+            <span>📁</span>
+            <span>档案馆</span>
+          </button>
+
           {showCountdown && (
             <div
               className="relative flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 cursor-default select-none"
