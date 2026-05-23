@@ -60,27 +60,33 @@
   "2026-5-21": [
     {
       "type": "feature",
-      "emoji": "📚",
-      "title": "长者语录功能",
-      "description": "15 条官方语录库，支持用户上传、搜索、删除"
+      "emoji": "♾️",
+      "title": "黑框眼镜无尽符号",
+      "description": "百岁诞辰倒计时悬浮框设计，鼠标悬停显示黑框眼镜 SVG"
     },
     {
-      "type": "feature",
-      "emoji": "⏳",
-      "title": "百岁诞辰倒计时",
-      "description": "Header 右上实时秒数计数，距 2026-08-17"
+      "type": "optimize",
+      "emoji": "💬",
+      "title": "倒计时悬浮框重新设计",
+      "description": "位置改下方、白色半透明毛玻璃效果、眼镜色改红色"
     },
     {
       "type": "feature",
       "emoji": "📍",
-      "title": "地点双模式添加",
-      "description": "支持地图标点和搜索选择两种快速添加方式"
+      "title": "地点添加双模式",
+      "description": "支持地图标点和手动输入两种快速方式"
     },
     {
-      "type": "optimize",
+      "type": "feature",
       "emoji": "📅",
-      "title": "日期系统优化",
+      "title": "日期体系完善",
       "description": "支持时间点和时间段选择，智能识别"
+    },
+    {
+      "type": "feature",
+      "emoji": "🚀",
+      "title": "应用上线到生产",
+      "description": "部署到 Vercel，正式对外发布"
     }
   ]
 }
