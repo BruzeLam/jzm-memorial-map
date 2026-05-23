@@ -177,12 +177,17 @@ function ZoomControl({ mapRef }) {
 }
 
 export default function MapView({ mapRef, markers, selectedMarkerId, onMarkerSelect, onMapClick, isAddingMode }) {
+  // 限制地图拖动范围在全球范围内
+  const globalBounds = [[-85, -180], [85, 180]];
+
   return (
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
       minZoom={2}
       maxZoom={13}
+      maxBounds={globalBounds}
+      maxBoundsViscosity={1.0}
       style={{ width: '100%', height: '100%' }}
       className={isAddingMode ? 'cursor-crosshair' : ''}
       zoomControl={false}
