@@ -50,14 +50,18 @@ function UploadForm({ onSave, onCancel }) {
 
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              语录内容 <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium text-gray-600">
+                语录内容 <span className="text-red-500">*</span>
+              </label>
+              <span className="text-xs text-gray-500">{text.length}/200</span>
+            </div>
             <textarea
               value={text}
               onChange={(e) => { setText(e.target.value); setError(''); }}
-              placeholder="请输入语录原文..."
+              placeholder="请输入语录原文（最多200字）..."
               rows={3}
+              maxLength={200}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
             />
             {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
