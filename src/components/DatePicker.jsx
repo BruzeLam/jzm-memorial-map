@@ -1,13 +1,54 @@
 import React, { useState } from 'react';
 
+// 模糊匹配多种日期格式
+function parseDateString(dateStr) {
+  if (!dateStr) return null;
+
+  dateStr = dateStr.trim();
+
+  // 已经是标准格式 YYYY-MM-DD
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStr)) {
+    const parts = dateStr.split('-');
+    const year = parts[0];
+    const month = String(parseInt(parts[1])).padStart(2, '0');
+    const day = String(parseInt(parts[2])).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // 8 位纯数字：YYYYMMDD
+  if (/^\d{8}$/.test(dateStr)) {
+    const year = dateStr.slice(0, 4);
+    const month = dateStr.slice(4, 6);
+    const day = dateStr.slice(6, 8);
+    return `${year}-${month}-${day}`;
+  }
+
+  // 7 位纯数字：YYYYMDD（月份单数字）
+  if (/^\d{7}$/.test(dateStr)) {
+    const year = dateStr.slice(0, 4);
+    const month = String(parseInt(dateStr.slice(4, 5))).padStart(2, '0');
+    const day = dateStr.slice(5, 7);
+    return `${year}-${month}-${day}`;
+  }
+
+  // 6 位纯数字：YYYYMM（只有年月，默认为月初）
+  if (/^\d{6}$/.test(dateStr)) {
+    const year = dateStr.slice(0, 4);
+    const month = dateStr.slice(4, 6);
+    return `${year}-${month}-01`;
+  }
+
+  return null;
+}
+
 export default function DatePicker({ onSelect, initialDate, initialEndDate, onClose }) {
   const [startDate, setStartDate] = useState(initialDate || '');
   const [endDate, setEndDate] = useState(initialEndDate || '');
   const [error, setError] = useState('');
 
-  const validateDateFormat = (dateStr) => {
-    if (!dateStr) return true;
-    return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+  const validateAndParse = (dateStr) => {
+    const parsed = parseDateString(dateStr);
+    return parsed !== null ? parsed : null;
   };
 
   const handleConfirm = () => {
@@ -16,25 +57,30 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
       return;
     }
 
-    if (!validateDateFormat(startDate)) {
-      setError('起始日期格式错误，请用 YYYY-MM-DD');
+    const parsedStart = validateAndParse(startDate);
+    if (!parsedStart) {
+      setError('起始日期格式错误，请用 YYYY-MM-DD、YYYYMMDD、YYYYMDD 或 YYYYMM');
       return;
     }
 
-    if (endDate && !validateDateFormat(endDate)) {
-      setError('结束日期格式错误，请用 YYYY-MM-DD');
-      return;
+    let parsedEnd = null;
+    if (endDate) {
+      parsedEnd = validateAndParse(endDate);
+      if (!parsedEnd) {
+        setError('结束日期格式错误，请用 YYYY-MM-DD、YYYYMMDD、YYYYMDD 或 YYYYMM');
+        return;
+      }
     }
 
-    if (endDate && startDate === endDate) {
+    if (parsedEnd && parsedStart === parsedEnd) {
       // Same date - treat as point
       onSelect({
-        date: startDate,
+        date: parsedStart,
         endDate: undefined,
       });
-    } else if (endDate) {
+    } else if (parsedEnd) {
       // Different dates - treat as range, ensure chronological order
-      const [minDate, maxDate] = startDate < endDate ? [startDate, endDate] : [endDate, startDate];
+      const [minDate, maxDate] = parsedStart < parsedEnd ? [parsedStart, parsedEnd] : [parsedEnd, parsedStart];
       onSelect({
         date: minDate,
         endDate: maxDate,
@@ -42,7 +88,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
     } else {
       // Only start date - point mode
       onSelect({
-        date: startDate,
+        date: parsedStart,
         endDate: undefined,
       });
     }
@@ -63,7 +109,11 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
         <p className="mb-1">📝 使用说明：</p>
         <p>• 只填第一个框 = <strong>时间点</strong>（某一天）</p>
         <p>• 两个都填 = <strong>时间段</strong>（从某天到某天）</p>
-        <p>• 格式: YYYY-MM-DD（如 2026-08-17）</p>
+        <p className="mt-2">📅 支持格式（自动识别）：</p>
+        <p>• YYYY-MM-DD（如 1991-4-19）</p>
+        <p>• YYYYMMDD（如 19910419）</p>
+        <p>• YYYYMDD（如 1991419）</p>
+        <p>• YYYYMM（如 199104，默认为月初）</p>
       </div>
 
       {/* Input fields */}
