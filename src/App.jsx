@@ -10,6 +10,7 @@ import QuotesPanel from './components/QuotesPanel';
 import DetailPanel from './components/DetailPanel';
 import ImageViewer from './components/ImageViewer';
 import GalleryPanel from './components/GalleryPanel';
+import ChangeLog from './components/ChangeLog';
 
 export default function App() {
   const {
@@ -50,6 +51,7 @@ export default function App() {
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
+  const [showChangeLog, setShowChangeLog] = useState(false);
 
   const mapRef = useRef(null);
 
@@ -208,8 +210,17 @@ export default function App() {
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
         onOpenGallery={() => setShowGallery(true)}
+        onOpenChangeLog={() => setShowChangeLog(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
+      {showChangeLog && (
+        <div
+          onClick={() => setShowChangeLog(false)}
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+        >
+          <ChangeLog />
+        </div>
+      )}
       {showGallery && (
         <GalleryPanel
           gallery={gallery}

@@ -47,7 +47,7 @@ function Glasses({ size = 32 }) {
   );
 }
 
-export default function Header({ onOpenQuotes, onOpenGallery }) {
+export default function Header({ onOpenQuotes, onOpenGallery, onOpenChangeLog }) {
   const seconds = useCountdown();
   const showCountdown = Date.now() < CENTENARY;
   const [hovered, setHovered] = useState(false);
@@ -97,6 +97,14 @@ export default function Header({ onOpenQuotes, onOpenGallery }) {
           >
             <span>📁</span>
             <span>档案馆</span>
+          </button>
+
+          <button
+            onClick={onOpenChangeLog}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-800 text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            <span>📋</span>
+            <span>更新日志</span>
           </button>
 
           {showCountdown && (
