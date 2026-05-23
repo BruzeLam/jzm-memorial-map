@@ -8,7 +8,7 @@ const typeConfig = {
   fix: { label: '🐛 修复', color: 'bg-red-50 border-red-200' },
 };
 
-export default function ChangeLog() {
+export default function ChangeLog({ onClose }) {
   const [expandedDates, setExpandedDates] = useState({});
 
   // 获取今日日期（YYYY-M-D 格式，与 JSON key 匹配）
@@ -47,10 +47,10 @@ export default function ChangeLog() {
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: 'rgba(255,255,255,0.5)' }}
+      style={{ background: 'rgba(240, 244, 255, 0.8)' }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          // 点击背景关闭（由父组件处理）
+        if (e.target === e.currentTarget && onClose) {
+          onClose();
         }
       }}
     >

@@ -213,14 +213,7 @@ export default function App() {
         onOpenChangeLog={() => setShowChangeLog(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
-      {showChangeLog && (
-        <div
-          onClick={() => setShowChangeLog(false)}
-          style={{ background: 'rgba(0,0,0,0.5)' }}
-        >
-          <ChangeLog />
-        </div>
-      )}
+      {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
       {showGallery && (
         <GalleryPanel
           gallery={gallery}
