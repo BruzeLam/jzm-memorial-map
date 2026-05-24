@@ -144,7 +144,14 @@ export default function MapFloatingCard({ coords, pixelPos, containerSize, onQui
               </div>
             )}
             {showDatePicker && (
-              <div className="mt-2 absolute z-[10000] bg-white rounded-lg border border-gray-200">
+              <div
+                className="mt-2 absolute z-[10000]"
+                style={{
+                  right: 0,
+                  maxHeight: containerSize?.height ? containerSize.height - clampedTop - 200 : 400,
+                  overflow: 'auto',
+                }}
+              >
                 <DatePicker
                   onSelect={({ date: d, endDate: ed }) => {
                     setDate(d);
