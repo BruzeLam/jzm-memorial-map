@@ -45,11 +45,25 @@ function useUserLocation() {
   return { location, error };
 }
 
+// 为 trip 分配颜色（预设调色板）
+const TRIP_COLORS = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+  '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B88B', '#A8D8EA',
+];
+
+function getTripColor(tripId) {
+  if (!tripId) return null;
+  const hash = tripId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return TRIP_COLORS[hash % TRIP_COLORS.length];
+}
+
 function createDivIcon(marker, isSelected) {
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
   const color = marker.color || typeInfo.color;
   const icon = marker.icon || typeInfo.icon;
   const size = isSelected ? 44 : 36;
+  const tripColor = getTripColor(marker.tripId);
+
   const html = `
     <div style="
       width:${size}px;
@@ -57,8 +71,8 @@ function createDivIcon(marker, isSelected) {
       background:${color};
       border-radius:50% 50% 50% 0;
       transform:rotate(-45deg);
-      border:3px solid rgba(255,255,255,0.9);
-      box-shadow:${isSelected ? `0 0 0 3px ${color}, 0 4px 12px rgba(0,0,0,0.5)` : '0 2px 8px rgba(0,0,0,0.4)'};
+      border:${tripColor ? `4px solid ${tripColor}` : '3px solid rgba(255,255,255,0.9)'};
+      box-shadow:${isSelected ? `0 0 0 3px ${color}, 0 4px 12px rgba(0,0,0,0.5)` : `0 2px 8px rgba(0,0,0,0.4)${tripColor ? `, inset 0 0 0 1px ${tripColor}` : ''}`};
       display:flex;
       align-items:center;
       justify-content:center;
@@ -110,6 +124,7 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
       const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
       const distance = location ? calculateDistance(location.lat, location.lng, m.latitude, m.longitude) : null;
 
+      const tripColor = getTripColor(m.tripId);
       const popupContent = `
         <div style="min-width:160px;font-family:system-ui,sans-serif">
           <div style="font-weight:700;font-size:14px;margin-bottom:4px">${m.name}</div>
@@ -120,6 +135,7 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
             ${m.date ? `<span style="margin-left:6px">${m.date}</span>` : ''}
             ${distance ? `<span style="margin-left:6px">距离您${distance}km</span>` : ''}
           </div>
+          ${m.tripName ? `<div style="font-size:11px;color:#999;margin-bottom:4px;padding:4px;background:#f5f5f5;border-left:3px solid ${tripColor};border-radius:2px">📍 ${m.tripName}</div>` : ''}
           <div style="font-size:12px;color:#444">${m.title}</div>
         </div>
       `;
