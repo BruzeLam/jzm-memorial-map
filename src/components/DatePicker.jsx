@@ -124,7 +124,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
       {/* Input fields */}
       <div className="space-y-2 mb-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">起始日期 *</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">起始日期</label>
           <input
             type="text"
             value={startDate}
@@ -132,7 +132,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
               setStartDate(e.target.value);
               setError('');
             }}
-            placeholder="YYYY-MM-DD"
+            placeholder="YYYY-MM-DD（可留空）"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
           />
         </div>
