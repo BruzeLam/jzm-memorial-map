@@ -13,19 +13,38 @@ export default function MapFloatingCard({ coords, pixelPos, containerSize, onQui
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const CARD_W = 320;
-  const CARD_H = 240; // approximate
+  const CARD_H = 380; // 包含 DatePicker 时的最大高度
 
-  // Position card above and centered on click point, clamped within container
+  const containerW = containerSize?.width || 800;
+  const containerH = containerSize?.height || 600;
+  const padding = 12;
+
+  // 智能定位：优先放在上方，如果不行就放下方，左右自动居中或调整
+  let clampedTop, positionedBelow;
+
+  const rawTop = pixelPos.y - CARD_H - padding;
+  if (rawTop >= padding) {
+    // 上方有足够空间
+    clampedTop = rawTop;
+    positionedBelow = false;
+  } else if (pixelPos.y + CARD_H + padding <= containerH) {
+    // 下方有足够空间
+    clampedTop = pixelPos.y + padding;
+    positionedBelow = true;
+  } else {
+    // 都没有足够空间，优先上方
+    clampedTop = Math.max(padding, pixelPos.y - CARD_H - padding);
+    positionedBelow = false;
+  }
+
+  // 水平定位：优先居中，否则靠边
   const rawLeft = pixelPos.x - CARD_W / 2;
-  const rawTop = pixelPos.y - CARD_H - 12;
+  const maxLeft = containerW - CARD_W - padding;
+  const clampedLeft = Math.max(padding, Math.min(rawLeft, maxLeft));
 
-  const maxLeft = (containerSize?.width || 800) - CARD_W - 8;
-  const clampedLeft = Math.max(8, Math.min(rawLeft, maxLeft));
-  const clampedTop = rawTop < 8 ? pixelPos.y + 16 : rawTop;
-
-  // Triangle points down toward click, positioned relative to card
-  const triangleLeft = pixelPos.x - clampedLeft - 8; // center arrow at click x
-  const showTriangleBelow = clampedTop === rawTop; // card is above click point
+  // 三角形位置（相对卡片）
+  const triangleLeft = Math.max(8, Math.min(pixelPos.x - clampedLeft - 8, CARD_W - 24));
+  const showTriangleBelow = positionedBelow;
 
   const inputClass =
     'w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-400 bg-white';

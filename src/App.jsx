@@ -52,8 +52,44 @@ export default function App() {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [showChangeLog, setShowChangeLog] = useState(false);
+  const [mapContainerSize, setMapContainerSize] = useState({ width: 800, height: 600 });
 
   const mapRef = useRef(null);
+
+  // 更新地图容器大小
+  useEffect(() => {
+    const updateMapSize = () => {
+      if (mapRef.current && mapRef.current.getContainer) {
+        const container = mapRef.current.getContainer();
+        if (container) {
+          setMapContainerSize({
+            width: container.offsetWidth,
+            height: container.offsetHeight,
+          });
+        }
+      }
+    };
+
+    // 初始化
+    updateMapSize();
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', updateMapSize);
+    return () => window.removeEventListener('resize', updateMapSize);
+  }, []);
+
+  // 浮窗卡出现时更新容器大小（确保位置计算准确）
+  useEffect(() => {
+    if (mapFloatingCard && mapRef.current && mapRef.current.getContainer) {
+      const container = mapRef.current.getContainer();
+      if (container) {
+        setMapContainerSize({
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+        });
+      }
+    }
+  }, [mapFloatingCard]);
 
   // Auto-focus on first search result when search query changes
   useEffect(() => {
@@ -74,7 +110,15 @@ export default function App() {
     selectMarker(id);
     const marker = markers.find((m) => m.id === id);
     if (marker && mapRef.current) {
-      mapRef.current.flyTo([marker.latitude, marker.longitude], 8, { duration: 1 });
+      const map = mapRef.current;
+      const currentZoom = map.getZoom();
+      // 计算目标缩放级别：如果已经足够近，保持不变；否则缩放到 10-12 范围
+      const targetZoom = Math.max(currentZoom, 10);
+      const constrainedZoom = Math.min(targetZoom, 12);
+      map.flyTo([marker.latitude, marker.longitude], constrainedZoom, {
+        duration: 0.8,
+        easeLinearity: 0.5, // 使动画更流畅
+      });
     }
   };
 
@@ -291,7 +335,7 @@ export default function App() {
             <MapFloatingCard
               coords={mapFloatingCard.coords}
               pixelPos={mapFloatingCard.pixelPos}
-              containerSize={{ width: 800, height: 600 }}
+              containerSize={mapContainerSize}
               onQuickSave={handleFloatingQuickSave}
               onMoreDetails={handleFloatingMoreDetails}
               onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
