@@ -248,6 +248,22 @@ export default function App() {
     setShowAddForm(true);
   };
 
+  // Floating card: 关闭时缩放回去一点，方便查看周边标点
+  const handleCloseFloatingCard = () => {
+    setMapFloatingCard(null);
+    setAddInputMode(null);
+    if (mapRef.current) {
+      const map = mapRef.current;
+      const currentZoom = map.getZoom();
+      // 缩小 2 级，但不低于 7（确保还能看到周边内容）
+      const newZoom = Math.max(currentZoom - 2, 7);
+      map.flyTo(map.getCenter(), newZoom, {
+        duration: 0.6,
+        easeLinearity: 0.5,
+      });
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -338,7 +354,7 @@ export default function App() {
               containerSize={mapContainerSize}
               onQuickSave={handleFloatingQuickSave}
               onMoreDetails={handleFloatingMoreDetails}
-              onCancel={() => { setMapFloatingCard(null); setAddInputMode(null); }}
+              onCancel={handleCloseFloatingCard}
             />
           )}
         </div>
