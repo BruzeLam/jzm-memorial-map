@@ -327,7 +327,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
         </div>
 
         <div>
-          <label className={labelClass}>日期</label>
+          <label className={labelClass}>日期（可选）</label>
           <button
             type="button"
             onClick={() => setShowDatePicker(!showDatePicker)}
