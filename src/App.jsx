@@ -23,9 +23,7 @@ export default function App() {
     deleteMarker,
     selectMarker,
     deselectMarker,
-    addVisit,
-    updateVisit,
-    deleteVisit,
+    // 多访问功能暂时搁置：addVisit, updateVisit, deleteVisit
     resetToSample,
     clearAll,
   } = useMarkers();
