@@ -126,7 +126,7 @@ export default function MapFloatingCard({ coords, pixelPos, containerSize, onQui
 
           {/* Date */}
           <div>
-            <label className={labelClass}>日期</label>
+            <label className={labelClass}>日期（可选）</label>
             <button
               type="button"
               onClick={() => setShowDatePicker(!showDatePicker)}

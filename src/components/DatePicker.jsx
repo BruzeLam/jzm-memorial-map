@@ -52,7 +52,18 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
   };
 
   const handleConfirm = () => {
-    if (!startDate.trim()) {
+    // 如果没有填写起始日期，直接返回空值（日期可选）
+    if (!startDate.trim() && !endDate.trim()) {
+      onSelect({
+        date: undefined,
+        endDate: undefined,
+      });
+      onClose && onClose();
+      return;
+    }
+
+    // 如果只有结束日期但没有起始日期，报错
+    if (!startDate.trim() && endDate.trim()) {
       setError('请输入起始日期');
       return;
     }
@@ -106,7 +117,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
     <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3 max-w-sm">
       {/* Instructions */}
       <div className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded leading-relaxed">
-        <div>📝 一个日期 = 时间点｜两个 = 时间段</div>
+        <div>📝 一个日期 = 时间点｜两个 = 时间段｜留空 = 无日期</div>
         <div className="text-gray-400 mt-0.5">支持: YYYY-MM-DD、YYYYMMDD、YYYYMDD、YYYYMM</div>
       </div>
 
@@ -160,7 +171,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
         <button
           type="button"
           onClick={handleReset}
-          disabled={!startDate}
+          disabled={!startDate && !endDate}
           className="flex-1 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:hover:bg-white transition-colors"
         >
           重置
@@ -168,7 +179,6 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
         <button
           type="button"
           onClick={handleConfirm}
-          disabled={!startDate}
           className="flex-1 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-40 disabled:hover:bg-blue-500 font-medium transition-colors"
         >
           确定
