@@ -103,21 +103,14 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
   };
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-4 max-w-sm">
+    <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3 max-w-sm">
       {/* Instructions */}
-      <div className="text-xs text-gray-500 mb-4 px-3 py-2 bg-gray-50 rounded">
-        <p className="mb-1">📝 使用说明：</p>
-        <p>• 只填第一个框 = <strong>时间点</strong>（某一天）</p>
-        <p>• 两个都填 = <strong>时间段</strong>（从某天到某天）</p>
-        <p className="mt-2">📅 支持格式（自动识别）：</p>
-        <p>• YYYY-MM-DD（如 1991-4-19）</p>
-        <p>• YYYYMMDD（如 19910419）</p>
-        <p>• YYYYMDD（如 1991419）</p>
-        <p>• YYYYMM（如 199104，默认为月初）</p>
+      <div className="text-xs text-gray-500 mb-3 px-2 py-1.5 bg-gray-50 rounded leading-relaxed">
+        📝 只填第一个 = 时间点｜两个都填 = 时间段｜支持多种格式（自动识别）
       </div>
 
       {/* Input fields */}
-      <div className="space-y-3 mb-4">
+      <div className="space-y-2 mb-3">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">起始日期 *</label>
           <input
@@ -149,17 +142,15 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
 
       {/* Error message */}
       {error && (
-        <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+        <div className="mb-2 px-2 py-1.5 bg-red-50 border border-red-200 rounded text-xs text-red-600">
           {error}
         </div>
       )}
 
       {/* Selected dates display */}
       {startDate && (
-        <div className="mb-3 px-3 py-2 bg-blue-50 rounded-lg text-sm text-gray-700 text-center font-medium">
-          {endDate && startDate !== endDate
-            ? `选中: ${startDate} — ${endDate}`
-            : `选中: ${startDate}`}
+        <div className="mb-2 px-2 py-1 bg-blue-50 rounded text-xs text-gray-700 text-center font-medium">
+          选中: {endDate && startDate !== endDate ? `${startDate} — ${endDate}` : startDate}
         </div>
       )}
 
