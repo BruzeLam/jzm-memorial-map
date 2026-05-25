@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { QUOTES } from '../data/quotes';
 
+const STORAGE_KEY = 'jzm_user_quotes';
+
+function loadAllQuotes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const userQuotes = raw ? JSON.parse(raw) : [];
+    // 合并内置语录和用户语录
+    return [...QUOTES, ...userQuotes];
+  } catch (e) {
+    return QUOTES;
+  }
+}
+
 export default function RandomQuoteDisplay() {
   const [currentQuote, setCurrentQuote] = useState(null);
   const [usedIndices, setUsedIndices] = useState(new Set());
@@ -15,8 +28,10 @@ export default function RandomQuoteDisplay() {
     setIsTransitioning(true);
 
     setTimeout(() => {
+      // 加载所有语录（内置 + 用户添加）
+      const allQuotes = loadAllQuotes();
       // 过滤：只显示文本长度 < 50 的语录
-      const filtered = QUOTES.filter((q) => q.text.length < 50);
+      const filtered = allQuotes.filter((q) => q.text.length < 50);
       const available = Array.from({ length: filtered.length }, (_, i) => i).filter(
         (i) => !used.has(i)
       );

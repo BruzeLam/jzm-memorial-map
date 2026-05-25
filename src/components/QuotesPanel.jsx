@@ -6,7 +6,13 @@ const STORAGE_KEY = 'jzm_user_quotes';
 function loadUserQuotes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const quotes = JSON.parse(raw);
+    // 确保所有来自 localStorage 的语录都被标记为用户添加的
+    return quotes.map((q) => ({
+      ...q,
+      isUserAdded: true,
+    }));
   } catch (e) {
     return [];
   }
