@@ -250,24 +250,28 @@ export default function QuotesPanel({ onClose }) {
               filteredQuotes.map((quote) => (
                   <div
                     key={quote.id}
-                    className="border border-gray-100 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors group"
+                    className={`border rounded-xl p-4 transition-colors ${
+                      quote.isUserAdded
+                        ? 'border-red-200 bg-red-50/30'
+                        : 'border-gray-100 hover:border-red-200 hover:bg-red-50/30'
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-gray-800 font-medium text-sm leading-relaxed mb-2 flex-1">
                         "{quote.text}"
                       </p>
                       {quote.isUserAdded && (
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0 mt-0.5">
+                        <div className="flex gap-2 flex-shrink-0 mt-0.5">
                           <button
                             onClick={() => handleEditUserQuote(quote)}
-                            className="text-gray-300 hover:text-blue-400 text-xs"
+                            className="text-gray-400 hover:text-blue-500 text-base px-1"
                             title="编辑"
                           >
                             ✎
                           </button>
                           <button
                             onClick={() => handleDeleteUserQuote(quote.id)}
-                            className="text-gray-300 hover:text-red-400 text-xs"
+                            className="text-gray-400 hover:text-red-500 text-base px-1"
                             title="删除"
                           >
                             🗑
