@@ -7,13 +7,26 @@ function loadUserQuotes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const quotes = JSON.parse(raw);
-    // 确保所有来自 localStorage 的语录都被标记为用户添加的
-    return quotes.map((q) => ({
-      ...q,
-      isUserAdded: true,
-    }));
+
+    let quotes = JSON.parse(raw);
+
+    // 数据迁移和修复：确保所有语录都有正确的格式
+    quotes = quotes.map((q, index) => ({
+      id: q.id || `user_${q.text?.substring(0, 10) || index}_${Date.now() + index}`,
+      text: q.text || '',
+      source: q.source || null,
+      context: q.context || null,
+      isUserAdded: true, // 强制标记为用户添加
+    })).filter(q => q.text.trim()); // 过滤掉空的语录
+
+    // 如果数据被修改了（迁移），保存回去
+    if (JSON.stringify(quotes) !== raw) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
+    }
+
+    return quotes;
   } catch (e) {
+    console.error('Failed to load user quotes:', e);
     return [];
   }
 }

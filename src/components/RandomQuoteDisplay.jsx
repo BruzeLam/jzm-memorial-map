@@ -6,7 +6,24 @@ const STORAGE_KEY = 'jzm_user_quotes';
 function loadAllQuotes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const userQuotes = raw ? JSON.parse(raw) : [];
+    if (!raw) return QUOTES;
+
+    let userQuotes = JSON.parse(raw);
+
+    // 数据迁移和修复：确保所有语录都有正确的格式
+    userQuotes = userQuotes.map((q, index) => ({
+      id: q.id || `user_${q.text?.substring(0, 10) || index}_${Date.now() + index}`,
+      text: q.text || '',
+      source: q.source || null,
+      context: q.context || null,
+      isUserAdded: true,
+    })).filter(q => q.text.trim());
+
+    // 如果数据被修改了（迁移），保存回去
+    if (JSON.stringify(userQuotes) !== raw) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userQuotes));
+    }
+
     // 合并内置语录和用户语录
     return [...QUOTES, ...userQuotes];
   } catch (e) {
