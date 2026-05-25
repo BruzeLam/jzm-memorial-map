@@ -34,6 +34,7 @@ export default function GalleryPanel({
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (uploading) return; // 防止并发上传
 
     setUploading(true);
     try {

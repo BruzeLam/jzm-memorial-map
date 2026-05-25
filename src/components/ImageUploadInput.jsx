@@ -31,6 +31,7 @@ export default function ImageUploadInput({ onUpload, disabled, label = '📸 上
   };
 
   const handlePaste = (e) => {
+    if (disabled) return; // 上传中禁止再次粘贴
     const files = e.clipboardData.files;
     if (files.length > 0) {
       handleFileUpload(files);
