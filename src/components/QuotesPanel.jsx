@@ -1,33 +1,48 @@
 import React, { useState, useMemo } from 'react';
 import { QUOTES } from '../data/quotes';
 
-const STORAGE_KEY = 'jzm_user_quotes';
+const STORAGE_KEY = 'jzm_all_quotes';
+const MIGRATED_KEY = 'jzm_quotes_migrated_v2';
 
-function loadUserQuotes() {
+function initializeAllQuotes() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
+    // 只在第一次加载时，把内置语录迁移进 localStorage
+    const migrated = localStorage.getItem(MIGRATED_KEY);
+    if (!migrated) {
+      // 先读取已有的用户自添加语录
+      const oldRaw = localStorage.getItem('jzm_user_quotes');
+      const oldUserQuotes = oldRaw ? JSON.parse(oldRaw) : [];
 
-    let quotes = JSON.parse(raw);
+      // 合并：内置语录 + 旧用户语录，全部标记为可编辑
+      const allQuotes = [
+        ...QUOTES.map((q, i) => ({
+          id: q.id || `builtin_${i}`,
+          text: q.text || '',
+          source: q.source || null,
+          context: q.context || null,
+          isUserAdded: true,
+        })),
+        ...oldUserQuotes.map((q, i) => ({
+          id: q.id || `user_migrated_${i}`,
+          text: q.text || '',
+          source: q.source || null,
+          context: q.context || null,
+          isUserAdded: true,
+        })),
+      ].filter(q => q.text.trim());
 
-    // 数据迁移和修复：确保所有语录都有正确的格式
-    quotes = quotes.map((q, index) => ({
-      id: q.id || `user_${q.text?.substring(0, 10) || index}_${Date.now() + index}`,
-      text: q.text || '',
-      source: q.source || null,
-      context: q.context || null,
-      isUserAdded: true, // 强制标记为用户添加
-    })).filter(q => q.text.trim()); // 过滤掉空的语录
-
-    // 如果数据被修改了（迁移），保存回去
-    if (JSON.stringify(quotes) !== raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allQuotes));
+      localStorage.setItem(MIGRATED_KEY, 'true');
+      return allQuotes;
     }
 
-    return quotes;
+    // 已迁移过，直接读取
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw).map(q => ({ ...q, isUserAdded: true }));
   } catch (e) {
-    console.error('Failed to load user quotes:', e);
-    return [];
+    console.error('Failed to initialize quotes:', e);
+    return QUOTES.map((q, i) => ({ ...q, id: q.id || `builtin_${i}`, isUserAdded: true }));
   }
 }
 
@@ -138,9 +153,9 @@ export default function QuotesPanel({ onClose }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [editingQuote, setEditingQuote] = useState(null);
-  const [userQuotes, setUserQuotes] = useState(loadUserQuotes);
+  const [userQuotes, setUserQuotes] = useState(initializeAllQuotes);
 
-  const allQuotes = useMemo(() => [...QUOTES, ...userQuotes], [userQuotes]);
+  const allQuotes = useMemo(() => userQuotes, [userQuotes]);
 
   const filteredQuotes = useMemo(() => {
     if (!searchQuery.trim()) return allQuotes;
@@ -250,28 +265,24 @@ export default function QuotesPanel({ onClose }) {
               filteredQuotes.map((quote) => (
                   <div
                     key={quote.id}
-                    className={`border rounded-xl p-4 transition-colors ${
-                      quote.isUserAdded
-                        ? 'border-red-200 bg-red-50/30'
-                        : 'border-gray-100 hover:border-red-200 hover:bg-red-50/30'
-                    }`}
+                    className="border border-gray-100 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-gray-800 font-medium text-sm leading-relaxed mb-2 flex-1">
                         "{quote.text}"
                       </p>
                       {quote.isUserAdded && (
-                        <div className="flex gap-2 flex-shrink-0 mt-0.5">
+                        <div className="flex gap-1 flex-shrink-0 mt-0.5">
                           <button
                             onClick={() => handleEditUserQuote(quote)}
-                            className="text-gray-400 hover:text-blue-500 text-base px-1"
+                            className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
                             title="编辑"
                           >
                             ✎
                           </button>
                           <button
                             onClick={() => handleDeleteUserQuote(quote.id)}
-                            className="text-gray-400 hover:text-red-500 text-base px-1"
+                            className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                             title="删除"
                           >
                             🗑
