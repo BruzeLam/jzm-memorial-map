@@ -1,6 +1,12 @@
 {
   "2026-5-25": [
     {
+      "type": "optimize",
+      "emoji": "🌍",
+      "title": "地图最小缩放限制",
+      "description": "设定最小缩放级别（zoom=3），地图不再能缩到整个世界视角，保持聚焦亚洲区域"
+    },
+    {
       "type": "feature",
       "emoji": "✏️",
       "title": "长者语录全面可编辑",
