@@ -19,18 +19,11 @@ export default function GalleryPanel({
   const [newImageToEdit, setNewImageToEdit] = useState(null);
   const [showUploadArea, setShowUploadArea] = useState(false);
 
-  // 搜索过滤
+  // 搜索过滤：仅按标题搜索
   const filteredGallery = searchQuery.trim()
     ? gallery.filter((img) => {
         const q = searchQuery.toLowerCase();
-        return (
-          img.title?.toLowerCase().includes(q) ||
-          img.description?.toLowerCase().includes(q) ||
-          img.location?.address?.toLowerCase().includes(q) ||
-          img.location?.city?.toLowerCase().includes(q) ||
-          img.location?.province?.toLowerCase().includes(q) ||
-          img.name?.toLowerCase().includes(q)
-        );
+        return img.title?.toLowerCase().includes(q);
       })
     : gallery;
 
