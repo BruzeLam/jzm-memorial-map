@@ -57,11 +57,35 @@ function getTripColor(tripId) {
   return TRIP_COLORS[hash % TRIP_COLORS.length];
 }
 
-function createDivIcon(marker, isSelected) {
+// 根据缩放级别计算标点尺寸：世界视图更小，城市级视图正常大小
+function getMarkerDimensions(zoom, isSelected) {
+  const baseZoom = 10;
+  const minZoom = 3;
+  const minScale = 0.38;
+  const selectedBoost = isSelected ? 1.2 : 1;
+
+  let scale = 1;
+  if (zoom < baseZoom) {
+    const t = Math.max(0, Math.min(1, (zoom - minZoom) / (baseZoom - minZoom)));
+    scale = minScale + t * (1 - minScale);
+  } else if (zoom > baseZoom) {
+    scale = Math.min(1.12, 1 + (zoom - baseZoom) * 0.015);
+  }
+
+  const baseSize = 36 * selectedBoost;
+  const size = Math.max(12, Math.round(baseSize * scale));
+  const fontSize = Math.max(8, Math.round((isSelected ? 18 : 15) * scale));
+  const borderWidth = Math.max(1, Math.round((isSelected ? 4 : 3) * scale));
+  const ringWidth = Math.max(1, Math.round(3 * scale));
+
+  return { size, fontSize, borderWidth, ringWidth };
+}
+
+function createDivIcon(marker, isSelected, zoom) {
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
   const color = marker.color || typeInfo.color;
   const icon = marker.icon || typeInfo.icon;
-  const size = isSelected ? 44 : 36;
+  const { size, fontSize, borderWidth, ringWidth } = getMarkerDimensions(zoom, isSelected);
   const tripColor = getTripColor(marker.tripId);
 
   const html = `
@@ -71,14 +95,14 @@ function createDivIcon(marker, isSelected) {
       background:${color};
       border-radius:50% 50% 50% 0;
       transform:rotate(-45deg);
-      border:${tripColor ? `4px solid ${tripColor}` : '3px solid rgba(255,255,255,0.9)'};
-      box-shadow:${isSelected ? `0 0 0 3px ${color}, 0 4px 12px rgba(0,0,0,0.5)` : `0 2px 8px rgba(0,0,0,0.4)${tripColor ? `, inset 0 0 0 1px ${tripColor}` : ''}`};
+      border:${tripColor ? `${borderWidth}px solid ${tripColor}` : `${borderWidth}px solid rgba(255,255,255,0.9)`};
+      box-shadow:${isSelected ? `0 0 0 ${ringWidth}px ${color}, 0 4px 12px rgba(0,0,0,0.5)` : `0 2px 8px rgba(0,0,0,0.4)${tripColor ? `, inset 0 0 0 1px ${tripColor}` : ''}`};
       display:flex;
       align-items:center;
       justify-content:center;
       cursor:pointer;
     ">
-      <span style="transform:rotate(45deg);font-size:${isSelected ? 18 : 15}px;line-height:1;">${icon}</span>
+      <span style="transform:rotate(45deg);font-size:${fontSize}px;line-height:1;">${icon}</span>
     </div>
   `;
   return L.divIcon({
@@ -112,13 +136,24 @@ function MapClickHandler({ isAddingMode, onMapClick }) {
 function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
   const map = useMap();
   const { location } = useUserLocation();
+  const [zoom, setZoom] = useState(() => map.getZoom());
+
+  useEffect(() => {
+    const updateZoom = () => setZoom(map.getZoom());
+    map.on('zoom', updateZoom);
+    map.on('zoomend', updateZoom);
+    return () => {
+      map.off('zoom', updateZoom);
+      map.off('zoomend', updateZoom);
+    };
+  }, [map]);
 
   useEffect(() => {
     const markerInstances = [];
 
     markers.forEach((m) => {
       const isSelected = m.id === selectedMarkerId;
-      const icon = createDivIcon(m, isSelected);
+      const icon = createDivIcon(m, isSelected, zoom);
       const leafletMarker = L.marker([m.latitude, m.longitude], { icon });
 
       const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
@@ -151,7 +186,7 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
     return () => {
       markerInstances.forEach((lm) => lm.remove());
     };
-  }, [markers, selectedMarkerId, onMarkerSelect, map, location]);
+  }, [markers, selectedMarkerId, onMarkerSelect, map, location, zoom]);
 
   return null;
 }
