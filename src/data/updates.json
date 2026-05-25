@@ -1,4 +1,50 @@
 {
+  "2026-5-25": [
+    {
+      "type": "feature",
+      "emoji": "✏️",
+      "title": "长者语录全面可编辑",
+      "description": "所有语录（含内置30条）均可编辑和删除，数据统一迁移至本地存储"
+    },
+    {
+      "type": "fix",
+      "emoji": "🔄",
+      "title": "随机语录同步修复",
+      "description": "Header 随机语录现包含用户新添加的内容，数据实时同步"
+    },
+    {
+      "type": "fix",
+      "emoji": "🚀",
+      "title": "Vercel 部署缓存修复",
+      "description": "添加 vercel.json 禁用 HTML 缓存，确保每次部署后用户立即看到最新版本"
+    }
+  ],
+  "2026-5-24": [
+    {
+      "type": "feature",
+      "emoji": "🗺️",
+      "title": "关闭浮窗卡自动缩放回退",
+      "description": "点叉关闭浮窗卡时，地图自动缩小2级（最低7级），方便查看周边标点"
+    },
+    {
+      "type": "optimize",
+      "emoji": "📍",
+      "title": "点击标点智能缩放",
+      "description": "点击标点时自动缩放至10-12级，流畅 flyTo 动画，用户操作可随时打断"
+    },
+    {
+      "type": "optimize",
+      "emoji": "💬",
+      "title": "浮窗卡智能定位",
+      "description": "动态计算弹出位置，自动上下左右调整，防止超出地图边界"
+    },
+    {
+      "type": "optimize",
+      "emoji": "📅",
+      "title": "日期字段完全可选",
+      "description": "标记日期可留空直接提交，空日期标记自动排序到列表最后"
+    }
+  ],
   "2026-5-23": [
     {
       "type": "feature",
