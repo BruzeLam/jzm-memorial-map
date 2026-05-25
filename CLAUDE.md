@@ -85,10 +85,10 @@ git push origin main
 
 ## 上次更新
 
-修复了地点上传图片无法同步到影像馆的 bug：
-- 在 `App.jsx` 的 `handleAddMarker` 中添加图片同步逻辑
-- 在 `handleUpdateMarker` 中处理新图片同步（避免重复）
-- 提交：`Fix: sync marker images to gallery on add/update`
+2026-05-25 网络配置调整后恢复正常推送 ✅
+- 回退代码到 `a7f258e`（特性：关闭浮窗卡时自动缩放回退）
+- 暂停新功能开发，专注于数据添加
+- GitHub和Vercel连接已恢复正常
 
 ---
 
