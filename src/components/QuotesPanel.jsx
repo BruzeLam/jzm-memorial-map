@@ -16,11 +16,13 @@ function saveUserQuotes(quotes) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
 }
 
-function UploadForm({ onSave, onCancel }) {
-  const [text, setText] = useState('');
-  const [source, setSource] = useState('');
-  const [context, setContext] = useState('');
+function UploadForm({ onSave, onCancel, initialData }) {
+  const [text, setText] = useState(initialData?.text || '');
+  const [source, setSource] = useState(initialData?.source || '');
+  const [context, setContext] = useState(initialData?.context || '');
   const [error, setError] = useState('');
+
+  const isEditing = !!initialData;
 
   const handleSubmit = () => {
     if (!text.trim()) {
@@ -28,7 +30,7 @@ function UploadForm({ onSave, onCancel }) {
       return;
     }
     onSave({
-      id: 'user_' + Date.now(),
+      id: initialData?.id || 'user_' + Date.now(),
       text: text.trim(),
       source: source.trim() || null,
       context: context.trim() || null,
@@ -46,7 +48,9 @@ function UploadForm({ onSave, onCancel }) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-base font-bold text-gray-800 mb-4">上传语录</h3>
+        <h3 className="text-base font-bold text-gray-800 mb-4">
+          {isEditing ? '编辑语录' : '上传语录'}
+        </h3>
 
         <div className="space-y-3">
           <div>
@@ -103,7 +107,7 @@ function UploadForm({ onSave, onCancel }) {
             onClick={handleSubmit}
             className="flex-1 py-2 text-sm font-medium bg-red-700 hover:bg-red-800 text-white rounded-lg transition-colors"
           >
-            保存
+            {isEditing ? '更新' : '保存'}
           </button>
         </div>
       </div>
@@ -114,6 +118,7 @@ function UploadForm({ onSave, onCancel }) {
 export default function QuotesPanel({ onClose }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [editingQuote, setEditingQuote] = useState(null);
   const [userQuotes, setUserQuotes] = useState(loadUserQuotes);
 
   const allQuotes = useMemo(() => [...QUOTES, ...userQuotes], [userQuotes]);
@@ -131,10 +136,21 @@ export default function QuotesPanel({ onClose }) {
   }, [allQuotes, searchQuery]);
 
   const handleSaveQuote = (quote) => {
-    const updated = [...userQuotes, quote];
+    let updated;
+    if (editingQuote) {
+      updated = userQuotes.map((q) => (q.id === quote.id ? quote : q));
+      setEditingQuote(null);
+    } else {
+      updated = [...userQuotes, quote];
+    }
     setUserQuotes(updated);
     saveUserQuotes(updated);
     setShowUploadForm(false);
+  };
+
+  const handleEditUserQuote = (quote) => {
+    setEditingQuote(quote);
+    setShowUploadForm(true);
   };
 
   const handleDeleteUserQuote = (id) => {
@@ -222,13 +238,22 @@ export default function QuotesPanel({ onClose }) {
                         "{quote.text}"
                       </p>
                       {quote.isUserAdded && (
-                        <button
-                          onClick={() => handleDeleteUserQuote(quote.id)}
-                          className="text-gray-300 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-all flex-shrink-0 mt-0.5"
-                          title="删除"
-                        >
-                          🗑
-                        </button>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0 mt-0.5">
+                          <button
+                            onClick={() => handleEditUserQuote(quote)}
+                            className="text-gray-300 hover:text-blue-400 text-xs"
+                            title="编辑"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUserQuote(quote.id)}
+                            className="text-gray-300 hover:text-red-400 text-xs"
+                            title="删除"
+                          >
+                            🗑
+                          </button>
+                        </div>
                       )}
                     </div>
                     {quote.source && (
@@ -260,7 +285,11 @@ export default function QuotesPanel({ onClose }) {
       {showUploadForm && (
         <UploadForm
           onSave={handleSaveQuote}
-          onCancel={() => setShowUploadForm(false)}
+          onCancel={() => {
+            setShowUploadForm(false);
+            setEditingQuote(null);
+          }}
+          initialData={editingQuote}
         />
       )}
     </>
