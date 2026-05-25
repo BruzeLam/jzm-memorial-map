@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 
 export default function RegionFilter({
   selectedRegions,
@@ -9,6 +9,8 @@ export default function RegionFilter({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedContinents, setExpandedContinents] = useState(new Set(['中国']));
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef(null);
 
   const toggleContinentExpand = (continent) => {
     setExpandedContinents((prev) => {
@@ -20,6 +22,17 @@ export default function RegionFilter({
       }
       return next;
     });
+  };
+
+  const handleButtonClick = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+      });
+    }
+    setIsOpen(!isOpen);
   };
 
   // 筛选地区（支持搜索）
@@ -46,9 +59,10 @@ export default function RegionFilter({
   }, [filteredRegions]);
 
   return (
-    <div className="relative">
+    <div>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={handleButtonClick}
         className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
       >
         🌍 地区
@@ -56,7 +70,14 @@ export default function RegionFilter({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-64">
+        <div
+          style={{
+            position: 'fixed',
+            top: `${menuPosition.top}px`,
+            left: `${menuPosition.left}px`,
+          }}
+          className="bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-64"
+        >
           {/* 搜索框 */}
           <div className="p-2 border-b border-gray-100">
             <input
