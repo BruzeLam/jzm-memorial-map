@@ -67,25 +67,31 @@ export function useGallery(markers = []) {
   }, [gallery]);
 
   const addImage = useCallback((imageData, metadata = {}) => {
-    const newImage = {
-      id: `img_${Date.now()}`,
-      data: imageData.data,
-      name: imageData.name || '图片',
-      title: metadata.title || '',
-      description: metadata.description || '',
-      location: metadata.location || {
-        country: '',
-        province: '',
-        city: '',
-        address: '',
-        latitude: '',
-        longitude: '',
-      },
-      relatedMarker: metadata.relatedMarker || null,
-      uploadTime: new Date().toISOString(),
-    };
-    setGallery((prev) => [newImage, ...prev]); // 新图片放在前面
-    return newImage;
+    let result = null;
+    setGallery((prev) => {
+      // 重复检查：相同 data 的图片不重复添加
+      if (prev.some((g) => g.data === imageData.data)) return prev;
+      const newImage = {
+        id: `img_${Date.now()}`,
+        data: imageData.data,
+        name: imageData.name || '图片',
+        title: metadata.title || '',
+        description: metadata.description || '',
+        location: metadata.location || {
+          country: '',
+          province: '',
+          city: '',
+          address: '',
+          latitude: '',
+          longitude: '',
+        },
+        relatedMarker: metadata.relatedMarker || null,
+        uploadTime: new Date().toISOString(),
+      };
+      result = newImage;
+      return [newImage, ...prev];
+    });
+    return result;
   }, []);
 
   const updateImage = useCallback((id, updates) => {
@@ -111,16 +117,8 @@ export function useGallery(markers = []) {
 
   const searchImages = useCallback((query) => {
     if (!query.trim()) return gallery;
-
     const q = query.toLowerCase();
-    return gallery.filter((img) =>
-      img.title?.toLowerCase().includes(q) ||
-      img.description?.toLowerCase().includes(q) ||
-      img.location?.address?.toLowerCase().includes(q) ||
-      img.location?.city?.toLowerCase().includes(q) ||
-      img.location?.province?.toLowerCase().includes(q) ||
-      img.name?.toLowerCase().includes(q)
-    );
+    return gallery.filter((img) => img.title?.toLowerCase().includes(q));
   }, [gallery]);
 
   return {
