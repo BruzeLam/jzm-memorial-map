@@ -1,3 +1,4 @@
+// Cache fix: 2026-05-25 - Force Vercel rebuild
 import React, { useState, useRef, useEffect } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
