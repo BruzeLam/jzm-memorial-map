@@ -108,6 +108,14 @@ export default function App() {
   }, [searchQuery, filteredMarkers, selectMarker]);
 
   const handleMarkerSelect = (id) => {
+    // 编辑中点击其他标点：视为暂停编辑，切换到新标点详情
+    if (showAddForm && editingMarker && editingMarker.id !== id) {
+      setShowAddForm(false);
+      setEditingMarker(null);
+      setFormPrefill(null);
+      setPendingCoords(null);
+    }
+
     selectMarker(id);
     const marker = markers.find((m) => m.id === id);
     if (marker && mapRef.current) {
