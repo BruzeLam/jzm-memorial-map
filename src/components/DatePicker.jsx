@@ -115,11 +115,9 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
 
   return (
     <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3 max-w-sm">
-      {/* Instructions */}
-      <div className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded leading-relaxed">
-        <div>📝 一个日期 = 时间点｜两个 = 时间段｜留空 = 无日期</div>
-        <div className="text-gray-400 mt-0.5">支持: YYYY-MM-DD、YYYYMMDD、YYYYMDD、YYYYMM</div>
-      </div>
+      <p className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded">
+        可留空；结束日期留空表示单日。格式 YYYY-MM-DD
+      </p>
 
       {/* Input fields */}
       <div className="space-y-2 mb-3">

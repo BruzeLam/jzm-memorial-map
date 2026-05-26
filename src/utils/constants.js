@@ -303,8 +303,6 @@ export const SAMPLE_MARKERS = [
     icon: '📍',
     images: [],
     sources: [{ title: '官方新闻', note: '' }],
-    tripId: 'trip_1984_sichuan',
-    tripName: '6月四川视察',
   },
   {
     id: 'event_trip_001',
@@ -322,10 +320,8 @@ export const SAMPLE_MARKERS = [
     icon: '⭐',
     images: [],
     sources: [{ title: '官方档案', note: '' }],
-    tripId: 'trip_1984_sichuan',
-    tripName: '6月四川视察',
   },
 ];
 
-// 数据版本：条数变更或结构迁移时递增（18 = 统一三级行政区划）
-export const DATA_VERSION = 18;
+// 数据版本：条数变更或结构迁移时递增（19 = 移除行程/主子条目联动）
+export const DATA_VERSION = 19;

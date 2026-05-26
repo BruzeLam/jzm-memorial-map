@@ -192,8 +192,9 @@ export function getRegionFilterKey(marker) {
 }
 
 export function migrateMarkerRegion(marker) {
-  const { country, province, city } = normalizeAdminRegion(marker);
-  return { ...marker, country, province, city };
+  const { tripId, tripName, parentId, childIds, ...rest } = marker;
+  const { country, province, city } = normalizeAdminRegion(rest);
+  return { ...rest, country, province, city };
 }
 
 export function migrateAllMarkerRegions(markers) {
