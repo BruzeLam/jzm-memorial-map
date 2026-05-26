@@ -57,28 +57,30 @@ function getTripColor(tripId) {
   return TRIP_COLORS[hash % TRIP_COLORS.length];
 }
 
-// 根据缩放级别计算标点尺寸：世界视图更小，城市级视图正常大小
+// 放大时保持原始标点大小；仅在缩小到较大尺度（世界/区域视图）时适度缩小
 function getMarkerDimensions(zoom, isSelected) {
-  const baseZoom = 10;
+  const fullSizeZoom = 8;
   const minZoom = 3;
-  const minScale = 0.38;
-  const selectedBoost = isSelected ? 1.2 : 1;
+  const minScale = 0.55;
 
-  let scale = 1;
-  if (zoom < baseZoom) {
-    const t = Math.max(0, Math.min(1, (zoom - minZoom) / (baseZoom - minZoom)));
-    scale = minScale + t * (1 - minScale);
-  } else if (zoom > baseZoom) {
-    scale = Math.min(1.12, 1 + (zoom - baseZoom) * 0.015);
+  const size = isSelected ? 44 : 36;
+  const fontSize = isSelected ? 18 : 15;
+  const borderWidth = isSelected ? 4 : 3;
+  const ringWidth = 3;
+
+  if (zoom >= fullSizeZoom) {
+    return { size, fontSize, borderWidth, ringWidth };
   }
 
-  const baseSize = 36 * selectedBoost;
-  const size = Math.max(12, Math.round(baseSize * scale));
-  const fontSize = Math.max(8, Math.round((isSelected ? 18 : 15) * scale));
-  const borderWidth = Math.max(1, Math.round((isSelected ? 4 : 3) * scale));
-  const ringWidth = Math.max(1, Math.round(3 * scale));
+  const t = Math.max(0, Math.min(1, (zoom - minZoom) / (fullSizeZoom - minZoom)));
+  const scale = minScale + t * (1 - minScale);
 
-  return { size, fontSize, borderWidth, ringWidth };
+  return {
+    size: Math.round(size * scale),
+    fontSize: Math.round(fontSize * scale),
+    borderWidth: Math.max(1, Math.round(borderWidth * scale)),
+    ringWidth: Math.max(1, Math.round(ringWidth * scale)),
+  };
 }
 
 function createDivIcon(marker, isSelected, zoom) {
