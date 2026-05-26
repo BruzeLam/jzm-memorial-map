@@ -175,7 +175,7 @@ export const SAMPLE_MARKERS = [
     latitude: 22.1987,
     longitude: 113.5439,
     country: '中国',
-    province: '澳门',
+    province: '澳门特别行政区',
     city: '',
     date: '1999-12-20',
     title: '澳门回归祖国',
@@ -295,7 +295,7 @@ export const SAMPLE_MARKERS = [
     longitude: 104.6537,
     country: '中国',
     province: '四川省',
-    city: '广元',
+    city: '广元市',
     date: '1984-06-09',
     title: '参观皇泽寺',
     description: '视察四川期间参观皇泽寺，留下题字。',
@@ -314,7 +314,7 @@ export const SAMPLE_MARKERS = [
     longitude: 104.6500,
     country: '中国',
     province: '四川省',
-    city: '广元',
+    city: '广元市',
     date: '1984-06-09',
     title: '视察广元市',
     description: '考察广元市的电子工业基地和地方发展。',
@@ -327,5 +327,5 @@ export const SAMPLE_MARKERS = [
   },
 ];
 
-// 自动版本号：等于数据条数，新增数据后无需手动维护
-export const DATA_VERSION = SAMPLE_MARKERS.length;
+// 数据版本：条数变更或结构迁移时递增（18 = 统一三级行政区划）
+export const DATA_VERSION = 18;

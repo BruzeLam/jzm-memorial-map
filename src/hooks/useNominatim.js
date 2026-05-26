@@ -1,42 +1,50 @@
 import { useState, useEffect } from 'react';
-
-const DIRECT_MUNICIPALITIES = new Set(['北京市', '上海市', '天津市', '重庆市']);
+import {
+  DIRECT_MUNICIPALITIES,
+  normalizeAdminRegion,
+  formatRegionPath,
+} from '../utils/regionFormat';
 
 export function extractAdminInfo(address) {
   if (!address) return { country: '', province: '', city: '' };
 
   const country = address.country || '';
-  const state = address.state || address.province || '';
+  const state = (address.state || address.province || '').trim();
 
-  if (DIRECT_MUNICIPALITIES.has(state)) {
-    const city = address.city || address.city_district || address.suburb || address.county || '';
-    return { country, province: state, city };
+  if (DIRECT_MUNICIPALITIES.has(state) || ['北京', '上海', '天津', '重庆'].includes(state)) {
+    const municipality = state.endsWith('市') ? state : `${state}市`;
+    const district =
+      address.city_district ||
+      address.suburb ||
+      (address.city && (address.city.endsWith('区') || address.city.endsWith('县'))
+        ? address.city
+        : '') ||
+      address.county ||
+      '';
+    return normalizeAdminRegion({
+      country,
+      province: municipality,
+      city: district,
+    });
   }
 
-  const candidates = [
-    address.city,
-    address.municipality,
-    address.county,
-    address.town,
-  ].filter(Boolean);
+  const prefecture =
+    [address.city, address.municipality].find((c) => c && c.endsWith('市')) ||
+    [address.city, address.municipality].find(
+      (c) => c && !c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')
+    ) ||
+    '';
 
-  let city = candidates.find(c => c.endsWith('市')) || '';
-  if (!city) {
-    city = candidates.find(c => !c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')) || '';
-  }
-  if (!city) city = candidates[0] || '';
-
-  return { country, province: state, city };
+  return normalizeAdminRegion({
+    country,
+    province: state,
+    city: prefecture,
+  });
 }
 
 export function formatRegion(address) {
   if (!address) return '';
-  const parts = [];
-  if (address.country) parts.push(address.country);
-  if (address.state || address.province) parts.push(address.state || address.province);
-  if (address.city || address.county || address.town)
-    parts.push(address.city || address.county || address.town);
-  return parts.slice(0, 3).join(' / ');
+  return formatRegionPath(extractAdminInfo(address));
 }
 
 export function useReverseGeocoding(lat, lng) {

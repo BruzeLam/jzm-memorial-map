@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { formatRegionPath } from '../utils/regionFormat';
 
 export function useSearch(markers) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,11 +25,15 @@ export function useSearch(markers) {
     return markers.filter((marker) => {
       if (!activeFilters[marker.type]) return false;
       if (!query) return true;
+      const regionText = formatRegionPath(marker).toLowerCase();
       return (
         marker.name.toLowerCase().includes(query) ||
         marker.title.toLowerCase().includes(query) ||
         marker.description.toLowerCase().includes(query) ||
-        (marker.date && marker.date.toLowerCase().includes(query))
+        (marker.date && marker.date.toLowerCase().includes(query)) ||
+        regionText.includes(query) ||
+        (marker.province && marker.province.toLowerCase().includes(query)) ||
+        (marker.city && marker.city.toLowerCase().includes(query))
       );
     });
   }, [markers, searchQuery, activeFilters]);

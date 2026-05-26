@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
+import { formatRegionPath } from '../utils/regionFormat';
 import ImageViewer from './ImageViewer';
 
 export default function DetailPanel({ marker, onClose }) {
@@ -64,14 +65,10 @@ export default function DetailPanel({ marker, onClose }) {
                   </span>
                 </div>
               )}
-              {(marker.country || marker.province || marker.city) && (
+              {formatRegionPath(marker) && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-600 min-w-16">🌍 地区:</span>
-                  <span className="text-gray-800">
-                    {marker.country}
-                    {marker.province ? ` / ${marker.province}` : ''}
-                    {marker.city ? ` / ${marker.city}` : ''}
-                  </span>
+                  <span className="text-gray-800">{formatRegionPath(marker)}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm">

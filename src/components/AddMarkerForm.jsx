@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { getRegionSuggestions } from '../utils/regionNormalization';
+import { normalizeAdminRegion, getAdminFieldLabels, formatRegionPath } from '../utils/regionFormat';
 import { compressImage } from '../utils/imageCompression';
 import { useReverseGeocoding, extractAdminInfo } from '../hooks/useNominatim';
 import LocationInput from './LocationInput';
@@ -37,14 +38,15 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
 
   useEffect(() => {
     if (editingMarker) {
+      const region = normalizeAdminRegion(editingMarker);
       setForm({
         type: editingMarker.type || 'spot',
         name: editingMarker.name || '',
         latitude: editingMarker.latitude ?? '',
         longitude: editingMarker.longitude ?? '',
-        country: editingMarker.country || '',
-        province: editingMarker.province || '',
-        city: editingMarker.city || '',
+        country: region.country,
+        province: region.province,
+        city: region.city,
         date: editingMarker.date || '',
         endDate: editingMarker.endDate || '',
         title: editingMarker.title || '',
@@ -159,8 +161,10 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
   const handleSubmit = (e) => {
     e.preventDefault();
     const typeInfo = MARKER_TYPES[form.type];
+    const region = normalizeAdminRegion(form);
     const data = {
       ...form,
+      ...region,
       latitude: parseFloat(form.latitude),
       longitude: parseFloat(form.longitude),
       color: typeInfo.color,
@@ -169,6 +173,9 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
     };
     onSubmit(data);
   };
+
+  const adminLabels = getAdminFieldLabels(form.country, form.province);
+  const regionPreview = formatRegionPath(form);
 
   const inputClass =
     'w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400 bg-white';
@@ -228,10 +235,16 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
         </div>
 
         <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
-          <label className={labelClass}>行政区划</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className={labelClass + ' mb-0'}>行政区划</label>
+            <span className="text-[10px] text-blue-600">{adminLabels.hint}</span>
+          </div>
+          {regionPreview && (
+            <p className="text-xs text-gray-600 mb-2 font-medium">{regionPreview}</p>
+          )}
           <div className="text-sm text-gray-700 space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 min-w-12">国家:</span>
+              <span className="text-gray-500 min-w-14">国家:</span>
               <input
                 type="text"
                 className={inputClass + ' text-xs'}
@@ -242,7 +255,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
             </div>
             <div className="relative">
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 min-w-12">省份:</span>
+                <span className="text-gray-500 min-w-14">{adminLabels.level2}:</span>
                 <input
                   type="text"
                   className={inputClass + ' text-xs'}
@@ -250,7 +263,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
                   onChange={(e) => handleProvinceChange(e.target.value)}
                   onFocus={() => form.province && setShowProvinceSuggestions(provinceSuggestions.length > 0)}
                   onBlur={() => setTimeout(() => setShowProvinceSuggestions(false), 180)}
-                  placeholder="自动识别或手动输入"
+                  placeholder={adminLabels.level2Placeholder}
                 />
               </div>
               {showProvinceSuggestions && provinceSuggestions.length > 0 && (
@@ -270,7 +283,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
             </div>
             <div className="relative">
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 min-w-12">城市:</span>
+                <span className="text-gray-500 min-w-14">{adminLabels.level3}:</span>
                 <input
                   type="text"
                   className={inputClass + ' text-xs'}
@@ -278,7 +291,7 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
                   onChange={(e) => handleCityChange(e.target.value)}
                   onFocus={() => form.city && setShowCitySuggestions(citySuggestions.length > 0)}
                   onBlur={() => setTimeout(() => setShowCitySuggestions(false), 180)}
-                  placeholder="自动识别或手动输入"
+                  placeholder={adminLabels.level3Placeholder}
                 />
               </div>
               {showCitySuggestions && citySuggestions.length > 0 && (

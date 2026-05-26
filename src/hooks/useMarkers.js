@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS } from '../utils/constants';
+import { migrateAllMarkerRegions } from '../utils/regionFormat';
 
 function loadFromStorage() {
   try {
@@ -9,10 +10,9 @@ function loadFromStorage() {
 
     if (Array.isArray(stored) && stored.length > 0) {
       if (storedVersion < DATA_VERSION) {
-        // 版本升级：把 SAMPLE_MARKERS 中新增的 id 合并进来，不覆盖用户已有的标记
         const storedIds = new Set(stored.map((m) => m.id));
         const newItems = SAMPLE_MARKERS.filter((m) => !storedIds.has(m.id));
-        const merged = [...stored, ...newItems];
+        const merged = migrateAllMarkerRegions([...stored, ...newItems]);
         localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
         return merged;
@@ -25,7 +25,7 @@ function loadFromStorage() {
 
   // 首次访问：存入初始数据和版本号
   localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
-  return SAMPLE_MARKERS;
+  return migrateAllMarkerRegions(SAMPLE_MARKERS);
 }
 
 function saveToStorage(markers) {
@@ -45,8 +45,9 @@ export function useMarkers() {
   }, [markers]);
 
   const addMarker = useCallback((markerData) => {
+    const normalized = migrateAllMarkerRegions([markerData])[0];
     const newMarker = {
-      ...markerData,
+      ...normalized,
       id: `${markerData.type}_${Date.now()}`,
       images: markerData.images || [],
       sources: markerData.sources || [],
@@ -57,7 +58,11 @@ export function useMarkers() {
 
   const updateMarker = useCallback((id, updates) => {
     setMarkers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, ...updates } : m))
+      prev.map((m) => {
+        if (m.id !== id) return m;
+        const merged = migrateAllMarkerRegions([{ ...m, ...updates }])[0];
+        return merged;
+      })
     );
   }, []);
 
