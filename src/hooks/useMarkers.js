@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS } from '../utils/constants';
+import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS, REMOVED_MARKER_IDS } from '../utils/constants';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
+
+const removedIdSet = new Set(REMOVED_MARKER_IDS);
+
+function applyMarkerMigrations(markers) {
+  const withoutRemoved = markers.filter((m) => !removedIdSet.has(m.id));
+  return migrateAllMarkerRegions(withoutRemoved);
+}
 
 function loadFromStorage() {
   try {
@@ -12,7 +19,7 @@ function loadFromStorage() {
       if (storedVersion < DATA_VERSION) {
         const storedIds = new Set(stored.map((m) => m.id));
         const newItems = SAMPLE_MARKERS.filter((m) => !storedIds.has(m.id));
-        const merged = migrateAllMarkerRegions([...stored, ...newItems]);
+        const merged = applyMarkerMigrations([...stored, ...newItems]);
         localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
         return merged;
@@ -25,7 +32,7 @@ function loadFromStorage() {
 
   // 首次访问：存入初始数据和版本号
   localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
-  return migrateAllMarkerRegions(SAMPLE_MARKERS);
+  return applyMarkerMigrations(SAMPLE_MARKERS);
 }
 
 function saveToStorage(markers) {

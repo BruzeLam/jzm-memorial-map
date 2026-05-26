@@ -287,41 +287,10 @@ export const SAMPLE_MARKERS = [
     images: [],
     sources: [{ title: '官方新闻', note: '' }],
   },
-  {
-    id: 'spot_trip_001',
-    type: 'spot',
-    name: '广元皇泽寺',
-    latitude: 32.4396,
-    longitude: 104.6537,
-    country: '中国',
-    province: '四川省',
-    city: '广元市',
-    date: '1984-06-09',
-    title: '参观皇泽寺',
-    description: '视察四川期间参观皇泽寺，留下题字。',
-    color: '#1E88E5',
-    icon: '📍',
-    images: [],
-    sources: [{ title: '官方新闻', note: '' }],
-  },
-  {
-    id: 'event_trip_001',
-    type: 'event',
-    name: '广元市考察',
-    latitude: 32.4396,
-    longitude: 104.6500,
-    country: '中国',
-    province: '四川省',
-    city: '广元市',
-    date: '1984-06-09',
-    title: '视察广元市',
-    description: '考察广元市的电子工业基地和地方发展。',
-    color: '#D32F2F',
-    icon: '⭐',
-    images: [],
-    sources: [{ title: '官方档案', note: '' }],
-  },
 ];
 
-// 数据版本：条数变更或结构迁移时递增（21 = 省级区划对照表，修正港澳）
-export const DATA_VERSION = 21;
+/** 已从示例库撤下的标点 ID（版本迁移时从 localStorage 同步删除） */
+export const REMOVED_MARKER_IDS = ['spot_trip_001', 'event_trip_001'];
+
+// 数据版本：条数变更或结构迁移时递增（22 = 移除广元测试标点）
+export const DATA_VERSION = 22;
