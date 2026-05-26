@@ -1,16 +1,21 @@
 /**
- * 统一三级行政区划：国家 → 省/直辖市 → 地级市 / 区
+ * 统一三级行政区划：国家 → 省级 → 地级 / 区
  * - 直辖市：中国 / 北京市 / 东城区
- * - 省辖：中国 / 广东省 / 广州市
- * - 海外：美国 / （州，可选） / 华盛顿
+ * - 省：中国 / 广东省 / 广州市
+ * - 自治区：中国 / 新疆维吾尔自治区 / 乌鲁木齐市
+ * - 特别行政区：中国 / 澳门特别行政区 / （区，可选）
+ * - 海外：美国 / 州或特区 / 城市
  */
 
-export const DIRECT_MUNICIPALITIES = new Set([
-  '北京市',
-  '上海市',
-  '天津市',
-  '重庆市',
-]);
+import {
+  DIRECT_MUNICIPALITIES,
+  resolveChinaProvinceLevel,
+  isSpecialAdministrativeRegion,
+  isDirectMunicipalityName,
+  normalizeSarCity,
+} from './chinaAdminRegions';
+
+export { DIRECT_MUNICIPALITIES };
 
 const PROVINCE_SUFFIXES = ['省', '自治区', '特别行政区'];
 const MUNICIPALITY_SUFFIXES = ['市', '州', '盟', '地区'];
@@ -27,6 +32,10 @@ const ZH_TW_TO_CN = {
   日內瓦: '日内瓦',
   日內瓦州: '日内瓦',
   巴黎: '巴黎',
+  澳門: '澳门',
+  澳門特別行政區: '澳门特别行政区',
+  澳門特别行政区: '澳门特别行政区',
+  香港特別行政區: '香港特别行政区',
 };
 
 const COUNTRY_ALIASES = {
@@ -83,7 +92,12 @@ export function pickChinesePlaceName(raw) {
     .replace(/倫/g, '伦')
     .replace(/亞/g, '亚')
     .replace(/島/g, '岛')
-    .replace(/灣/g, '湾');
+    .replace(/灣/g, '湾')
+    .replace(/門/g, '门')
+    .replace(/東/g, '东')
+    .replace(/廣/g, '广')
+    .replace(/蘇/g, '苏')
+    .replace(/漢/g, '汉');
 }
 
 /** 常见「区/县」→ 地级市」纠错（逆地理或手填误把区级写入 city） */
@@ -107,41 +121,20 @@ export function isChina(country) {
 }
 
 export function isDirectMunicipality(province, country = '中国') {
+  if (!isChina(country)) return false;
   const p = normalizeProvinceName(province, country);
-  return DIRECT_MUNICIPALITIES.has(p);
+  return isDirectMunicipalityName(p);
 }
 
 export function normalizeProvinceName(province, country = '') {
   if (!province) return '';
-  let p = pickChinesePlaceName(province);
-
-  if (p === '北京') p = '北京市';
-  if (p === '上海') p = '上海市';
-  if (p === '天津') p = '天津市';
-  if (p === '重庆') p = '重庆市';
-  if (p === '江苏') p = '江苏省';
-  if (p === '广东') p = '广东省';
-  if (p === '四川') p = '四川省';
-  if (p === '澳门') p = '澳门特别行政区';
-  if (p === '香港') p = '香港特别行政区';
-
   const countryNorm = pickChinesePlaceName(country) || country;
 
-  if (
-    isChina(countryNorm) &&
-    !DIRECT_MUNICIPALITIES.has(p) &&
-    !PROVINCE_SUFFIXES.some((s) => p.endsWith(s)) &&
-    !p.endsWith('市') &&
-    p.length >= 2
-  ) {
-    if (['内蒙古', '西藏', '新疆', '宁夏', '广西'].some((r) => p.startsWith(r))) {
-      if (!p.includes('自治区')) p = p + '自治区';
-    } else if (!p.endsWith('省')) {
-      p = p + '省';
-    }
+  if (isChina(countryNorm)) {
+    return resolveChinaProvinceLevel(pickChinesePlaceName(province));
   }
 
-  return p;
+  return pickChinesePlaceName(province);
 }
 
 function normalizeCityName(city, province, country) {
@@ -152,15 +145,19 @@ function normalizeCityName(city, province, country) {
   const countryNorm = pickChinesePlaceName(country) || country;
   const p = normalizeProvinceName(province, countryNorm);
 
-  if (isChina(countryNorm) && isDirectMunicipality(p, countryNorm)) {
+  if (isChina(countryNorm) && isSpecialAdministrativeRegion(p)) {
+    return normalizeSarCity(p, c);
+  }
+
+  if (isChina(countryNorm) && isDirectMunicipalityName(p)) {
     if (c === p || c === p.replace('市', '')) return '';
     if (!c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')) {
       if (!c.endsWith('市')) c = c + '区';
     }
-    return c;
+    return c.replace(/區/g, '区');
   }
 
-  if (isChina(countryNorm) && p && !isDirectMunicipality(p, countryNorm)) {
+  if (isChina(countryNorm) && p && !isDirectMunicipalityName(p) && !isSpecialAdministrativeRegion(p)) {
     if (c.endsWith('区') || c.endsWith('县')) {
       const mapped = DISTRICT_TO_PREFECTURE_CITY[c];
       if (mapped) return mapped;
@@ -200,7 +197,7 @@ export function normalizeAdminRegion({ country = '', province = '', city = '' } 
 
     if (p && cityNorm === p) cityNorm = '';
 
-    if (p && !isDirectMunicipality(p) && (p.endsWith('区') || p.endsWith('县'))) {
+    if (p && !isDirectMunicipalityName(p) && !isSpecialAdministrativeRegion(p) && (p.endsWith('区') || p.endsWith('县'))) {
       const mapped = DISTRICT_TO_PREFECTURE_CITY[p];
       if (mapped) {
         cityNorm = mapped;
@@ -208,8 +205,12 @@ export function normalizeAdminRegion({ country = '', province = '', city = '' } 
       }
     }
 
-    cityNorm = normalizeCityName(cityNorm, p, c);
     p = normalizeProvinceName(p, c);
+    cityNorm = normalizeCityName(cityNorm, p, c);
+
+    if (isSpecialAdministrativeRegion(p)) {
+      cityNorm = normalizeSarCity(p, cityNorm);
+    }
   } else {
     p = pickChinesePlaceName(province);
     cityNorm = pickChinesePlaceName(city);
@@ -234,6 +235,8 @@ function inferProvinceFromCity(cityName) {
 
 /** 表单字段标签 */
 export function getAdminFieldLabels(country, province) {
+  const p = normalizeProvinceName(province, country);
+
   if (isChina(country) && isDirectMunicipality(province, country)) {
     return {
       level2: '直辖市',
@@ -241,6 +244,15 @@ export function getAdminFieldLabels(country, province) {
       level3: '区',
       level3Placeholder: '如：东城区（可选）',
       hint: '直辖市：国家 → 直辖市 → 区',
+    };
+  }
+  if (isChina(country) && isSpecialAdministrativeRegion(p)) {
+    return {
+      level2: '特别行政区',
+      level2Placeholder: '如：澳门特别行政区',
+      level3: '区',
+      level3Placeholder: '如花地玛堂区（可选）',
+      hint: '港澳：国家 → 特别行政区 → 区',
     };
   }
   if (isChina(country)) {

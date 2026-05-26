@@ -7,11 +7,37 @@ import {
   isChina,
 } from '../utils/regionFormat';
 
+function isMacauOrHongKongAddress(address, state, city) {
+  const blob = [state, city, address?.state, address?.city, address?.county]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return (
+    /macau|macao|澳门|澳門|mo\b/.test(blob) ||
+    /hong kong|香港|hk\b/.test(blob)
+  );
+}
+
+function extractSarFromAddress(address, state, city) {
+  const blob = `${state} ${city} ${address?.city || ''}`;
+  if (/香港|hong kong|hk/i.test(blob)) {
+    return { country: '中国', province: '香港特别行政区', city: '' };
+  }
+  return { country: '中国', province: '澳门特别行政区', city: '' };
+}
+
 export function extractAdminInfo(address) {
   if (!address) return { country: '', province: '', city: '' };
 
   const country = pickChinesePlaceName(address.country);
   const state = pickChinesePlaceName(address.state || address.province || '');
+  const cityRaw = pickChinesePlaceName(
+    address.city || address.town || address.municipality || address.county || ''
+  );
+
+  if (isMacauOrHongKongAddress(address, state, cityRaw)) {
+    return normalizeAdminRegion(extractSarFromAddress(address, state, cityRaw));
+  }
 
   if (
     isChina(country) &&
@@ -51,14 +77,10 @@ export function extractAdminInfo(address) {
     });
   }
 
-  const city = pickChinesePlaceName(
-    address.city || address.town || address.municipality || address.county || ''
-  );
-
   return normalizeAdminRegion({
     country,
     province: state,
-    city,
+    city: cityRaw,
   });
 }
 
