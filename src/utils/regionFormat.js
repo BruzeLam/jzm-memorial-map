@@ -17,7 +17,6 @@ import {
 
 export { DIRECT_MUNICIPALITIES };
 
-const PROVINCE_SUFFIXES = ['省', '自治区', '特别行政区'];
 const MUNICIPALITY_SUFFIXES = ['市', '州', '盟', '地区'];
 
 /** Nominatim 常返回「简体;繁体」或多值，取单一简体中文名 */
