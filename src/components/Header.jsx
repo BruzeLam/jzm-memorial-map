@@ -56,9 +56,11 @@ export default function Header({ onOpenQuotes, onOpenGallery, onOpenChangeLog })
     <header className="bg-gray-200 border-b border-gray-300 shadow-sm flex-shrink-0">
       <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-red-700 flex items-center justify-center text-white text-sm font-bold">
-            纪
-          </div>
+          <img
+            src={`${process.env.PUBLIC_URL}/logo.png`}
+            alt=""
+            className="w-9 h-9 rounded object-cover ring-1 ring-gray-300 shadow-sm"
+          />
           <h1 className="text-lg font-serif font-bold leading-tight">
             <a
               href="https://www.news.cn/politics/2022-12/02/c_1129179786.htm"
