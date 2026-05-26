@@ -15,6 +15,77 @@ export const DIRECT_MUNICIPALITIES = new Set([
 const PROVINCE_SUFFIXES = ['省', '自治区', '特别行政区'];
 const MUNICIPALITY_SUFFIXES = ['市', '州', '盟', '地区'];
 
+/** Nominatim 常返回「简体;繁体」或多值，取单一简体中文名 */
+const ZH_TW_TO_CN = {
+  美國: '美国',
+  臺灣: '台湾',
+  台灣: '台湾',
+  華盛頓: '华盛顿',
+  哥倫比亞特區: '哥伦比亚特区',
+  哥倫比亞特区: '哥伦比亚特区',
+  莫斯科: '莫斯科',
+  日內瓦: '日内瓦',
+  日內瓦州: '日内瓦',
+  巴黎: '巴黎',
+};
+
+const COUNTRY_ALIASES = {
+  'United States': '美国',
+  'United States of America': '美国',
+  USA: '美国',
+  Russia: '俄罗斯',
+  'Russian Federation': '俄罗斯',
+  Switzerland: '瑞士',
+  France: '法国',
+  China: '中国',
+};
+
+/**
+ * 从 Nominatim 字段中提取唯一中文地名（优先简体、优先 zh-CN 段）
+ */
+export function pickChinesePlaceName(raw) {
+  if (!raw) return '';
+  const text = String(raw).trim();
+  if (!text) return '';
+
+  if (COUNTRY_ALIASES[text]) return COUNTRY_ALIASES[text];
+
+  const parts = text
+    .split(/[;/,|]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const candidates = parts.length > 0 ? parts : [text];
+
+  const score = (s) => {
+    if (ZH_TW_TO_CN[s]) return 100;
+    let n = 0;
+    if (/[\u4e00-\u9fff]/.test(s)) n += 20;
+    if (s.includes('国') && !s.includes('國')) n += 15;
+    if (s.includes('國')) n -= 10;
+    if (/[區縣華爾盛頓羅蘇格蘭]/.test(s)) n -= 5;
+    if (s.length <= 12) n += 3;
+    if (/[a-zA-Z]/.test(s)) n -= 8;
+    return n;
+  };
+
+  const best = [...candidates].sort((a, b) => score(b) - score(a))[0];
+  if (ZH_TW_TO_CN[best]) return ZH_TW_TO_CN[best];
+
+  return best
+    .replace(/國/g, '国')
+    .replace(/華/g, '华')
+    .replace(/爾/g, '尔')
+    .replace(/羅/g, '罗')
+    .replace(/蘇/g, '苏')
+    .replace(/區/g, '区')
+    .replace(/縣/g, '县')
+    .replace(/倫/g, '伦')
+    .replace(/亞/g, '亚')
+    .replace(/島/g, '岛')
+    .replace(/灣/g, '湾');
+}
+
 /** 常见「区/县」→ 地级市」纠错（逆地理或手填误把区级写入 city） */
 const DISTRICT_TO_PREFECTURE_CITY = {
   广陵区: '扬州市',
@@ -35,14 +106,14 @@ export function isChina(country) {
   return c === '中国' || c === 'China' || c === 'CN';
 }
 
-export function isDirectMunicipality(province) {
-  const p = normalizeProvinceName(province);
+export function isDirectMunicipality(province, country = '中国') {
+  const p = normalizeProvinceName(province, country);
   return DIRECT_MUNICIPALITIES.has(p);
 }
 
-export function normalizeProvinceName(province) {
+export function normalizeProvinceName(province, country = '') {
   if (!province) return '';
-  let p = province.trim();
+  let p = pickChinesePlaceName(province);
 
   if (p === '北京') p = '北京市';
   if (p === '上海') p = '上海市';
@@ -54,12 +125,14 @@ export function normalizeProvinceName(province) {
   if (p === '澳门') p = '澳门特别行政区';
   if (p === '香港') p = '香港特别行政区';
 
+  const countryNorm = pickChinesePlaceName(country) || country;
+
   if (
+    isChina(countryNorm) &&
     !DIRECT_MUNICIPALITIES.has(p) &&
     !PROVINCE_SUFFIXES.some((s) => p.endsWith(s)) &&
     !p.endsWith('市') &&
-    p.length >= 2 &&
-    isChina('中国')
+    p.length >= 2
   ) {
     if (['内蒙古', '西藏', '新疆', '宁夏', '广西'].some((r) => p.startsWith(r))) {
       if (!p.includes('自治区')) p = p + '自治区';
@@ -73,12 +146,13 @@ export function normalizeProvinceName(province) {
 
 function normalizeCityName(city, province, country) {
   if (!city) return '';
-  let c = city.trim();
+  let c = pickChinesePlaceName(city);
   if (!c) return '';
 
-  const p = normalizeProvinceName(province);
+  const countryNorm = pickChinesePlaceName(country) || country;
+  const p = normalizeProvinceName(province, countryNorm);
 
-  if (isChina(country) && isDirectMunicipality(p)) {
+  if (isChina(countryNorm) && isDirectMunicipality(p, countryNorm)) {
     if (c === p || c === p.replace('市', '')) return '';
     if (!c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')) {
       if (!c.endsWith('市')) c = c + '区';
@@ -86,7 +160,7 @@ function normalizeCityName(city, province, country) {
     return c;
   }
 
-  if (isChina(country) && p && !isDirectMunicipality(p)) {
+  if (isChina(countryNorm) && p && !isDirectMunicipality(p, countryNorm)) {
     if (c.endsWith('区') || c.endsWith('县')) {
       const mapped = DISTRICT_TO_PREFECTURE_CITY[c];
       if (mapped) return mapped;
@@ -108,11 +182,12 @@ function normalizeCityName(city, province, country) {
  * 规范为三级：{ country, province, city }
  */
 export function normalizeAdminRegion({ country = '', province = '', city = '' } = {}) {
-  let c = (country || '').trim();
-  let p = normalizeProvinceName(province);
-  let cityNorm = (city || '').trim();
+  let c = pickChinesePlaceName(country);
+  let p = normalizeProvinceName(province, c);
+  let cityNorm = pickChinesePlaceName(city);
 
   if (!c && (p || cityNorm)) c = '中国';
+  if (COUNTRY_ALIASES[c]) c = COUNTRY_ALIASES[c];
   if (c === 'China') c = '中国';
 
   if (isChina(c)) {
@@ -134,7 +209,13 @@ export function normalizeAdminRegion({ country = '', province = '', city = '' } 
     }
 
     cityNorm = normalizeCityName(cityNorm, p, c);
-    p = normalizeProvinceName(p);
+    p = normalizeProvinceName(p, c);
+  } else {
+    p = pickChinesePlaceName(province);
+    cityNorm = pickChinesePlaceName(city);
+    if (p.endsWith('省') && !isChina(c)) {
+      p = p.replace(/省$/, '');
+    }
   }
 
   return { country: c, province: p, city: cityNorm };
@@ -153,7 +234,7 @@ function inferProvinceFromCity(cityName) {
 
 /** 表单字段标签 */
 export function getAdminFieldLabels(country, province) {
-  if (isChina(country) && isDirectMunicipality(province)) {
+  if (isChina(country) && isDirectMunicipality(province, country)) {
     return {
       level2: '直辖市',
       level2Placeholder: '如：北京市',

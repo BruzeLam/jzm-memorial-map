@@ -323,5 +323,5 @@ export const SAMPLE_MARKERS = [
   },
 ];
 
-// 数据版本：条数变更或结构迁移时递增（19 = 移除行程/主子条目联动）
-export const DATA_VERSION = 19;
+// 数据版本：条数变更或结构迁移时递增（20 = 地名去重为单一简体中文）
+export const DATA_VERSION = 20;

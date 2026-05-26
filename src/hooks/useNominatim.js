@@ -3,42 +3,62 @@ import {
   DIRECT_MUNICIPALITIES,
   normalizeAdminRegion,
   formatRegionPath,
+  pickChinesePlaceName,
+  isChina,
 } from '../utils/regionFormat';
 
 export function extractAdminInfo(address) {
   if (!address) return { country: '', province: '', city: '' };
 
-  const country = address.country || '';
-  const state = (address.state || address.province || '').trim();
+  const country = pickChinesePlaceName(address.country);
+  const state = pickChinesePlaceName(address.state || address.province || '');
 
-  if (DIRECT_MUNICIPALITIES.has(state) || ['北京', '上海', '天津', '重庆'].includes(state)) {
-    const municipality = state.endsWith('市') ? state : `${state}市`;
-    const district =
+  if (
+    isChina(country) &&
+    (DIRECT_MUNICIPALITIES.has(state) ||
+      ['北京市', '上海市', '天津市', '重庆市', '北京', '上海', '天津', '重庆'].includes(state))
+  ) {
+    const municipality = state.endsWith('市') ? state : `${state.replace(/市$/, '')}市`;
+    const district = pickChinesePlaceName(
       address.city_district ||
-      address.suburb ||
-      (address.city && (address.city.endsWith('区') || address.city.endsWith('县'))
-        ? address.city
-        : '') ||
-      address.county ||
-      '';
+        address.suburb ||
+        (address.city && (address.city.endsWith('区') || address.city.endsWith('县'))
+          ? address.city
+          : '') ||
+        address.county ||
+        ''
+    );
     return normalizeAdminRegion({
-      country,
+      country: '中国',
       province: municipality,
       city: district,
     });
   }
 
-  const prefecture =
-    [address.city, address.municipality].find((c) => c && c.endsWith('市')) ||
-    [address.city, address.municipality].find(
-      (c) => c && !c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')
-    ) ||
-    '';
+  if (isChina(country)) {
+    const prefecture = pickChinesePlaceName(
+      [address.city, address.municipality].find((c) => c && c.endsWith('市')) ||
+        [address.city, address.municipality].find(
+          (c) => c && !c.endsWith('区') && !c.endsWith('县') && !c.endsWith('旗')
+        ) ||
+        ''
+    );
+
+    return normalizeAdminRegion({
+      country: '中国',
+      province: state,
+      city: prefecture,
+    });
+  }
+
+  const city = pickChinesePlaceName(
+    address.city || address.town || address.municipality || address.county || ''
+  );
 
   return normalizeAdminRegion({
     country,
     province: state,
-    city: prefecture,
+    city,
   });
 }
 
