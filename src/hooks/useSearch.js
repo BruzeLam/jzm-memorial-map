@@ -1,13 +1,33 @@
 import { useState, useMemo, useCallback } from 'react';
-import { formatRegionPath } from '../utils/regionFormat';
+import {
+  formatRegionPath,
+  buildRegionTree,
+  markerMatchesRegionFilter,
+} from '../utils/regionFormat';
 
 export function useSearch(markers) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRegionKeys, setSelectedRegionKeys] = useState(() => new Set());
   const [activeFilters, setActiveFilters] = useState({
     spot: true,
     event: true,
     inscription: true,
   });
+
+  const regionTree = useMemo(() => buildRegionTree(markers), [markers]);
+
+  const toggleRegionKey = useCallback((key) => {
+    setSelectedRegionKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const clearRegionFilter = useCallback(() => {
+    setSelectedRegionKeys(new Set());
+  }, []);
 
   const toggleFilter = useCallback((type) => {
     setActiveFilters((prev) => ({
@@ -24,6 +44,7 @@ export function useSearch(markers) {
     const query = searchQuery.trim().toLowerCase();
     return markers.filter((marker) => {
       if (!activeFilters[marker.type]) return false;
+      if (!markerMatchesRegionFilter(marker, selectedRegionKeys)) return false;
       if (!query) return true;
       const regionText = formatRegionPath(marker).toLowerCase();
       return (
@@ -36,7 +57,7 @@ export function useSearch(markers) {
         (marker.city && marker.city.toLowerCase().includes(query))
       );
     });
-  }, [markers, searchQuery, activeFilters]);
+  }, [markers, searchQuery, activeFilters, selectedRegionKeys]);
 
   return {
     searchQuery,
@@ -45,5 +66,9 @@ export function useSearch(markers) {
     toggleFilter,
     clearSearch,
     filteredMarkers,
+    regionTree,
+    selectedRegionKeys,
+    toggleRegionKey,
+    clearRegionFilter,
   };
 }

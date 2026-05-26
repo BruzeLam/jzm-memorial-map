@@ -191,6 +191,134 @@ export function getRegionFilterKey(marker) {
   return formatRegionPath(marker);
 }
 
+/** 树节点用的分级 key */
+export function makeCountryKey(country) {
+  return `c:${country}`;
+}
+
+export function makeProvinceKey(country, province) {
+  return `p:${country}/${province}`;
+}
+
+export function makeCityKey(country, province, city) {
+  return `x:${country}/${province}/${city}`;
+}
+
+export function getMarkerRegionKeys(marker) {
+  const r = normalizeAdminRegion(marker);
+  const keys = [];
+  if (r.country) keys.push(makeCountryKey(r.country));
+  if (r.country && r.province) {
+    keys.push(makeProvinceKey(r.country, r.province));
+    if (r.city) keys.push(makeCityKey(r.country, r.province, r.city));
+  } else if (r.country && r.city) {
+    keys.push(makeProvinceKey(r.country, r.city));
+  }
+  return keys;
+}
+
+/** 多选地区：选中父级则包含其下所有标记 */
+export function markerMatchesRegionFilter(marker, selectedKeys) {
+  if (!selectedKeys || selectedKeys.size === 0) return true;
+
+  const r = normalizeAdminRegion(marker);
+  for (const sel of selectedKeys) {
+    if (sel.startsWith('c:')) {
+      const country = sel.slice(2);
+      if (r.country === country) return true;
+    } else if (sel.startsWith('p:')) {
+      const path = sel.slice(2);
+      const [country, province] = path.split('/');
+      if (r.country !== country) continue;
+      if (r.province === province) return true;
+      if (!r.province && r.city === province) return true;
+    } else if (sel.startsWith('x:')) {
+      const path = sel.slice(2);
+      const [country, province, city] = path.split('/');
+      if (r.country === country && r.province === province && r.city === city) return true;
+    }
+  }
+  return false;
+}
+
+function countMarkersForKeys(markers, matchFn) {
+  return markers.filter(matchFn).length;
+}
+
+/** 从标记列表构建三级树（国家 → 省/直辖市 → 市/区） */
+export function buildRegionTree(markers) {
+  const tree = new Map();
+
+  markers.forEach((m) => {
+    const r = normalizeAdminRegion(m);
+    if (!r.country) return;
+
+    if (!tree.has(r.country)) {
+      tree.set(r.country, new Map());
+    }
+    const provinces = tree.get(r.country);
+
+    if (!r.province) {
+      if (r.city) {
+        if (!provinces.has(r.city)) provinces.set(r.city, new Set());
+      }
+      return;
+    }
+
+    if (!provinces.has(r.province)) {
+      provinces.set(r.province, new Set());
+    }
+    if (r.city) {
+      provinces.get(r.province).add(r.city);
+    }
+  });
+
+  const china = [];
+  const overseas = [];
+
+  const sortedCountries = [...tree.keys()].sort((a, b) => {
+    if (a === '中国') return -1;
+    if (b === '中国') return 1;
+    return a.localeCompare(b, 'zh-CN');
+  });
+
+  sortedCountries.forEach((country) => {
+    const provincesMap = tree.get(country);
+    const provinceNodes = [...provincesMap.keys()]
+      .sort((a, b) => a.localeCompare(b, 'zh-CN'))
+      .map((province) => {
+        const cities = [...provincesMap.get(province)]
+          .sort((a, b) => a.localeCompare(b, 'zh-CN'))
+          .map((city) => {
+            const key = makeCityKey(country, province, city);
+            const count = countMarkersForKeys(markers, (m) =>
+              markerMatchesRegionFilter(m, new Set([key]))
+            );
+            return { key, label: city, count };
+          });
+
+        const pKey = makeProvinceKey(country, province);
+        const pCount = countMarkersForKeys(markers, (m) =>
+          markerMatchesRegionFilter(m, new Set([pKey]))
+        );
+
+        return { key: pKey, label: province, count: pCount, cities };
+      });
+
+    const cKey = makeCountryKey(country);
+    const cCount = countMarkersForKeys(markers, (m) =>
+      markerMatchesRegionFilter(m, new Set([cKey]))
+    );
+
+    const node = { key: cKey, label: country, count: cCount, provinces: provinceNodes };
+
+    if (country === '中国') china.push(node);
+    else overseas.push(node);
+  });
+
+  return { china, overseas };
+}
+
 export function migrateMarkerRegion(marker) {
   const { tripId, tripName, parentId, childIds, ...rest } = marker;
   const { country, province, city } = normalizeAdminRegion(rest);

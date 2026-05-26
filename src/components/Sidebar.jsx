@@ -5,6 +5,7 @@ import MarkerDetails from './MarkerDetails';
 import AddMarkerForm from './AddMarkerForm';
 import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
+import RegionFilter from './RegionFilter';
 
 export default function Sidebar({
   mapRef,
@@ -37,6 +38,10 @@ export default function Sidebar({
   onClearAll,
   onOpenDetail,
   onViewImage,
+  regionTree,
+  selectedRegionKeys,
+  onToggleRegion,
+  onClearRegions,
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -90,9 +95,16 @@ export default function Sidebar({
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-2">
+        <RegionFilter
+          selectedRegionKeys={selectedRegionKeys}
+          regionTree={regionTree}
+          onToggleRegion={onToggleRegion}
+          onClearRegions={onClearRegions}
+        />
         <button
+          type="button"
           onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-          className="flex-1 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1"
+          className="flex-1 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1 border border-gray-200"
         >
           📅 时间 {sortOrder === 'date-asc' ? '↑' : '↓'}
         </button>

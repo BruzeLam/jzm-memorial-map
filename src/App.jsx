@@ -28,8 +28,18 @@ export default function App() {
     clearAll,
   } = useMarkers();
 
-  const { searchQuery, setSearchQuery, activeFilters, toggleFilter, clearSearch, filteredMarkers } =
-    useSearch(markers);
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeFilters,
+    toggleFilter,
+    clearSearch,
+    filteredMarkers,
+    regionTree,
+    selectedRegionKeys,
+    toggleRegionKey,
+    clearRegionFilter,
+  } = useSearch(markers);
 
   const { gallery, addImage, updateImage, deleteImage, removeMarkerRelation } = useGallery(markers);
 
@@ -339,6 +349,10 @@ export default function App() {
             onClearAll={clearAll}
             onOpenDetail={() => setShowDetailPanel(true)}
             onViewImage={(index) => setViewingImageIndex(index)}
+            regionTree={regionTree}
+            selectedRegionKeys={selectedRegionKeys}
+            onToggleRegion={toggleRegionKey}
+            onClearRegions={clearRegionFilter}
           />
         </div>
 
