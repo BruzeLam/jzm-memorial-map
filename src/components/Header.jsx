@@ -47,7 +47,7 @@ function Glasses({ size = 32 }) {
   );
 }
 
-export default function Header({ onOpenQuotes, onOpenGallery, onOpenChangeLog }) {
+export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onOpenChangeLog }) {
   const seconds = useCountdown();
   const showCountdown = Date.now() < CENTENARY;
   const [hovered, setHovered] = useState(false);
@@ -93,9 +93,8 @@ export default function Header({ onOpenQuotes, onOpenGallery, onOpenChangeLog })
           </button>
 
           <button
-            disabled
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-400 text-white text-xs font-medium rounded-lg cursor-not-allowed opacity-60"
-            title="敬请期待"
+            onClick={onOpenArchive}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs font-medium rounded-lg transition-colors"
           >
             <span>📁</span>
             <span>档案馆</span>

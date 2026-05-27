@@ -8,6 +8,7 @@ import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
 import QuotesPanel from './components/QuotesPanel';
+import ArchivePanel from './components/ArchivePanel';
 import DetailPanel from './components/DetailPanel';
 import ImageViewer from './components/ImageViewer';
 import GalleryPanel from './components/GalleryPanel';
@@ -59,6 +60,7 @@ export default function App() {
   const [mapFloatingCard, setMapFloatingCard] = useState(null);
 
   const [showQuotes, setShowQuotes] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
@@ -288,10 +290,12 @@ export default function App() {
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
+        onOpenArchive={() => setShowArchive(true)}
         onOpenGallery={() => setShowGallery(true)}
         onOpenChangeLog={() => setShowChangeLog(true)}
       />
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
+      {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
       {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
       {showGallery && (
         <GalleryPanel
