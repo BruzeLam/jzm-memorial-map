@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ARCHIVES } from '../data/archives';
 import { compressImage } from '../utils/imageCompression';
+import { filterBySearch, getArchiveSearchFields } from '../utils/textSearch';
 
 const STORAGE_KEY = 'jzm_all_archives';
 const MIGRATED_KEY = 'jzm_archives_migrated_v1';
@@ -306,23 +307,10 @@ export default function ArchivePanel({ onClose }) {
   const [previewImage, setPreviewImage] = useState(null);
   const [archives, setArchives] = useState(initializeArchives);
 
-  const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return archives;
-    const q = searchQuery.trim().toLowerCase();
-    return archives.filter((item) => {
-      const haystack = [
-        item.title,
-        item.text,
-        item.source,
-        item.context,
-        ...(item.links || []).map((l) => `${l.label} ${l.url}`),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [archives, searchQuery]);
+  const filtered = useMemo(
+    () => filterBySearch(archives, searchQuery, getArchiveSearchFields),
+    [archives, searchQuery]
+  );
 
   const handleSave = (item) => {
     let updated;

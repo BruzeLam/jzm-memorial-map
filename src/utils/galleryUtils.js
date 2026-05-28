@@ -16,17 +16,6 @@ export function isSameImageData(a, b) {
   return imageDataFingerprint(a) === imageDataFingerprint(b);
 }
 
-/** 仅按标题搜索；无标题的图片不参与搜索匹配 */
-export function filterGalleryByTitle(gallery, query) {
-  const q = query.trim().toLowerCase();
-  if (!q) return gallery;
-  return gallery.filter((img) => {
-    const title = (img.title || '').trim().toLowerCase();
-    if (!title) return false;
-    return title.includes(q);
-  });
-}
-
 /** 按图片数据去重，保留较早一条，合并关联地点信息 */
 export function dedupeGallery(gallery) {
   const seen = new Map();

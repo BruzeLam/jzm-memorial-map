@@ -4,6 +4,7 @@ import {
   buildRegionTree,
   markerMatchesRegionFilter,
 } from '../utils/regionFormat';
+import { filterBySearch, getMarkerSearchFields } from '../utils/textSearch';
 
 export function useSearch(markers) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,22 +42,14 @@ export function useSearch(markers) {
   }, []);
 
   const filteredMarkers = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    return markers.filter((marker) => {
+    const byTypeAndRegion = markers.filter((marker) => {
       if (!activeFilters[marker.type]) return false;
       if (!markerMatchesRegionFilter(marker, selectedRegionKeys)) return false;
-      if (!query) return true;
-      const regionText = formatRegionPath(marker).toLowerCase();
-      return (
-        marker.name.toLowerCase().includes(query) ||
-        marker.title.toLowerCase().includes(query) ||
-        marker.description.toLowerCase().includes(query) ||
-        (marker.date && marker.date.toLowerCase().includes(query)) ||
-        regionText.includes(query) ||
-        (marker.province && marker.province.toLowerCase().includes(query)) ||
-        (marker.city && marker.city.toLowerCase().includes(query))
-      );
+      return true;
     });
+    return filterBySearch(byTypeAndRegion, searchQuery, (marker) =>
+      getMarkerSearchFields(marker, formatRegionPath(marker))
+    );
   }, [markers, searchQuery, activeFilters, selectedRegionKeys]);
 
   return {

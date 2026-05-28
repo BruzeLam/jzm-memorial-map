@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
+import { matchesBoundedSearch, normalizeSearchQuery } from '../utils/textSearch';
 
 function TreeCheckbox({ checked, indeterminate, onChange }) {
   return (
@@ -135,16 +136,18 @@ export default function RegionFilter({
   };
 
   const filterTree = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = normalizeSearchQuery(searchQuery);
     if (!q) return regionTree;
 
+    const labelMatches = (label) => matchesBoundedSearch(label, q);
+
     const filterCountry = (country) => {
-      const countryMatch = country.label.toLowerCase().includes(q);
+      const countryMatch = labelMatches(country.label);
       const provinces = country.provinces
         .map((p) => {
-          const provinceMatch = p.label.toLowerCase().includes(q);
+          const provinceMatch = labelMatches(p.label);
           const cities = p.cities.filter(
-            (c) => c.label.toLowerCase().includes(q) || provinceMatch || countryMatch
+            (c) => labelMatches(c.label) || provinceMatch || countryMatch
           );
           if (provinceMatch || countryMatch || cities.length > 0) {
             return { ...p, cities: provinceMatch || countryMatch ? p.cities : cities };

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { QUOTES } from '../data/quotes';
+import { filterBySearch, getQuoteSearchFields } from '../utils/textSearch';
 
 const STORAGE_KEY = 'jzm_all_quotes';
 const MIGRATED_KEY = 'jzm_quotes_migrated_v2';
@@ -157,17 +158,10 @@ export default function QuotesPanel({ onClose }) {
 
   const allQuotes = useMemo(() => userQuotes, [userQuotes]);
 
-  const filteredQuotes = useMemo(() => {
-    if (!searchQuery.trim()) return allQuotes;
-
-    const q = searchQuery.trim().toLowerCase();
-    return allQuotes.filter(
-      (quote) =>
-        quote.text.toLowerCase().includes(q) ||
-        (quote.source && quote.source.toLowerCase().includes(q)) ||
-        (quote.context && quote.context.toLowerCase().includes(q))
-    );
-  }, [allQuotes, searchQuery]);
+  const filteredQuotes = useMemo(
+    () => filterBySearch(allQuotes, searchQuery, getQuoteSearchFields),
+    [allQuotes, searchQuery]
+  );
 
   const handleSaveQuote = (quote) => {
     let updated;

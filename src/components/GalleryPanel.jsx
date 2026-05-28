@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { compressImage } from '../utils/imageCompression';
-import { filterGalleryByTitle } from '../utils/galleryUtils';
+import { filterGalleryBySearch } from '../utils/textSearch';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
 import ImageUploadInput from './ImageUploadInput';
@@ -21,8 +21,8 @@ export default function GalleryPanel({
   const [showUploadArea, setShowUploadArea] = useState(false);
 
   const filteredGallery = useMemo(
-    () => filterGalleryByTitle(gallery, searchQuery),
-    [gallery, searchQuery]
+    () => filterGalleryBySearch(gallery, searchQuery, markers),
+    [gallery, searchQuery, markers]
   );
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function GalleryPanel({
           <div className="flex gap-2 items-center">
             <input
               type="text"
-              placeholder="仅搜索图片标题…"
+              placeholder="搜索标题、关联地点、时间…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"

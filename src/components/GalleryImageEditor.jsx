@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { filterBySearch, getMarkerSearchFields } from '../utils/textSearch';
+import { formatRegionPath } from '../utils/regionFormat';
 
 export default function GalleryImageEditor({
   image,
@@ -26,14 +28,13 @@ export default function GalleryImageEditor({
     setMarkerSearchQuery('');
   };
 
-  // 搜索地点
-  const filteredMarkers = markerSearchQuery.trim()
-    ? markers.filter(m =>
-        m.name.toLowerCase().includes(markerSearchQuery.toLowerCase()) ||
-        m.city?.toLowerCase().includes(markerSearchQuery.toLowerCase()) ||
-        m.province?.toLowerCase().includes(markerSearchQuery.toLowerCase())
-      )
-    : markers;
+  const filteredMarkers = useMemo(
+    () =>
+      filterBySearch(markers, markerSearchQuery, (m) =>
+        getMarkerSearchFields(m, formatRegionPath(m))
+      ),
+    [markers, markerSearchQuery]
+  );
 
   const inputClass =
     'w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400 bg-white';

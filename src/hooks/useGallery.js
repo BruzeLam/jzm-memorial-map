@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   dedupeGallery,
-  filterGalleryByTitle,
   isSameImageData,
   markerImageAlreadyInGallery,
 } from '../utils/galleryUtils';
+import { filterGalleryBySearch } from '../utils/textSearch';
 
 const GALLERY_KEY = 'jzm_gallery_images';
 const GALLERY_VERSION_KEY = 'jzm_gallery_version';
@@ -153,7 +153,7 @@ export function useGallery(markers = []) {
   }, []);
 
   const searchImages = useCallback(
-    (query) => filterGalleryByTitle(gallery, query),
+    (query, markersList = []) => filterGalleryBySearch(gallery, query, markersList),
     [gallery]
   );
 
