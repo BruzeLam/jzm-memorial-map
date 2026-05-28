@@ -7,6 +7,8 @@ import { useReverseGeocoding, extractAdminInfo } from '../hooks/useNominatim';
 import LocationInput from './LocationInput';
 import DatePicker from './DatePicker';
 import ImageUploadInput from './ImageUploadInput';
+import MarkerTagInput from './MarkerTagInput';
+import { normalizeMarkerTagList } from '../utils/markerTags';
 
 const emptyForm = {
   type: 'spot',
@@ -20,11 +22,21 @@ const emptyForm = {
   endDate: '',
   title: '',
   description: '',
+  tripSummary: '',
+  tags: [],
   sources: [{ title: '', note: '' }],
   images: [],
 };
 
-export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoords, editingMarker, prefillData }) {
+export default function AddMarkerForm({
+  mapRef,
+  onSubmit,
+  onCancel,
+  initialCoords,
+  editingMarker,
+  prefillData,
+  allMarkerTags = [],
+}) {
   const [form, setForm] = useState(emptyForm);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [provinceSuggestions, setProvinceSuggestions] = useState([]);
@@ -51,6 +63,8 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
         endDate: editingMarker.endDate || '',
         title: editingMarker.title || '',
         description: editingMarker.description || '',
+        tripSummary: editingMarker.tripSummary || '',
+        tags: normalizeMarkerTagList(editingMarker.tags || []),
         sources: editingMarker.sources?.length > 0 ? editingMarker.sources : [{ title: '', note: '' }],
         images: editingMarker.images || [],
       });
@@ -174,6 +188,8 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
       longitude: parseFloat(form.longitude),
       color: typeInfo.color,
       icon: typeInfo.icon,
+      tags: normalizeMarkerTagList(form.tags),
+      tripSummary: form.tripSummary.trim() || null,
       sources: form.sources.filter((s) => s.title.trim()),
     };
     onSubmit(data);
@@ -395,7 +411,29 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
             rows={3}
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
-            placeholder="详细说明..."
+            placeholder="本地点的说明（可选；同一行程可只在部分城市填写）"
+          />
+        </div>
+
+        <div>
+          <label className={labelClass}>行程总述</label>
+          <textarea
+            className={`${inputClass} resize-none`}
+            rows={2}
+            value={form.tripSummary}
+            onChange={(e) => set('tripSummary', e.target.value)}
+            placeholder="整段访问的共性说明（可选；同标签只需一处填写，其它站点会自动显示）"
+          />
+        </div>
+
+        <div>
+          <label className={labelClass}>行程标签</label>
+          <MarkerTagInput
+            tags={form.tags}
+            onChange={(next) => setForm((prev) => ({ ...prev, tags: next }))}
+            allTags={allMarkerTags}
+            placeholder="输入 #标签 后按 Enter，如 #1993巴西国事访问"
+            hint="同一国事访问的多座城市请使用相同标签；与档案馆标签相互独立"
           />
         </div>
 

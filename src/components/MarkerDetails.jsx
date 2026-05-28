@@ -1,11 +1,26 @@
 import React from 'react';
 import { MARKER_TYPES } from '../utils/constants';
+import { getTripSiblings, resolveTripSummary, resolveLocalDescription } from '../utils/markerTrips';
+import { MarkerTagPills } from './MarkerTagInput';
 
-export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpenDetail, onViewImage }) {
+export default function MarkerDetails({
+  marker,
+  markers = [],
+  onEdit,
+  onDelete,
+  onClose,
+  onOpenDetail,
+  onViewImage,
+  onTagSearch,
+  onSelectMarker,
+}) {
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
   const hasImages = marker.images && marker.images.length > 0;
+  const localDesc = resolveLocalDescription(marker);
+  const tripSummary = resolveTripSummary(marker, markers);
+  const siblings = getTripSiblings(markers, marker);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -32,8 +47,19 @@ export default function MarkerDetails({ marker, onEdit, onDelete, onClose, onOpe
             📅 {marker.date}{marker.endDate ? ` — ${marker.endDate}` : ''}
           </p>
         )}
-        {marker.description && (
-          <p className="text-sm text-gray-700 leading-relaxed mb-3">{marker.description}</p>
+        {marker.tags?.length > 0 && (
+          <MarkerTagPills tags={marker.tags} onTagClick={onTagSearch} className="mb-2" />
+        )}
+        {tripSummary && (
+          <p className="text-sm text-gray-600 leading-relaxed mb-2 border-l-2 border-blue-200 pl-2">
+            {tripSummary.length > 120 ? `${tripSummary.slice(0, 120)}…` : tripSummary}
+          </p>
+        )}
+        {localDesc && (
+          <p className="text-sm text-gray-700 leading-relaxed mb-3">{localDesc}</p>
+        )}
+        {siblings.length > 0 && (
+          <p className="text-xs text-blue-600 mb-2">同行程还有 {siblings.length} 处足迹</p>
         )}
         <p className="text-xs text-gray-400 mb-3">
           📍 {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}

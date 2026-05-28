@@ -317,7 +317,13 @@ export default function App() {
       {showDetailPanel && (
         <DetailPanel
           marker={selectedMarker}
+          markers={markers}
           onClose={() => setShowDetailPanel(false)}
+          onSelectMarker={(id) => {
+            selectMarker(id);
+            setShowDetailPanel(true);
+          }}
+          onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
         />
       )}
       {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (
@@ -376,6 +382,8 @@ export default function App() {
           <MapView
             mapRef={mapRef}
             markers={filteredMarkers}
+            allMarkers={markers}
+            selectedMarker={selectedMarker}
             selectedMarkerId={selectedMarkerId}
             onMarkerSelect={handleMarkerSelect}
             onMapClick={handleMapClick}

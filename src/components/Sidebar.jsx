@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { collectAllMarkerTags } from '../utils/markerTags';
+import { MarkerTagPills } from './MarkerTagInput';
 import SearchBar from './SearchBar';
 import FilterPanel from './FilterPanel';
 import MarkerDetails from './MarkerDetails';
@@ -45,6 +47,7 @@ export default function Sidebar({
   onClearRegions,
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
+  const allMarkerTags = useMemo(() => collectAllMarkerTags(markers), [markers]);
   const [showSettings, setShowSettings] = useState(false);
   const [showLanguageDrawer, setShowLanguageDrawer] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -164,6 +167,7 @@ export default function Sidebar({
               initialCoords={pendingCoords}
               editingMarker={editingMarker}
               prefillData={formPrefill}
+              allMarkerTags={allMarkerTags}
             />
           </div>
         ) : selectedMarker ? (
@@ -171,11 +175,14 @@ export default function Sidebar({
           <div className="p-3">
             <MarkerDetails
               marker={selectedMarker}
+              markers={markers}
               onEdit={onEditMarker}
               onDelete={onDeleteMarker}
               onClose={() => onMarkerSelect(selectedMarkerId)}
               onOpenDetail={onOpenDetail}
               onViewImage={onViewImage}
+              onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
+              onSelectMarker={onMarkerSelect}
             />
           </div>
         ) : (
@@ -225,6 +232,13 @@ export default function Sidebar({
                         </div>
                         {m.title && (
                           <p className="text-xs text-gray-500 mt-0.5 truncate">{m.title}</p>
+                        )}
+                        {m.tags?.length > 0 && (
+                          <MarkerTagPills
+                            tags={m.tags}
+                            onTagClick={(tag) => setSearchQuery(`#${tag}`)}
+                            className="mt-1"
+                          />
                         )}
                       </div>
                     </div>

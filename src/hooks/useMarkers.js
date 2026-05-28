@@ -1,12 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS, REMOVED_MARKER_IDS } from '../utils/constants';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
+import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 
 const removedIdSet = new Set(REMOVED_MARKER_IDS);
 
+function normalizeMarkerFields(marker) {
+  return {
+    ...marker,
+    tags: normalizeMarkerTagList(marker.tags),
+    tripSummary: marker.tripSummary?.trim() || null,
+    images: marker.images || [],
+    sources: marker.sources || [],
+  };
+}
+
 function applyMarkerMigrations(markers) {
   const withoutRemoved = markers.filter((m) => !removedIdSet.has(m.id));
-  return migrateAllMarkerRegions(withoutRemoved);
+  const migrated = migrateAllMarkerRegions(withoutRemoved).map(normalizeMarkerFields);
+  registerMarkerTags(collectAllMarkerTags(migrated));
+  return migrated;
 }
 
 function loadFromStorage() {
@@ -52,25 +65,26 @@ export function useMarkers() {
   }, [markers]);
 
   const addMarker = useCallback((markerData) => {
-    const normalized = migrateAllMarkerRegions([markerData])[0];
+    const normalized = normalizeMarkerFields(migrateAllMarkerRegions([markerData])[0]);
     const newMarker = {
       ...normalized,
       id: `${markerData.type}_${Date.now()}`,
-      images: markerData.images || [],
-      sources: markerData.sources || [],
     };
+    registerMarkerTags(newMarker.tags);
     setMarkers((prev) => [...prev, newMarker]);
     return newMarker.id;
   }, []);
 
   const updateMarker = useCallback((id, updates) => {
-    setMarkers((prev) =>
-      prev.map((m) => {
+    setMarkers((prev) => {
+      const next = prev.map((m) => {
         if (m.id !== id) return m;
-        const merged = migrateAllMarkerRegions([{ ...m, ...updates }])[0];
+        const merged = normalizeMarkerFields(migrateAllMarkerRegions([{ ...m, ...updates }])[0]);
         return merged;
-      })
-    );
+      });
+      registerMarkerTags(collectAllMarkerTags(next));
+      return next;
+    });
   }, []);
 
   const deleteMarker = useCallback((id) => {

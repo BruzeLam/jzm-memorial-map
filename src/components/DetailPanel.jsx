@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { formatRegionPath } from '../utils/regionFormat';
+import {
+  getTripSiblings,
+  resolveTripSummary,
+  resolveLocalDescription,
+} from '../utils/markerTrips';
+import { MarkerTagPills } from './MarkerTagInput';
 import ImageViewer from './ImageViewer';
 
-export default function DetailPanel({ marker, onClose }) {
+export default function DetailPanel({ marker, markers = [], onClose, onSelectMarker, onTagSearch }) {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
 
   if (!marker) return null;
 
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
+  const localDesc = resolveLocalDescription(marker);
+  const tripSummary = resolveTripSummary(marker, markers);
+  const siblings = getTripSiblings(markers, marker);
 
   return (
     <div
@@ -21,7 +30,6 @@ export default function DetailPanel({ marker, onClose }) {
         style={{ maxHeight: '80vh' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div
           className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0"
           style={{ backgroundColor: marker.color + '18' }}
@@ -46,16 +54,20 @@ export default function DetailPanel({ marker, onClose }) {
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* 基本信息 */}
+          {marker.tags?.length > 0 && (
+            <MarkerTagPills
+              tags={marker.tags}
+              onTagClick={onTagSearch}
+              className="mb-3"
+            />
+          )}
+
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
-            {/* Title */}
             {marker.title && (
               <h3 className="font-bold text-lg text-gray-800 mb-3">{marker.title}</h3>
             )}
 
-            {/* Info */}
             <div className="space-y-2 mb-3">
               {marker.date && (
                 <div className="flex items-center gap-2 text-sm">
@@ -73,21 +85,30 @@ export default function DetailPanel({ marker, onClose }) {
               )}
               <div className="flex items-center gap-2 text-sm">
                 <span className="text-gray-600 min-w-16">📍 坐标:</span>
-                <span className="text-gray-800 font-mono">{marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}</span>
+                <span className="text-gray-800 font-mono">
+                  {marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}
+                </span>
               </div>
             </div>
 
-            {/* Description */}
-            {marker.description && (
+            {tripSummary && (
               <div className="mb-3">
-                <h4 className="text-xs font-semibold text-gray-700 mb-1">背景说明</h4>
+                <h4 className="text-xs font-semibold text-gray-700 mb-1">行程总述</h4>
                 <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {marker.description}
+                  {tripSummary}
                 </p>
               </div>
             )}
 
-            {/* Sources */}
+            {localDesc && (
+              <div className="mb-3">
+                <h4 className="text-xs font-semibold text-gray-700 mb-1">本地点说明</h4>
+                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                  {localDesc}
+                </p>
+              </div>
+            )}
+
             {marker.sources && marker.sources.length > 0 && (
               <div className="mb-3">
                 <h4 className="text-xs font-semibold text-gray-700 mb-1">资料来源</h4>
@@ -108,50 +129,59 @@ export default function DetailPanel({ marker, onClose }) {
             )}
           </div>
 
-          {/* Images */}
+          {siblings.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                同行程足迹（{siblings.length}）
+              </h4>
+              <ul className="space-y-1.5">
+                {siblings.map((sib) => (
+                  <li key={sib.id}>
+                    <button
+                      type="button"
+                      onClick={() => onSelectMarker?.(sib.id)}
+                      className="w-full text-left px-3 py-2 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
+                    >
+                      <span className="text-sm font-medium text-gray-800">{sib.name}</span>
+                      {sib.title && (
+                        <span className="text-xs text-gray-500 ml-2">{sib.title}</span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {marker.images && marker.images.length > 0 && (
             <div className="mt-6 mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">📸 图片库 ({marker.images.length})</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                📸 图片库 ({marker.images.length})
+              </h4>
               <div className="grid grid-cols-2 gap-2">
                 {marker.images.map((img, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setViewingImageIndex(i)}
-                    className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors bg-gray-100 group"
+                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:opacity-90"
                   >
-                    <img
-                      src={img.data}
-                      alt={`${marker.name}-${i}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity">🔍</span>
-                    </div>
+                    <img src={img.data} alt={img.name || ''} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             </div>
           )}
-          {viewingImageIndex !== null && marker.images && (
-            <ImageViewer
-              images={marker.images}
-              initialIndex={viewingImageIndex}
-              onClose={() => setViewingImageIndex(null)}
-            />
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
-          >
-            关闭
-          </button>
         </div>
       </div>
+
+      {viewingImageIndex !== null && marker.images?.length > 0 && (
+        <ImageViewer
+          images={marker.images}
+          initialIndex={viewingImageIndex}
+          onClose={() => setViewingImageIndex(null)}
+        />
+      )}
     </div>
   );
 }

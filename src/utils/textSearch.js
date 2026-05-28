@@ -105,16 +105,20 @@ export function filterGalleryBySearch(gallery, query, markers = []) {
   return filterBySearch(gallery, query, (img) => getGallerySearchFields(img, markers));
 }
 
-/** 地点列表侧边栏 */
+/** 地点列表侧边栏（含行程标签） */
 export function getMarkerSearchFields(marker, regionPath = '') {
+  const tagFields = (marker.tags || []).flatMap((t) => [t, `#${t}`]);
   return [
     marker.name,
     marker.title,
     marker.description,
+    marker.tripSummary,
     marker.date,
+    marker.endDate,
     marker.province,
     marker.city,
     marker.country,
+    ...tagFields,
     regionPath,
   ];
 }

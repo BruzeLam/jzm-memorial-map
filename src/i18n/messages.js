@@ -11,7 +11,7 @@ const zh = {
       seconds: '秒',
     },
     sidebar: {
-      searchPlaceholder: '搜索地点、事件…',
+      searchPlaceholder: '搜索地点、事件、标签（如 #1993巴西国事访问）…',
       totalMarkers: '共 {total} 个标记',
       showingMarkers: '当前显示 {count} 个',
       region: '地区',
@@ -134,7 +134,7 @@ const en = {
       seconds: 'sec',
     },
     sidebar: {
-      searchPlaceholder: 'Search places, events…',
+      searchPlaceholder: 'Search places, events, tags (e.g. #tag)…',
       totalMarkers: '{total} markers',
       showingMarkers: 'Showing {count}',
       region: 'Region',

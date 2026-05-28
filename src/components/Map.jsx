@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MARKER_TYPES } from '../utils/constants';
+import { getTripMateIds } from '../utils/markerTrips';
 
 // 计算两点间距离（Haversine公式）单位：km
 function calculateDistance(lat1, lng1, lat2, lng2) {
@@ -71,11 +72,20 @@ function getMarkerDimensions(zoom, isSelected) {
   };
 }
 
-function createDivIcon(marker, isSelected, zoom) {
+function createDivIcon(marker, isSelected, isTripMate, zoom) {
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
   const color = marker.color || typeInfo.color;
   const icon = marker.icon || typeInfo.icon;
-  const { size, fontSize, borderWidth, ringWidth } = getMarkerDimensions(zoom, isSelected);
+  const { size, fontSize, borderWidth, ringWidth } = getMarkerDimensions(zoom, isSelected || isTripMate);
+
+  const tripRing = isTripMate && !isSelected
+    ? `0 0 0 ${ringWidth}px rgba(30,136,229,0.65)`
+    : null;
+  const shadow = isSelected
+    ? `0 0 0 ${ringWidth}px ${color}, 0 4px 12px rgba(0,0,0,0.5)`
+    : tripRing
+      ? `${tripRing}, 0 2px 8px rgba(0,0,0,0.4)`
+      : '0 2px 8px rgba(0,0,0,0.4)';
 
   const html = `
     <div style="
@@ -85,7 +95,7 @@ function createDivIcon(marker, isSelected, zoom) {
       border-radius:50% 50% 50% 0;
       transform:rotate(-45deg);
       border:${borderWidth}px solid rgba(255,255,255,0.9);
-      box-shadow:${isSelected ? `0 0 0 ${ringWidth}px ${color}, 0 4px 12px rgba(0,0,0,0.5)` : '0 2px 8px rgba(0,0,0,0.4)'};
+      box-shadow:${shadow};
       display:flex;
       align-items:center;
       justify-content:center;
@@ -122,10 +132,14 @@ function MapClickHandler({ isAddingMode, onMapClick }) {
   return null;
 }
 
-function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
+function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect }) {
   const map = useMap();
   const { location } = useUserLocation();
   const [zoom, setZoom] = useState(() => map.getZoom());
+  const tripMateIds = useMemo(
+    () => getTripMateIds(allMarkers || markers, selectedMarker),
+    [allMarkers, markers, selectedMarker]
+  );
 
   useEffect(() => {
     const updateZoom = () => setZoom(map.getZoom());
@@ -142,7 +156,8 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
 
     markers.forEach((m) => {
       const isSelected = m.id === selectedMarkerId;
-      const icon = createDivIcon(m, isSelected, zoom);
+      const isTripMate = tripMateIds.has(m.id);
+      const icon = createDivIcon(m, isSelected, isTripMate, zoom);
       const leafletMarker = L.marker([m.latitude, m.longitude], { icon });
 
       const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
@@ -173,7 +188,7 @@ function MarkersLayer({ markers, selectedMarkerId, onMarkerSelect }) {
     return () => {
       markerInstances.forEach((lm) => lm.remove());
     };
-  }, [markers, selectedMarkerId, onMarkerSelect, map, location, zoom]);
+  }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds]);
 
   return null;
 }
@@ -214,7 +229,16 @@ function ZoomControl({ mapRef }) {
   );
 }
 
-export default function MapView({ mapRef, markers, selectedMarkerId, onMarkerSelect, onMapClick, isAddingMode }) {
+export default function MapView({
+  mapRef,
+  markers,
+  allMarkers,
+  selectedMarker,
+  selectedMarkerId,
+  onMarkerSelect,
+  onMapClick,
+  isAddingMode,
+}) {
   // 限制地图拖动范围在全球范围内
   const globalBounds = [[-85, -180], [85, 180]];
 
@@ -237,6 +261,8 @@ export default function MapView({ mapRef, markers, selectedMarkerId, onMarkerSel
       <MapClickHandler isAddingMode={isAddingMode} onMapClick={onMapClick} />
       <MarkersLayer
         markers={markers}
+        allMarkers={allMarkers}
+        selectedMarker={selectedMarker}
         selectedMarkerId={selectedMarkerId}
         onMarkerSelect={onMarkerSelect}
       />
