@@ -9,6 +9,7 @@ import DatePicker from './DatePicker';
 import ImageUploadInput from './ImageUploadInput';
 import MarkerTagInput from './MarkerTagInput';
 import { normalizeMarkerTagList } from '../utils/markerTags';
+import { findTripTemplateFromTag, applyTripTemplateToForm } from '../utils/markerTrips';
 
 const emptyForm = {
   type: 'spot',
@@ -36,8 +37,10 @@ export default function AddMarkerForm({
   editingMarker,
   prefillData,
   allMarkerTags = [],
+  markers = [],
 }) {
   const [form, setForm] = useState(emptyForm);
+  const [tagAutofillHint, setTagAutofillHint] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [provinceSuggestions, setProvinceSuggestions] = useState([]);
   const [citySuggestions, setCitySuggestions] = useState([]);
@@ -176,6 +179,28 @@ export default function AddMarkerForm({
 
   const removeImage = (i) =>
     setForm((prev) => ({ ...prev, images: prev.images.filter((_, idx) => idx !== i) }));
+
+  const handleTagsChange = (nextTags) => {
+    const normalized = normalizeMarkerTagList(nextTags);
+    setForm((prev) => {
+      const added = normalized.filter((t) => !prev.tags.includes(t));
+      let next = { ...prev, tags: normalized };
+      let hint = '';
+
+      for (const tag of added) {
+        const template = findTripTemplateFromTag(markers, tag, editingMarker?.id);
+        const { form: merged, filled } = applyTripTemplateToForm(next, template);
+        next = merged;
+        if (filled.length > 0 && template) {
+          hint = `已从「${template.fromName}」等同标签足迹补全：${filled.join('、')}`;
+          break;
+        }
+      }
+
+      setTagAutofillHint(hint);
+      return next;
+    });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -416,25 +441,31 @@ export default function AddMarkerForm({
         </div>
 
         <div>
+          <label className={labelClass}>行程标签</label>
+          <MarkerTagInput
+            tags={form.tags}
+            onChange={handleTagsChange}
+            allTags={allMarkerTags}
+            placeholder="输入 #标签 后按 Enter，如 #1993巴西国事访问"
+            hint="足迹、历史事件、题字均可共用同一标签；选已有标签可自动补全行程总述与时间（仅填空项）"
+          />
+        </div>
+
+        <div>
           <label className={labelClass}>行程总述</label>
           <textarea
             className={`${inputClass} resize-none`}
             rows={2}
             value={form.tripSummary}
-            onChange={(e) => set('tripSummary', e.target.value)}
-            placeholder="整段访问的共性说明（可选；同标签只需一处填写，其它站点会自动显示）"
+            onChange={(e) => {
+              set('tripSummary', e.target.value);
+              setTagAutofillHint('');
+            }}
+            placeholder="整段访问的共性说明；选同标签可自动填入，也可留空由其它站点提供"
           />
-        </div>
-
-        <div>
-          <label className={labelClass}>行程标签</label>
-          <MarkerTagInput
-            tags={form.tags}
-            onChange={(next) => setForm((prev) => ({ ...prev, tags: next }))}
-            allTags={allMarkerTags}
-            placeholder="输入 #标签 后按 Enter，如 #1993巴西国事访问"
-            hint="同一国事访问的多座城市请使用相同标签；与档案馆标签相互独立"
-          />
+          {tagAutofillHint && (
+            <p className="text-xs text-blue-600 mt-1">{tagAutofillHint}</p>
+          )}
         </div>
 
         <div>

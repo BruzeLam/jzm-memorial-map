@@ -168,6 +168,7 @@ export default function Sidebar({
               editingMarker={editingMarker}
               prefillData={formPrefill}
               allMarkerTags={allMarkerTags}
+              markers={markers}
             />
           </div>
         ) : selectedMarker ? (

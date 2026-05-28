@@ -2,6 +2,7 @@ import React from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { getTripSiblings, resolveTripSummary, resolveLocalDescription } from '../utils/markerTrips';
 import { MarkerTagPills } from './MarkerTagInput';
+import TripSiblingsSection from './TripSiblingsSection';
 
 export default function MarkerDetails({
   marker,
@@ -58,9 +59,7 @@ export default function MarkerDetails({
         {localDesc && (
           <p className="text-sm text-gray-700 leading-relaxed mb-3">{localDesc}</p>
         )}
-        {siblings.length > 0 && (
-          <p className="text-xs text-blue-600 mb-2">同行程还有 {siblings.length} 处足迹</p>
-        )}
+        <TripSiblingsSection siblings={siblings} onSelectMarker={onSelectMarker} compact />
         <p className="text-xs text-gray-400 mb-3">
           📍 {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
         </p>

@@ -7,6 +7,7 @@ import {
   resolveLocalDescription,
 } from '../utils/markerTrips';
 import { MarkerTagPills } from './MarkerTagInput';
+import TripSiblingsSection from './TripSiblingsSection';
 import ImageViewer from './ImageViewer';
 
 export default function DetailPanel({ marker, markers = [], onClose, onSelectMarker, onTagSearch }) {
@@ -129,29 +130,7 @@ export default function DetailPanel({ marker, markers = [], onClose, onSelectMar
             )}
           </div>
 
-          {siblings.length > 0 && (
-            <div className="mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                同行程足迹（{siblings.length}）
-              </h4>
-              <ul className="space-y-1.5">
-                {siblings.map((sib) => (
-                  <li key={sib.id}>
-                    <button
-                      type="button"
-                      onClick={() => onSelectMarker?.(sib.id)}
-                      className="w-full text-left px-3 py-2 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
-                    >
-                      <span className="text-sm font-medium text-gray-800">{sib.name}</span>
-                      {sib.title && (
-                        <span className="text-xs text-gray-500 ml-2">{sib.title}</span>
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <TripSiblingsSection siblings={siblings} onSelectMarker={onSelectMarker} />
 
           {marker.images && marker.images.length > 0 && (
             <div className="mt-6 mb-4">
