@@ -53,6 +53,7 @@ function saveUserQuotes(quotes) {
 }
 
 function UploadForm({ onSave, onCancel, initialData }) {
+  const { t } = useI18n();
   const [text, setText] = useState(initialData?.text || '');
   const [source, setSource] = useState(initialData?.source || '');
   const [context, setContext] = useState(initialData?.context || '');
@@ -62,7 +63,7 @@ function UploadForm({ onSave, onCancel, initialData }) {
 
   const handleSubmit = () => {
     if (!text.trim()) {
-      setError('语录内容不能为空');
+      setError(t('quotes.contentRequired'));
       return;
     }
     onSave({
@@ -85,21 +86,21 @@ function UploadForm({ onSave, onCancel, initialData }) {
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-base font-bold text-gray-800 mb-4">
-          {isEditing ? '编辑语录' : '上传语录'}
+          {isEditing ? t('quotes.editQuote') : t('quotes.uploadQuote')}
         </h3>
 
         <div className="space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-medium text-gray-600">
-                语录内容 <span className="text-red-500">*</span>
+                {t('quotes.content')} <span className="text-red-500">*</span>
               </label>
               <span className="text-xs text-gray-500">{text.length}/200</span>
             </div>
             <textarea
               value={text}
               onChange={(e) => { setText(e.target.value); setError(''); }}
-              placeholder="请输入语录原文（最多200字）..."
+              placeholder=""
               rows={3}
               maxLength={200}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
@@ -108,23 +109,23 @@ function UploadForm({ onSave, onCancel, initialData }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">出处</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t('quotes.source')}</label>
             <input
               type="text"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder="如：[宋] 范仲淹《岳阳楼记》"
+              placeholder=""
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">背景说明</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">{t('quotes.context')}</label>
             <input
               type="text"
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              placeholder="如：1997年访美时引用，表达..."
+              placeholder=""
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
@@ -136,14 +137,14 @@ function UploadForm({ onSave, onCancel, initialData }) {
             onClick={onCancel}
             className="flex-1 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
           >
-            取消
+            {t('quotes.cancel')}
           </button>
           <button
             type="button"
             onClick={handleSubmit}
             className="flex-1 py-2 text-sm font-medium bg-red-700 hover:bg-red-800 text-white rounded-lg transition-colors"
           >
-            {isEditing ? '更新' : '保存'}
+            {isEditing ? t('quotes.update') : t('quotes.save')}
           </button>
         </div>
       </div>

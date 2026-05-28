@@ -10,11 +10,14 @@ const typeStyle = {
   story: { emoji: '📜', color: 'bg-emerald-50 border-emerald-200' },
 };
 
-function formatDateLabel(dateKey, isToday, t) {
+function formatDateLabel(dateKey, isToday, t, locale) {
   if (isToday) return `🔔 ${t('changelog.today')}`;
   const parts = dateKey.split('-').map((n) => parseInt(n, 10));
   if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
-    return `📅 ${parts[0]}年${parts[1]}月${parts[2]}日`;
+    const [y, m, d] = parts;
+    if (locale === 'en') return `📅 ${m}/${d}/${y}`;
+    if (locale === 'ja') return `📅 ${y}年${m}月${d}日`;
+    return `📅 ${y}年${m}月${d}日`;
   }
   return `📅 ${dateKey}`;
 }
@@ -27,7 +30,7 @@ function resolveImageSrc(path) {
 }
 
 export default function ChangeLog({ onClose }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [expandedDates, setExpandedDates] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -115,7 +118,7 @@ export default function ChangeLog({ onClose }) {
                     }`}
                   >
                     <span className={`font-semibold text-sm ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
-                      {formatDateLabel(date, isToday, t)}
+                      {formatDateLabel(date, isToday, t, locale)}
                     </span>
                     <span
                       className="text-gray-400 transition-transform"

@@ -79,40 +79,36 @@ export default function GalleryImageEditor({
 
           {/* 标题 */}
           <div>
-            <label className={labelClass}>标题</label>
+            <label className={labelClass}>{t('gallery.fieldTitle')}</label>
             <input
               type="text"
               className={inputClass}
               value={form.title}
               onChange={(e) => set('title', e.target.value)}
-              placeholder="输入标题"
             />
           </div>
 
           {/* 描述 */}
           <div>
-            <label className={labelClass}>描述</label>
+            <label className={labelClass}>{t('gallery.fieldDesc')}</label>
             <textarea
               className={`${inputClass} resize-none`}
               rows={3}
               value={form.description}
               onChange={(e) => set('description', e.target.value)}
-              placeholder="输入描述"
             />
           </div>
 
           {/* 关联地点 */}
           <div>
-            <label className={labelClass}>关联地点（可选）</label>
-            <p className="text-xs text-gray-400 mb-2">
-              仅在本馆显示关联标签，不会把图片写入地点详情（地点上传的图片才会同步到影像馆）
-            </p>
+            <label className={labelClass}>{t('gallery.linkMarker')}</label>
+            <p className="text-xs text-gray-400 mb-2">{t('gallery.linkHint')}</p>
 
             {/* 搜索框 */}
             <input
               type="text"
               className={inputClass + ' mb-2'}
-              placeholder="搜索地点名称或地区..."
+              placeholder={t('gallery.searchPlace')}
               value={markerSearchQuery}
               onChange={(e) => setMarkerSearchQuery(e.target.value)}
             />
@@ -137,11 +133,11 @@ export default function GalleryImageEditor({
             <div className="bg-gray-50 rounded-lg p-2 max-h-40 overflow-y-auto border border-gray-200">
               {markers.length === 0 ? (
                 <div className="text-sm text-gray-400 text-center py-4">
-                  暂无地点
+                  {t('gallery.noMarkers')}
                 </div>
               ) : filteredMarkers.length === 0 ? (
                 <div className="text-sm text-gray-400 text-center py-4">
-                  没有匹配的地点
+                  {t('gallery.noMatch')}
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -171,13 +167,13 @@ export default function GalleryImageEditor({
             <button
               type="button"
               onClick={() => {
-                if (window.confirm('确定要删除这个图片吗？')) {
+                if (window.confirm(t('gallery.confirmDelete'))) {
                   onDelete();
                 }
               }}
               className="px-4 py-2 text-sm font-medium border border-red-200 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
             >
-              🗑️ 删除
+              🗑️ {t('common.delete')}
             </button>
           )}
           <div className="flex-1" />
@@ -185,13 +181,13 @@ export default function GalleryImageEditor({
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
           >
-            {isNew ? '取消上传' : '取消'}
+            {isNew ? t('gallery.cancelUpload') : t('common.cancel')}
           </button>
           <button
             onClick={() => onSave(form)}
             className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
-            {isNew ? '上传' : '保存'}
+            {isNew ? t('common.upload') : t('common.save')}
           </button>
         </div>
       </div>

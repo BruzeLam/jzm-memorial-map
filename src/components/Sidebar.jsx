@@ -44,8 +44,9 @@ export default function Sidebar({
   onToggleRegion,
   onClearRegions,
 }) {
-  const { t, locale, setLocale, markerTypeLabel } = useI18n();
+  const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
   const [showSettings, setShowSettings] = useState(false);
+  const [showLanguageDrawer, setShowLanguageDrawer] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortOrder, setSortOrder] = useState('date-asc');
 
@@ -271,34 +272,57 @@ export default function Sidebar({
 
         <div className="relative">
           <button
-            onClick={() => setShowSettings(!showSettings)}
+            onClick={() => {
+              setShowSettings(!showSettings);
+              if (showSettings) setShowLanguageDrawer(false);
+            }}
             className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
           >
             ⚙️
           </button>
           {showSettings && (
-            <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-44">
+            <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-48">
               <button
                 type="button"
-                onClick={() => {
-                  setLocale(locale === 'zh' ? 'en' : 'zh');
-                  setShowSettings(false);
-                }}
-                className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 border-b border-gray-100"
+                onClick={() => setShowLanguageDrawer((v) => !v)}
+                className="flex w-full items-center justify-between px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 border-b border-gray-100"
               >
-                🌐 {t('sidebar.language')}
+                <span>🌐 {t('sidebar.languageLabel')}</span>
+                <span className="text-gray-400">{showLanguageDrawer ? '▲' : '▼'}</span>
               </button>
+              {showLanguageDrawer && (
+                <div className="max-h-52 overflow-y-auto border-b border-gray-100 bg-gray-50/80">
+                  {localeOptions.map((opt) => (
+                    <button
+                      key={opt.code}
+                      type="button"
+                      onClick={() => setLocale(opt.code)}
+                      className={`flex w-full items-center justify-between px-4 py-2 text-xs text-left hover:bg-white ${
+                        locale === opt.code
+                          ? 'text-blue-700 font-semibold bg-blue-50/80'
+                          : 'text-gray-700'
+                      }`}
+                    >
+                      <span>{opt.native}</span>
+                      {locale === opt.code && <span className="text-blue-600">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
               <button
-                onClick={() => { onResetToSample(); setShowSettings(false); }}
+                type="button"
+                onClick={() => { onResetToSample(); setShowSettings(false); setShowLanguageDrawer(false); }}
                 className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
               >
                 🔄 {t('sidebar.restoreSample')}
               </button>
               <button
+                type="button"
                 onClick={() => {
                   if (window.confirm(t('sidebar.confirmClearAll'))) {
                     onClearAll();
                     setShowSettings(false);
+                    setShowLanguageDrawer(false);
                   }
                 }}
                 className="block w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-red-50"

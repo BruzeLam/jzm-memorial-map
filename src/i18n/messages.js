@@ -1,6 +1,7 @@
-/** UI 文案（不含用户内容与网站主标题） */
-export const messages = {
-  zh: {
+import { deepToTraditional } from './traditionalZh';
+import { intlMessages } from './messagesIntl';
+
+const zh = {
     nav: {
       gallery: '影像馆',
       quotes: '长者语录',
@@ -28,7 +29,6 @@ export const messages = {
       restoreSample: '恢复示例数据',
       clearAll: '清空所有数据',
       confirmClearAll: '确定清空所有数据吗？',
-      language: 'English',
       languageLabel: '语言',
     },
     region: {
@@ -55,6 +55,17 @@ export const messages = {
       edit: '编辑',
       newImageInfo: '新图片信息',
       editImageInfo: '编辑图片信息',
+      fieldTitle: '标题',
+      fieldDesc: '描述',
+      linkMarker: '关联地点（可选）',
+      linkHint: '仅在本馆显示关联标签，不会把图片写入地点详情（地点上传的图片才会同步到影像馆）',
+      searchPlace: '搜索地点名称或地区…',
+      noMarkers: '暂无地点',
+      noMatch: '没有匹配的地点',
+      confirmDelete: '确定要删除这个图片吗？',
+      cancelUpload: '取消上传',
+      closeUpload: '关闭',
+      uploading: '压缩上传中…',
     },
     archive: {
       title: '档案馆',
@@ -73,6 +84,15 @@ export const messages = {
       noResults: '未找到相关语录',
       total: '共 {count} 条语录',
       close: '关闭',
+      editQuote: '编辑语录',
+      uploadQuote: '上传语录',
+      content: '语录内容',
+      source: '出处',
+      context: '背景说明',
+      contentRequired: '语录内容不能为空',
+      save: '保存',
+      update: '更新',
+      cancel: '取消',
     },
     changelog: {
       title: '更新日志',
@@ -97,8 +117,9 @@ export const messages = {
       search: '搜索',
       optional: '可选',
     },
-  },
-  en: {
+};
+
+const en = {
     nav: {
       gallery: 'Gallery',
       quotes: 'Quotes',
@@ -126,7 +147,6 @@ export const messages = {
       restoreSample: 'Restore sample data',
       clearAll: 'Clear all data',
       confirmClearAll: 'Clear all data? This cannot be undone.',
-      language: '中文',
       languageLabel: 'Language',
     },
     region: {
@@ -153,6 +173,17 @@ export const messages = {
       edit: 'Edit',
       newImageInfo: 'New image',
       editImageInfo: 'Edit image',
+      fieldTitle: 'Title',
+      fieldDesc: 'Description',
+      linkMarker: 'Linked place (optional)',
+      linkHint: 'Gallery label only; does not add images to the marker.',
+      searchPlace: 'Search places…',
+      noMarkers: 'No places yet',
+      noMatch: 'No matching places',
+      confirmDelete: 'Delete this image?',
+      cancelUpload: 'Cancel upload',
+      closeUpload: 'Close',
+      uploading: 'Uploading…',
     },
     archive: {
       title: 'Archive',
@@ -171,6 +202,15 @@ export const messages = {
       noResults: 'No matching quotes',
       total: '{count} quotes',
       close: 'Close',
+      editQuote: 'Edit quote',
+      uploadQuote: 'Add quote',
+      content: 'Quote',
+      source: 'Source',
+      context: 'Context',
+      contentRequired: 'Quote text is required',
+      save: 'Save',
+      update: 'Update',
+      cancel: 'Cancel',
     },
     changelog: {
       title: 'Changelog',
@@ -195,5 +235,11 @@ export const messages = {
       search: 'Search',
       optional: 'Optional',
     },
-  },
+};
+
+export const messages = {
+  zh,
+  en,
+  'zh-TW': deepToTraditional(zh),
+  ...intlMessages,
 };
