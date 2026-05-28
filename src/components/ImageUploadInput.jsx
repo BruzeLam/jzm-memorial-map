@@ -4,10 +4,15 @@ export default function ImageUploadInput({ onUpload, disabled, label = '📸 上
   const fileInputRef = useRef(null);
   const dropZoneRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const busyRef = useRef(false);
 
   const handleFileUpload = async (files) => {
-    if (files && files[0]) {
+    if (!files?.[0] || disabled || busyRef.current) return;
+    busyRef.current = true;
+    try {
       await onUpload({ target: { files } });
+    } finally {
+      busyRef.current = false;
     }
   };
 

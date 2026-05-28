@@ -101,6 +101,9 @@ export default function GalleryImageEditor({
           {/* 关联地点 */}
           <div>
             <label className={labelClass}>关联地点（可选）</label>
+            <p className="text-xs text-gray-400 mb-2">
+              仅在本馆显示关联标签，不会把图片写入地点详情（地点上传的图片才会同步到影像馆）
+            </p>
 
             {/* 搜索框 */}
             <input

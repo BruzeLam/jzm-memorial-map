@@ -13,7 +13,16 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [images.length, onClose]);
 
-  const currentImage = images[currentIndex];
+  const safeIndex = images.length
+    ? Math.min(Math.max(0, currentIndex), images.length - 1)
+    : 0;
+  const currentImage = images[safeIndex];
+
+  useEffect(() => {
+    if (!images.length) onClose();
+  }, [images.length, onClose]);
+
+  if (!currentImage) return null;
 
   return (
     <div
@@ -35,7 +44,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }) {
         {/* 图片 */}
         <img
           src={currentImage.data}
-          alt={currentImage.name}
+          alt={currentImage.title || currentImage.name || ''}
           className="max-w-[90vw] max-h-[90vh] object-contain"
         />
 

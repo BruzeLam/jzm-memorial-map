@@ -42,7 +42,14 @@ export default function App() {
     clearRegionFilter,
   } = useSearch(markers);
 
-  const { gallery, addImage, updateImage, deleteImage, removeMarkerRelation } = useGallery(markers);
+  const {
+    gallery,
+    addImage,
+    syncImagesFromMarker,
+    updateImage,
+    deleteImage,
+    removeMarkerRelation,
+  } = useGallery(markers);
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   // 'map' | 'manual' | null
@@ -167,14 +174,14 @@ export default function App() {
 
   const handleAddMarker = (data) => {
     const newId = addMarker(data);
-    // Sync images from marker to gallery
-    if (data.images && data.images.length > 0) {
-      data.images.forEach((img) => {
-        addImage(img, {
-          title: data.name,
-          description: '',
-          relatedMarker: newId,
-        });
+    // 地点 → 影像馆（单向同步）
+    if (data.images?.length > 0) {
+      syncImagesFromMarker(newId, data.name, data.images, {
+        country: data.country,
+        province: data.province,
+        city: data.city,
+        latitude: data.latitude,
+        longitude: data.longitude,
       });
     }
     setShowAddForm(false);
@@ -191,16 +198,14 @@ export default function App() {
 
   const handleUpdateMarker = (data) => {
     updateMarker(editingMarker.id, data);
-    // Sync new images to gallery
-    if (data.images && data.images.length > 0) {
-      const existingImageCount = editingMarker.images?.length || 0;
-      const newImages = data.images.slice(existingImageCount);
-      newImages.forEach((img) => {
-        addImage(img, {
-          title: data.name,
-          description: '',
-          relatedMarker: editingMarker.id,
-        });
+    // 地点 → 影像馆：补全尚未入库的图片（按数据去重）
+    if (data.images?.length > 0) {
+      syncImagesFromMarker(editingMarker.id, data.name, data.images, {
+        country: data.country,
+        province: data.province,
+        city: data.city,
+        latitude: data.latitude,
+        longitude: data.longitude,
       });
     }
     setShowAddForm(false);

@@ -144,10 +144,15 @@ export default function AddMarkerForm({ mapRef, onSubmit, onCancel, initialCoord
     setUploadingImage(true);
     try {
       const compressed = await compressImage(file);
-      setForm((prev) => ({
-        ...prev,
-        images: [...prev.images, { data: compressed.data, name: compressed.name }],
-      }));
+      setForm((prev) => {
+        if (prev.images.some((img) => img.data === compressed.data)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          images: [...prev.images, { data: compressed.data, name: compressed.name }],
+        };
+      });
     } catch (error) {
       alert(`上传失败: ${error.message}`);
     } finally {

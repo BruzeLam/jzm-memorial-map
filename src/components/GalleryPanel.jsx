@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { compressImage } from '../utils/imageCompression';
+import { filterGalleryByTitle } from '../utils/galleryUtils';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
 import ImageUploadInput from './ImageUploadInput';
@@ -19,13 +20,14 @@ export default function GalleryPanel({
   const [newImageToEdit, setNewImageToEdit] = useState(null);
   const [showUploadArea, setShowUploadArea] = useState(false);
 
-  // 搜索过滤：仅按标题搜索
-  const filteredGallery = searchQuery.trim()
-    ? gallery.filter((img) => {
-        const q = searchQuery.toLowerCase();
-        return img.title?.toLowerCase().includes(q);
-      })
-    : gallery;
+  const filteredGallery = useMemo(
+    () => filterGalleryByTitle(gallery, searchQuery),
+    [gallery, searchQuery]
+  );
+
+  useEffect(() => {
+    setViewingImageIndex(null);
+  }, [searchQuery]);
 
   const editingImage = editingImageId
     ? gallery.find(img => img.id === editingImageId)
@@ -117,7 +119,7 @@ export default function GalleryPanel({
           <div className="flex gap-2 items-center">
             <input
               type="text"
-              placeholder="搜索标题、地址、描述..."
+              placeholder="仅搜索图片标题…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
@@ -151,13 +153,11 @@ export default function GalleryPanel({
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {filteredGallery.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-2">
-                {searchQuery ? '没有找到匹配的图片' : '影像馆是空的'}
-              </div>
+            <div className="text-center py-12 text-gray-400 text-sm">
+              {searchQuery.trim() ? '没有找到匹配的图片' : '影像馆是空的'}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {filteredGallery.map((img, idx) => {
                 const relatedMarker = img.relatedMarker
                   ? markers.find(m => m.id === img.relatedMarker)
@@ -217,7 +217,12 @@ export default function GalleryPanel({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 flex justify-end flex-shrink-0">
+        <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
+          <span className="text-xs text-gray-400">
+            {searchQuery.trim()
+              ? `找到 ${filteredGallery.length} / 共 ${gallery.length} 张`
+              : `共 ${gallery.length} 张`}
+          </span>
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -228,10 +233,10 @@ export default function GalleryPanel({
       </div>
 
       {/* Image Viewer */}
-      {viewingImageIndex !== null && (
+      {viewingImageIndex !== null && filteredGallery.length > 0 && (
         <ImageViewer
           images={filteredGallery}
-          initialIndex={viewingImageIndex}
+          initialIndex={Math.min(viewingImageIndex, filteredGallery.length - 1)}
           onClose={() => setViewingImageIndex(null)}
         />
       )}
