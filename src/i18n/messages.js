@@ -42,6 +42,11 @@ const zh = {
       event: '历史事件',
       inscription: '题字',
     },
+    markerTypeHint: {
+      spot: '出生地、工作地、出访城市等日常地点',
+      event: '影响较大的历史节点，如「中共十四大」',
+      inscription: '书法题字所在地',
+    },
     gallery: {
       title: '影像馆',
       upload: '上传',
@@ -164,6 +169,11 @@ const en = {
       spot: 'Footprint',
       event: 'Historical event',
       inscription: 'Inscription',
+    },
+    markerTypeHint: {
+      spot: 'Birthplace, workplace, state visits, and similar places',
+      event: 'Major historical milestones, e.g. the 14th CPC National Congress',
+      inscription: 'Places with calligraphy inscriptions',
     },
     gallery: {
       title: 'Gallery',

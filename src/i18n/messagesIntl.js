@@ -37,6 +37,11 @@ const fr = {
     clearFilter: 'Effacer le filtre',
   },
   markerType: { spot: 'Trace', event: 'Événement', inscription: 'Inscription' },
+  markerTypeHint: {
+    spot: 'Lieux du quotidien : naissance, travail, visites…',
+    event: 'Jalons majeurs, ex. le XIVe congrès du PCC',
+    inscription: 'Lieux de calligraphie offerte',
+  },
   gallery: {
     title: 'Galerie',
     upload: 'Importer',
@@ -153,6 +158,11 @@ const ja = {
     clearFilter: 'フィルター解除',
   },
   markerType: { spot: '足跡', event: '歴史的事件', inscription: '題字' },
+  markerTypeHint: {
+    spot: '出生地・勤務地・訪問都市など日常的な地点',
+    event: '中共十四大など影響の大きい歴史的節点',
+    inscription: '書道の題字が残る場所',
+  },
   gallery: {
     title: 'ギャラリー',
     upload: 'アップロード',
@@ -269,6 +279,11 @@ const ru = {
     clearFilter: 'Сбросить фильтр',
   },
   markerType: { spot: 'След', event: 'Событие', inscription: 'Надпись' },
+  markerTypeHint: {
+    spot: 'Повседневные места: родина, работа, визиты…',
+    event: 'Крупные вехи, напр. XIV съезд КПК',
+    inscription: 'Места с каллиграфическими надписями',
+  },
   gallery: {
     title: 'Галерея',
     upload: 'Загрузить',
@@ -385,6 +400,11 @@ const de = {
     clearFilter: 'Filter löschen',
   },
   markerType: { spot: 'Spur', event: 'Ereignis', inscription: 'Inschrift' },
+  markerTypeHint: {
+    spot: 'Alltägliche Orte: Geburtsort, Arbeit, Staatsbesuche…',
+    event: 'Große historische Wendepunkte, z. B. XIV. Parteitag',
+    inscription: 'Orte mit Kalligraphie-Inschriften',
+  },
   gallery: {
     title: 'Galerie',
     upload: 'Hochladen',
@@ -501,6 +521,11 @@ const es = {
     clearFilter: 'Quitar filtro',
   },
   markerType: { spot: 'Huella', event: 'Evento', inscription: 'Inscripción' },
+  markerTypeHint: {
+    spot: 'Lugares cotidianos: nacimiento, trabajo, visitas…',
+    event: 'Hitos mayores, p. ej. el XIV Congreso del PCCh',
+    inscription: 'Lugares con inscripciones caligráficas',
+  },
   gallery: {
     title: 'Galería',
     upload: 'Subir',

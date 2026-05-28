@@ -6,6 +6,7 @@ export const MARKER_TYPES = {
     color: '#1E88E5',
     icon: '📍',
     description: '出生地、工作地、访问地点',
+    filterHint: '出生地、工作地、出访城市等日常地点',
   },
   event: {
     key: 'event',
@@ -14,6 +15,7 @@ export const MARKER_TYPES = {
     color: '#D32F2F',
     icon: '⭐',
     description: '重要历史时刻',
+    filterHint: '影响较大的历史节点，如「中共十四大」',
   },
   inscription: {
     key: 'inscription',
@@ -22,6 +24,7 @@ export const MARKER_TYPES = {
     color: '#F57F17',
     icon: '✒️',
     description: '书法题字地点',
+    filterHint: '书法题字所在地',
   },
 };
 
