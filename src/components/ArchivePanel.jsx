@@ -2,36 +2,71 @@ import React, { useState, useMemo } from 'react';
 import { ARCHIVES } from '../data/archives';
 import { compressImage } from '../utils/imageCompression';
 import { filterBySearch, getArchiveSearchFields } from '../utils/textSearch';
+import {
+  normalizeTagList,
+  collectAllTags,
+  registerTags,
+} from '../utils/archiveTags';
+import ArchiveTagInput from './ArchiveTagInput';
 import { useI18n } from '../i18n/LanguageContext';
 
 const STORAGE_KEY = 'jzm_all_archives';
 const MIGRATED_KEY = 'jzm_archives_migrated_v1';
+const TAGS_SEED_KEY = 'jzm_archives_tags_seeded_v2';
 
 function normalizeArchive(item, index) {
+  let tags = normalizeTagList(item.tags);
+  if (!tags.length && item.context?.trim()) {
+    tags = normalizeTagList([item.context]);
+  }
   return {
     id: item.id || `archive_${index}`,
     title: item.title || '',
     text: item.text || '',
     source: item.source || null,
-    context: item.context || null,
+    tags,
     links: Array.isArray(item.links) ? item.links : [],
     images: Array.isArray(item.images) ? item.images : [],
-    isUserAdded: true,
+    isUserAdded: item.isUserAdded !== false,
   };
+}
+
+function seedBuiltinTags(list) {
+  if (localStorage.getItem(TAGS_SEED_KEY)) return list;
+  const seedById = Object.fromEntries(
+    ARCHIVES.filter((a) => a.tags?.length).map((a) => [a.id, a.tags])
+  );
+  const updated = list.map((item) => {
+    const seedTags = seedById[item.id];
+    if (!seedTags?.length) return item;
+    const merged = normalizeTagList([...(item.tags || []), ...seedTags]);
+    return merged.length ? { ...item, tags: merged } : item;
+  });
+  localStorage.setItem(TAGS_SEED_KEY, 'true');
+  return updated;
 }
 
 function initializeArchives() {
   try {
     const migrated = localStorage.getItem(MIGRATED_KEY);
     if (!migrated) {
-      const all = ARCHIVES.map(normalizeArchive).filter((a) => a.text.trim());
+      let all = ARCHIVES.map(normalizeArchive).filter((a) => a.text.trim());
+      all = seedBuiltinTags(all);
+      registerTags(collectAllTags(all));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
       localStorage.setItem(MIGRATED_KEY, 'true');
       return all;
     }
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw).map((a, i) => normalizeArchive(a, i));
+    let list = JSON.parse(raw).map((a, i) => normalizeArchive(a, i));
+    const beforeSeed = JSON.stringify(list);
+    list = seedBuiltinTags(list);
+    if (JSON.stringify(list) !== beforeSeed) {
+      saveArchives(list);
+      registerTags(collectAllTags(list));
+    }
+    return list;
   } catch (e) {
     console.error('Failed to initialize archives:', e);
     return ARCHIVES.map(normalizeArchive);
@@ -72,11 +107,32 @@ function listPreview(archive) {
   return t.length > 72 ? `${t.slice(0, 72)}…` : t;
 }
 
-function ArchiveForm({ onSave, onCancel, initialData }) {
+function ArchiveTagPills({ tags, onTagClick, className = '' }) {
+  if (!tags?.length) return null;
+  return (
+    <div className={`flex flex-wrap gap-1.5 ${className}`}>
+      {tags.map((tag) => (
+        <button
+          key={tag}
+          type="button"
+          onClick={onTagClick ? () => onTagClick(tag) : undefined}
+          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-900 ${
+            onTagClick ? 'hover:bg-amber-200 cursor-pointer' : ''
+          }`}
+        >
+          #{tag}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
+  const { t } = useI18n();
   const [title, setTitle] = useState(initialData?.title || '');
   const [text, setText] = useState(initialData?.text || '');
   const [source, setSource] = useState(initialData?.source || '');
-  const [context, setContext] = useState(initialData?.context || '');
+  const [tags, setTags] = useState(() => normalizeTagList(initialData?.tags || []));
   const [links, setLinks] = useState(
     initialData?.links?.length ? initialData.links : [{ label: '', url: '' }]
   );
@@ -119,7 +175,7 @@ function ArchiveForm({ onSave, onCancel, initialData }) {
       title: title.trim(),
       text: text.trim(),
       source: source.trim() || null,
-      context: context.trim() || null,
+      tags: normalizeTagList(tags),
       links: cleanLinks,
       images,
       isUserAdded: true,
@@ -138,7 +194,7 @@ function ArchiveForm({ onSave, onCancel, initialData }) {
       >
         <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
           <h3 className="text-base font-bold text-gray-800">
-            {isEditing ? '编辑文献' : '添加文献'}
+            {isEditing ? t('archive.formEdit') : t('archive.formAdd')}
           </h3>
         </div>
 
@@ -184,13 +240,15 @@ function ArchiveForm({ onSave, onCancel, initialData }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">备注说明</label>
-            <input
-              type="text"
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-              placeholder="背景、相关事件等（可选）"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              {t('archive.tagsLabel')}
+            </label>
+            <ArchiveTagInput
+              tags={tags}
+              onChange={setTags}
+              allTags={allTags}
+              placeholder={t('archive.tagsPlaceholder')}
+              hint={t('archive.tagsHint')}
             />
           </div>
 
@@ -309,18 +367,22 @@ export default function ArchivePanel({ onClose }) {
   const [previewImage, setPreviewImage] = useState(null);
   const [archives, setArchives] = useState(initializeArchives);
 
+  const allTags = useMemo(() => collectAllTags(archives), [archives]);
+
   const filtered = useMemo(
     () => filterBySearch(archives, searchQuery, getArchiveSearchFields),
     [archives, searchQuery]
   );
 
   const handleSave = (item) => {
+    const normalized = { ...item, tags: normalizeTagList(item.tags) };
+    registerTags(normalized.tags);
     let updated;
     if (editingItem) {
-      updated = archives.map((a) => (a.id === item.id ? item : a));
+      updated = archives.map((a) => (a.id === normalized.id ? normalized : a));
       setEditingItem(null);
     } else {
-      updated = [...archives, item];
+      updated = [...archives, normalized];
     }
     setArchives(updated);
     saveArchives(updated);
@@ -419,6 +481,13 @@ export default function ArchivePanel({ onClose }) {
                         {item.source && !expanded && (
                           <p className="text-xs text-gray-500 truncate">—— {item.source}</p>
                         )}
+                        {!expanded && item.tags?.length > 0 && (
+                          <ArchiveTagPills
+                            tags={item.tags}
+                            onTagClick={(tag) => setSearchQuery(`#${tag}`)}
+                            className="mt-1.5"
+                          />
+                        )}
                       </div>
                       <span className="text-gray-400 text-xs flex-shrink-0 mt-1">
                         {expanded ? `${t('archive.collapse')} ▲` : `${t('archive.expand')} ▼`}
@@ -457,8 +526,12 @@ export default function ArchivePanel({ onClose }) {
                           </p>
                         )}
 
-                        {item.context && (
-                          <p className="text-xs text-gray-500 mb-2">{item.context}</p>
+                        {item.tags?.length > 0 && (
+                          <ArchiveTagPills
+                            tags={item.tags}
+                            onTagClick={(tag) => setSearchQuery(`#${tag}`)}
+                            className="mb-2"
+                          />
                         )}
 
                         {item.links?.length > 0 && (
@@ -524,6 +597,7 @@ export default function ArchivePanel({ onClose }) {
             setEditingItem(null);
           }}
           initialData={editingItem}
+          allTags={allTags}
         />
       )}
 

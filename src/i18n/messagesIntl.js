@@ -67,7 +67,7 @@ const fr = {
   archive: {
     title: 'Archives',
     addDoc: 'Ajouter',
-    searchPlaceholder: 'Titre, texte, source…',
+    searchPlaceholder: 'Titre, texte, source, tags (#…)…',
     noResults: 'Aucun document',
     total: '{count} documents',
     close: 'Fermer',
@@ -183,7 +183,7 @@ const ja = {
   archive: {
     title: '文庫',
     addDoc: '文献を追加',
-    searchPlaceholder: 'タイトル・本文・出典…',
+    searchPlaceholder: 'タイトル・本文・出典・タグ（#）…',
     noResults: '該当なし',
     total: '{count} 件',
     close: '閉じる',
@@ -299,7 +299,7 @@ const ru = {
   archive: {
     title: 'Архив',
     addDoc: 'Добавить',
-    searchPlaceholder: 'Заголовок, текст, источник…',
+    searchPlaceholder: 'Заголовок, текст, источник, теги (#)…',
     noResults: 'Нет документов',
     total: '{count} документов',
     close: 'Закрыть',
@@ -415,7 +415,7 @@ const de = {
   archive: {
     title: 'Archiv',
     addDoc: 'Hinzufügen',
-    searchPlaceholder: 'Titel, Text, Quelle…',
+    searchPlaceholder: 'Titel, Text, Quelle, Tags (#)…',
     noResults: 'Keine Dokumente',
     total: '{count} Dokumente',
     close: 'Schließen',
@@ -531,7 +531,7 @@ const es = {
   archive: {
     title: 'Archivo',
     addDoc: 'Añadir',
-    searchPlaceholder: 'Título, texto, fuente…',
+    searchPlaceholder: 'Título, texto, fuente, etiquetas (#)…',
     noResults: 'Sin documentos',
     total: '{count} documentos',
     close: 'Cerrar',

@@ -124,13 +124,14 @@ export function getQuoteSearchFields(quote) {
   return [quote.text, quote.source, quote.context];
 }
 
-/** 档案馆 */
+/** 档案馆（含标签，支持 #标签 检索） */
 export function getArchiveSearchFields(item) {
+  const tagFields = (item.tags || []).flatMap((t) => [t, `#${t}`]);
   return [
     item.title,
     item.text,
     item.source,
-    item.context,
+    ...tagFields,
     ...(item.links || []).map((l) => `${l.label} ${l.url}`),
   ];
 }
