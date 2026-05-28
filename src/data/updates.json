@@ -1,4 +1,32 @@
 {
+  "2025-6-5": [
+    {
+      "type": "story",
+      "emoji": "🗺️",
+      "title": "第一次粗糙的「纪念地图」",
+      "description": "尝试美团 NoCode 产品，搭了一个简陋版「江足迹与题字地图」。功能粗糙，但验证了「地图 + 时间轴」的方向。",
+      "image": "/changelog/2025-06-05-nocode-map.png",
+      "imageAlt": "NoCode 历史人物地图原型截图"
+    }
+  ],
+  "2023-1-9": [
+    {
+      "type": "story",
+      "emoji": "💡",
+      "title": "第一次产品灵感",
+      "description": "受苏东坡人生轨迹地图启发，在思维导图里写下「蛤迹」构想：足迹、题字、行程可视化……当时能力有限，没能做出来。",
+      "image": "/changelog/2023-01-09-inspiration.png",
+      "imageAlt": "蛤迹 XMind 思维导图"
+    }
+  ],
+  "2026-5-28": [
+    {
+      "type": "feature",
+      "emoji": "📋",
+      "title": "更新日志支持配图与产品历程",
+      "description": "日志条目可附带图片；新增「产品历程」类型，收录 2023 灵感与 2025 NoCode 原型等独立开发彩蛋"
+    }
+  ],
   "2026-5-27": [
     {
       "type": "fix",
