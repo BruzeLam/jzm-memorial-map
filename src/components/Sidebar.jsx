@@ -6,6 +6,7 @@ import AddMarkerForm from './AddMarkerForm';
 import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
+import { useI18n } from '../i18n/LanguageContext';
 
 export default function Sidebar({
   mapRef,
@@ -43,6 +44,7 @@ export default function Sidebar({
   onToggleRegion,
   onClearRegions,
 }) {
+  const { t, locale, setLocale, markerTypeLabel } = useI18n();
   const [showSettings, setShowSettings] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortOrder, setSortOrder] = useState('date-asc');
@@ -88,9 +90,9 @@ export default function Sidebar({
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
-        <span>共 <strong className="text-gray-700">{stats.total}</strong> 个标记</span>
+        <span>{t('sidebar.totalMarkers', { total: stats.total })}</span>
         {filteredMarkers.length !== stats.total && (
-          <span>当前显示 <strong className="text-gray-700">{filteredMarkers.length}</strong> 个</span>
+          <span>{t('sidebar.showingMarkers', { count: filteredMarkers.length })}</span>
         )}
       </div>
 
@@ -106,7 +108,7 @@ export default function Sidebar({
           onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
           className="flex-1 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1 border border-gray-200"
         >
-          📅 时间 {sortOrder === 'date-asc' ? '↑' : '↓'}
+          📅 {t('sidebar.sortTime')} {sortOrder === 'date-asc' ? '↑' : '↓'}
         </button>
       </div>
 
@@ -116,7 +118,7 @@ export default function Sidebar({
           <div className="p-4">
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">选择添加方式</span>
+                <span className="text-sm font-semibold text-gray-700">{t('sidebar.chooseAddMode')}</span>
                 <button
                   type="button"
                   onClick={onCancelAdd}
@@ -133,8 +135,8 @@ export default function Sidebar({
                 >
                   <span className="text-2xl">🗺️</span>
                   <div>
-                    <div className="text-sm font-semibold text-blue-700">地图标点</div>
-                    <div className="text-xs text-blue-500 mt-0.5">点击地图选择位置，快速填写信息</div>
+                    <div className="text-sm font-semibold text-blue-700">{t('sidebar.mapPick')}</div>
+                    <div className="text-xs text-blue-500 mt-0.5">{t('sidebar.mapPickHint')}</div>
                   </div>
                 </button>
                 <button
@@ -144,8 +146,8 @@ export default function Sidebar({
                 >
                   <span className="text-2xl">✏️</span>
                   <div>
-                    <div className="text-sm font-semibold text-gray-700">手动输入</div>
-                    <div className="text-xs text-gray-500 mt-0.5">搜索地址或手动填写经纬度</div>
+                    <div className="text-sm font-semibold text-gray-700">{t('sidebar.manualInput')}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{t('sidebar.manualInputHint')}</div>
                   </div>
                 </button>
               </div>
@@ -180,12 +182,12 @@ export default function Sidebar({
           <ul className="py-1">
             {sortedMarkers.length === 0 ? (
               <li className="px-4 py-6 text-center">
-                <div className="text-sm text-gray-400 mb-3">没有找到相关标记</div>
+                <div className="text-sm text-gray-400 mb-3">{t('sidebar.noMarkers')}</div>
                 <button
                   onClick={onStartAddMode}
                   className="text-sm text-blue-500 hover:text-blue-700 underline transition-colors"
                 >
-                  添加标记
+                  {t('sidebar.addMarker')}
                 </button>
               </li>
             ) : (
@@ -216,7 +218,7 @@ export default function Sidebar({
                             className="px-1.5 py-0.5 rounded-full text-white"
                             style={{ backgroundColor: typeInfo.color, fontSize: 10 }}
                           >
-                            {typeInfo.label}
+                            {markerTypeLabel(m.type)}
                           </span>
                           {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
                         </div>
@@ -242,7 +244,7 @@ export default function Sidebar({
               : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
-          {inActiveAddFlow ? '✕ 取消' : '➕ 添加新标记'}
+          {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
         </button>
 
         <div className="relative">
@@ -250,7 +252,7 @@ export default function Sidebar({
             onClick={() => setShowExportMenu(!showExportMenu)}
             className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
           >
-            ⬇️ 导出
+            ⬇️ {t('sidebar.export')}
           </button>
           {showExportMenu && (
             <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10">
@@ -275,23 +277,33 @@ export default function Sidebar({
             ⚙️
           </button>
           {showSettings && (
-            <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-40">
+            <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-44">
+              <button
+                type="button"
+                onClick={() => {
+                  setLocale(locale === 'zh' ? 'en' : 'zh');
+                  setShowSettings(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 border-b border-gray-100"
+              >
+                🌐 {t('sidebar.language')}
+              </button>
               <button
                 onClick={() => { onResetToSample(); setShowSettings(false); }}
                 className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
               >
-                🔄 恢复示例数据
+                🔄 {t('sidebar.restoreSample')}
               </button>
               <button
                 onClick={() => {
-                  if (window.confirm('确定清空所有数据吗？')) {
+                  if (window.confirm(t('sidebar.confirmClearAll'))) {
                     onClearAll();
                     setShowSettings(false);
                   }
                 }}
                 className="block w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-red-50"
               >
-                🗑️ 清空所有数据
+                🗑️ {t('sidebar.clearAll')}
               </button>
             </div>
           )}

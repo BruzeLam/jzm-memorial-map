@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { QUOTES } from '../data/quotes';
 import { filterBySearch, getQuoteSearchFields } from '../utils/textSearch';
+import { useI18n } from '../i18n/LanguageContext';
 
 const STORAGE_KEY = 'jzm_all_quotes';
 const MIGRATED_KEY = 'jzm_quotes_migrated_v2';
@@ -151,6 +152,7 @@ function UploadForm({ onSave, onCancel, initialData }) {
 }
 
 export default function QuotesPanel({ onClose }) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [editingQuote, setEditingQuote] = useState(null);
@@ -204,7 +206,7 @@ export default function QuotesPanel({ onClose }) {
             <div className="flex items-center gap-2">
               <span className="text-xl">📚</span>
               <div>
-                <h2 className="text-base font-bold text-gray-800">长者语录</h2>
+                <h2 className="text-base font-bold text-gray-800">{t('quotes.title')}</h2>
                 <p className="text-xs text-gray-400">The Yangtze Quotes Library</p>
               </div>
             </div>
@@ -214,7 +216,7 @@ export default function QuotesPanel({ onClose }) {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
               >
                 <span>＋</span>
-                <span>上传语录</span>
+                <span>{t('quotes.upload')}</span>
               </button>
               <button
                 onClick={onClose}
@@ -233,7 +235,7 @@ export default function QuotesPanel({ onClose }) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索语录、出处、背景..."
+                placeholder={t('quotes.searchPlaceholder')}
                 className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 bg-gray-50"
               />
               {searchQuery && (
@@ -253,7 +255,7 @@ export default function QuotesPanel({ onClose }) {
             {filteredQuotes.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
                 <div className="text-3xl mb-2">🔍</div>
-                <p className="text-sm">未找到相关语录</p>
+                <p className="text-sm">{t('quotes.noResults')}</p>
               </div>
             ) : (
               filteredQuotes.map((quote) => (
@@ -298,13 +300,13 @@ export default function QuotesPanel({ onClose }) {
           {/* Footer */}
           <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
             <span className="text-xs text-gray-400">
-              共 {filteredQuotes.length} 条语录
+              {t('quotes.total', { count: filteredQuotes.length })}
             </span>
             <button
               onClick={onClose}
               className="px-4 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
             >
-              关闭
+              {t('quotes.close')}
             </button>
           </div>
         </div>

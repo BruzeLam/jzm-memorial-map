@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { matchesBoundedSearch, normalizeSearchQuery } from '../utils/textSearch';
+import { useI18n } from '../i18n/LanguageContext';
 
 function TreeCheckbox({ checked, indeterminate, onChange }) {
   return (
@@ -112,6 +113,7 @@ export default function RegionFilter({
   onToggleRegion,
   onClearRegions,
 }) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedKeys, setExpandedKeys] = useState(() => new Set(['c:中国']));
@@ -180,7 +182,7 @@ export default function RegionFilter({
         onClick={handleButtonClick}
         className={`w-full text-xs py-1.5 px-2 rounded border transition-colors font-medium flex items-center justify-center gap-1 ${activeClass}`}
       >
-        🌍 地区
+        🌍 {t('region.label')}
         {hasSelection && (
           <span className="text-blue-600 font-bold">({selectedRegionKeys.size})</span>
         )}
@@ -196,7 +198,7 @@ export default function RegionFilter({
             <div className="p-2 border-b border-gray-100">
               <input
                 type="text"
-                placeholder="搜索省、市…"
+                placeholder={t('region.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:border-blue-400"
@@ -230,7 +232,7 @@ export default function RegionFilter({
                 </>
               )}
               {filterTree.china.length === 0 && filterTree.overseas.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-4">无匹配地区</p>
+                <p className="text-xs text-gray-400 text-center py-4">{t('region.noMatch')}</p>
               )}
             </div>
 
@@ -244,7 +246,7 @@ export default function RegionFilter({
                   }}
                   className="w-full py-1.5 text-xs text-gray-600 hover:bg-gray-50 rounded transition-colors"
                 >
-                  清除地区筛选
+                  {t('region.clearFilter')}
                 </button>
               </div>
             )}

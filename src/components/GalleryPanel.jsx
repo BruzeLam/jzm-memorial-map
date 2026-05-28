@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { compressImage } from '../utils/imageCompression';
 import { filterGalleryBySearch } from '../utils/textSearch';
+import { useI18n } from '../i18n/LanguageContext';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
 import ImageUploadInput from './ImageUploadInput';
@@ -13,6 +14,7 @@ export default function GalleryPanel({
   onClose,
   markers,
 }) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [editingImageId, setEditingImageId] = useState(null);
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
@@ -105,7 +107,7 @@ export default function GalleryPanel({
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-800">🖼️ 影像馆</h2>
+          <h2 className="text-xl font-bold text-gray-800">🖼️ {t('gallery.title')}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl leading-none transition-colors"
@@ -119,7 +121,7 @@ export default function GalleryPanel({
           <div className="flex gap-2 items-center">
             <input
               type="text"
-              placeholder="搜索标题、关联地点、时间…"
+              placeholder={t('gallery.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
@@ -130,7 +132,7 @@ export default function GalleryPanel({
                 disabled={uploading}
                 className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
               >
-                📸 上传
+                📸 {t('gallery.upload')}
               </button>
             )}
           </div>
@@ -154,7 +156,7 @@ export default function GalleryPanel({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {filteredGallery.length === 0 ? (
             <div className="text-center py-12 text-gray-400 text-sm">
-              {searchQuery.trim() ? '没有找到匹配的图片' : '影像馆是空的'}
+              {searchQuery.trim() ? t('gallery.noResults') : t('gallery.empty')}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -181,14 +183,14 @@ export default function GalleryPanel({
                         onClick={() => setViewingImageIndex(idx)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white px-3 py-1.5 rounded text-sm font-medium text-gray-700"
                       >
-                        🔍 查看
+                        🔍 {t('gallery.view')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingImageId(img.id)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white px-3 py-1.5 rounded text-sm font-medium text-gray-700"
                       >
-                        ✏️ 编辑
+                        ✏️ {t('gallery.edit')}
                       </button>
                     </div>
 
@@ -220,14 +222,14 @@ export default function GalleryPanel({
         <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
           <span className="text-xs text-gray-400">
             {searchQuery.trim()
-              ? `找到 ${filteredGallery.length} / 共 ${gallery.length} 张`
-              : `共 ${gallery.length} 张`}
+              ? t('gallery.found', { found: filteredGallery.length, total: gallery.length })
+              : t('gallery.total', { total: gallery.length })}
           </span>
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
-            关闭
+            {t('gallery.close')}
           </button>
         </div>
       </div>

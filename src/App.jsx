@@ -13,6 +13,7 @@ import DetailPanel from './components/DetailPanel';
 import ImageViewer from './components/ImageViewer';
 import GalleryPanel from './components/GalleryPanel';
 import ChangeLog from './components/ChangeLog';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 export default function App() {
   const {
@@ -292,6 +293,7 @@ export default function App() {
 
 
   return (
+    <LanguageProvider>
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
@@ -392,5 +394,6 @@ export default function App() {
         </div>
       </div>
     </div>
+    </LanguageProvider>
   );
 }

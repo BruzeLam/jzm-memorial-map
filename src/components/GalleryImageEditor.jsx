@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { filterBySearch, getMarkerSearchFields } from '../utils/textSearch';
 import { formatRegionPath } from '../utils/regionFormat';
+import { useI18n } from '../i18n/LanguageContext';
 
 export default function GalleryImageEditor({
   image,
@@ -10,6 +11,7 @@ export default function GalleryImageEditor({
   onDelete,
   isNew = false,
 }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({
     title: image.title || '',
     description: image.description || '',
@@ -54,7 +56,7 @@ export default function GalleryImageEditor({
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
           <h2 className="text-xl font-bold text-gray-800">
-            {isNew ? '新图片信息' : '编辑图片信息'}
+            {isNew ? t('gallery.newImageInfo') : t('gallery.editImageInfo')}
           </h2>
           <button
             onClick={onCancel}

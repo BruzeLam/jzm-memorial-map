@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ARCHIVES } from '../data/archives';
 import { compressImage } from '../utils/imageCompression';
 import { filterBySearch, getArchiveSearchFields } from '../utils/textSearch';
+import { useI18n } from '../i18n/LanguageContext';
 
 const STORAGE_KEY = 'jzm_all_archives';
 const MIGRATED_KEY = 'jzm_archives_migrated_v1';
@@ -300,6 +301,7 @@ function ArchiveForm({ onSave, onCancel, initialData }) {
 }
 
 export default function ArchivePanel({ onClose }) {
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -349,7 +351,7 @@ export default function ArchivePanel({ onClose }) {
             <div className="flex items-center gap-2">
               <span className="text-xl">📁</span>
               <div>
-                <h2 className="text-base font-bold text-gray-800">档案馆</h2>
+                <h2 className="text-base font-bold text-gray-800">{t('archive.title')}</h2>
                 <p className="text-xs text-gray-400">Historical Archives</p>
               </div>
             </div>
@@ -359,7 +361,7 @@ export default function ArchivePanel({ onClose }) {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs font-medium rounded-lg"
               >
                 <span>＋</span>
-                <span>添加文献</span>
+                <span>{t('archive.addDoc')}</span>
               </button>
               <button
                 onClick={onClose}
@@ -377,7 +379,7 @@ export default function ArchivePanel({ onClose }) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索标题、正文、出处、链接…"
+                placeholder={t('archive.searchPlaceholder')}
                 className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-gray-50"
               />
               {searchQuery && (
@@ -395,7 +397,7 @@ export default function ArchivePanel({ onClose }) {
             {filtered.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
                 <div className="text-3xl mb-2">🔍</div>
-                <p className="text-sm">未找到相关文献</p>
+                <p className="text-sm">{t('archive.noResults')}</p>
               </div>
             ) : (
               filtered.map((item) => {
@@ -419,7 +421,7 @@ export default function ArchivePanel({ onClose }) {
                         )}
                       </div>
                       <span className="text-gray-400 text-xs flex-shrink-0 mt-1">
-                        {expanded ? '收起 ▲' : '展开 ▼'}
+                        {expanded ? `${t('archive.collapse')} ▲` : `${t('archive.expand')} ▼`}
                       </span>
                     </button>
 
@@ -503,12 +505,12 @@ export default function ArchivePanel({ onClose }) {
           </div>
 
           <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
-            <span className="text-xs text-gray-400">共 {filtered.length} 条文献</span>
+            <span className="text-xs text-gray-400">{t('archive.total', { count: filtered.length })}</span>
             <button
               onClick={onClose}
               className="px-4 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg"
             >
-              关闭
+              {t('archive.close')}
             </button>
           </div>
         </div>

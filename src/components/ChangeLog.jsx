@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import updates from '../data/updates.json';
+import { useI18n } from '../i18n/LanguageContext';
 
-const typeConfig = {
-  feature: { label: '✨ 功能', color: 'bg-blue-50 border-blue-200' },
-  optimize: { label: '⚡ 优化', color: 'bg-amber-50 border-amber-200' },
-  refactor: { label: '🔧 重构', color: 'bg-purple-50 border-purple-200' },
-  fix: { label: '🐛 修复', color: 'bg-red-50 border-red-200' },
-  story: { label: '📜 产品历程', color: 'bg-emerald-50 border-emerald-200' },
+const typeStyle = {
+  feature: { emoji: '✨', color: 'bg-blue-50 border-blue-200' },
+  optimize: { emoji: '⚡', color: 'bg-amber-50 border-amber-200' },
+  refactor: { emoji: '🔧', color: 'bg-purple-50 border-purple-200' },
+  fix: { emoji: '🐛', color: 'bg-red-50 border-red-200' },
+  story: { emoji: '📜', color: 'bg-emerald-50 border-emerald-200' },
 };
 
-function formatDateLabel(dateKey, isToday) {
-  if (isToday) return '🔔 今日更新';
+function formatDateLabel(dateKey, isToday, t) {
+  if (isToday) return `🔔 ${t('changelog.today')}`;
   const parts = dateKey.split('-').map((n) => parseInt(n, 10));
   if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
     return `📅 ${parts[0]}年${parts[1]}月${parts[2]}日`;
@@ -26,8 +27,16 @@ function resolveImageSrc(path) {
 }
 
 export default function ChangeLog({ onClose }) {
+  const { t } = useI18n();
   const [expandedDates, setExpandedDates] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
+
+  const typeLabel = (type) => {
+    const key = `changelog.types.${type}`;
+    const label = t(key);
+    const style = typeStyle[type] || typeStyle.feature;
+    return `${style.emoji} ${label === key ? type : label}`;
+  };
 
   const getTodayKey = () => {
     const today = new Date();
@@ -76,7 +85,7 @@ export default function ChangeLog({ onClose }) {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-            <h2 className="text-xl font-bold text-gray-800">📋 更新日志</h2>
+            <h2 className="text-xl font-bold text-gray-800">📋 {t('changelog.title')}</h2>
             <button
               type="button"
               onClick={onClose}
@@ -106,7 +115,7 @@ export default function ChangeLog({ onClose }) {
                     }`}
                   >
                     <span className={`font-semibold text-sm ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
-                      {formatDateLabel(date, isToday)}
+                      {formatDateLabel(date, isToday, t)}
                     </span>
                     <span
                       className="text-gray-400 transition-transform"
@@ -120,19 +129,19 @@ export default function ChangeLog({ onClose }) {
                     <div className="px-4 py-4 space-y-4">
                       {Object.entries(groupedByType).map(([type, items]) => (
                         <div key={type}>
-                          <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
-                            {typeConfig[type]?.label || type}
-                          </div>
-                          <div className="space-y-3 pl-2 border-l-2 border-gray-200">
-                            {items.map((item, idx) => {
-                              const imageSrc = resolveImageSrc(item.image);
-                              return (
-                                <div
-                                  key={idx}
-                                  className={`rounded-lg border p-3 ${
-                                    typeConfig[type]?.color || 'bg-gray-50 border-gray-200'
-                                  }`}
-                                >
+                        <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+                          {typeLabel(type)}
+                        </div>
+                        <div className="space-y-3 pl-2 border-l-2 border-gray-200">
+                          {items.map((item, idx) => {
+                            const imageSrc = resolveImageSrc(item.image);
+                            return (
+                              <div
+                                key={idx}
+                                className={`rounded-lg border p-3 ${
+                                  typeStyle[type]?.color || 'bg-gray-50 border-gray-200'
+                                }`}
+                              >
                                   <div className="flex items-start gap-2">
                                     <span className="text-lg mt-0.5 flex-shrink-0">{item.emoji}</span>
                                     <div className="flex-1 min-w-0">

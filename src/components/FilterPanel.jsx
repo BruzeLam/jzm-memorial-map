@@ -1,7 +1,9 @@
 import React from 'react';
 import { MARKER_TYPES } from '../utils/constants';
+import { useI18n } from '../i18n/LanguageContext';
 
 export default function FilterPanel({ activeFilters, toggleFilter, stats }) {
+  const { markerTypeLabel } = useI18n();
   return (
     <div className="flex flex-col gap-1">
       {Object.entries(MARKER_TYPES).map(([key, typeInfo]) => {
@@ -24,7 +26,7 @@ export default function FilterPanel({ activeFilters, toggleFilter, stats }) {
             >
               {typeInfo.icon}
             </span>
-            <span className="text-sm text-gray-700 flex-1">{typeInfo.label}</span>
+            <span className="text-sm text-gray-700 flex-1">{markerTypeLabel(key)}</span>
             <span
               className="text-xs px-1.5 py-0.5 rounded-full text-white font-medium"
               style={{ backgroundColor: typeInfo.color }}

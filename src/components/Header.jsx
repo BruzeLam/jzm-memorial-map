@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RandomQuoteDisplay from './RandomQuoteDisplay';
+import { useI18n } from '../i18n/LanguageContext';
 
 const CENTENARY = new Date('2026-08-17T00:00:00');
 
@@ -48,6 +49,7 @@ function Glasses({ size = 32 }) {
 }
 
 export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onOpenChangeLog }) {
+  const { t } = useI18n();
   const seconds = useCountdown();
   const showCountdown = Date.now() < CENTENARY;
   const [hovered, setHovered] = useState(false);
@@ -81,7 +83,7 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
             className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-lg transition-colors"
           >
             <span>🖼️</span>
-            <span>影像馆</span>
+            <span>{t('nav.gallery')}</span>
           </button>
 
           <button
@@ -89,7 +91,7 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
             className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
           >
             <span>📚</span>
-            <span>长者语录</span>
+            <span>{t('nav.quotes')}</span>
           </button>
 
           <button
@@ -97,7 +99,7 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
             className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs font-medium rounded-lg transition-colors"
           >
             <span>📁</span>
-            <span>档案馆</span>
+            <span>{t('nav.archive')}</span>
           </button>
 
           <button
@@ -105,7 +107,7 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium rounded-lg transition-colors"
           >
             <span>📋</span>
-            <span>更新日志</span>
+            <span>{t('nav.changelog')}</span>
           </button>
 
           {showCountdown && (
@@ -115,12 +117,12 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
               onMouseLeave={() => setHovered(false)}
             >
               <span className="text-xs text-red-600 font-medium whitespace-nowrap">
-                距百岁诞辰
+                {t('nav.countdown')}
               </span>
               <span className="font-mono font-bold text-red-700 text-sm tabular-nums bg-red-100 px-1.5 py-0.5 rounded">
                 {seconds.toLocaleString()}
               </span>
-              <span className="text-xs text-red-600 font-medium">秒</span>
+              <span className="text-xs text-red-600 font-medium">{t('nav.seconds')}</span>
 
               {hovered && (
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg shadow-2xl whitespace-nowrap flex items-center gap-2 text-sm font-medium border border-gray-100" style={{ zIndex: 99999 }}>
