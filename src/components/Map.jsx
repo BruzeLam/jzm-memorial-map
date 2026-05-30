@@ -121,10 +121,10 @@ function MapRefSetter({ mapRef }) {
   return null;
 }
 
-function MapClickHandler({ isAddingMode, onMapClick }) {
+function MapClickHandler({ isMapInteractive, onMapClick }) {
   useMapEvents({
     click(e) {
-      if (isAddingMode) {
+      if (isMapInteractive) {
         onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
       }
     },
@@ -237,7 +237,7 @@ export default function MapView({
   selectedMarkerId,
   onMarkerSelect,
   onMapClick,
-  isAddingMode,
+  isMapInteractive,
 }) {
   // 限制地图拖动范围在全球范围内
   const globalBounds = [[-85, -180], [85, 180]];
@@ -250,7 +250,7 @@ export default function MapView({
       maxBounds={globalBounds}
       maxBoundsViscosity={1.0}
       style={{ width: '100%', height: '100%' }}
-      className={isAddingMode ? 'cursor-crosshair' : ''}
+      className={isMapInteractive ? 'cursor-crosshair' : ''}
       zoomControl={false}
     >
       <TileLayer
@@ -258,7 +258,7 @@ export default function MapView({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapRefSetter mapRef={mapRef} />
-      <MapClickHandler isAddingMode={isAddingMode} onMapClick={onMapClick} />
+      <MapClickHandler isMapInteractive={isMapInteractive} onMapClick={onMapClick} />
       <MarkersLayer
         markers={markers}
         allMarkers={allMarkers}

@@ -37,6 +37,10 @@ export default function Sidebar({
   onCancelAdd,
   onPickMapMode,
   onPickManualMode,
+  mapPickForForm,
+  onToggleMapPickForForm,
+  mapPickCoords,
+  onMapPickConsumed,
   onResetToSample,
   onClearAll,
   onOpenDetail,
@@ -169,6 +173,10 @@ export default function Sidebar({
               prefillData={formPrefill}
               allMarkerTags={allMarkerTags}
               markers={markers}
+              mapPickForForm={mapPickForForm}
+              onToggleMapPickForForm={onToggleMapPickForForm}
+              mapPickCoords={mapPickCoords}
+              onMapPickConsumed={onMapPickConsumed}
             />
           </div>
         ) : selectedMarker ? (

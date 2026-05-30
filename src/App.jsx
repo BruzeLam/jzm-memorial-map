@@ -66,6 +66,9 @@ export default function App() {
 
   // Floating card state: { coords: {lat,lng}, pixelPos: {x,y} }
   const [mapFloatingCard, setMapFloatingCard] = useState(null);
+  /** 侧边栏表单开启时，点击地图更新经纬度（添加/编辑均可） */
+  const [mapPickForForm, setMapPickForForm] = useState(false);
+  const [mapPickCoords, setMapPickCoords] = useState(null);
 
   const [showQuotes, setShowQuotes] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -152,6 +155,12 @@ export default function App() {
   };
 
   const handleMapClick = (latlng) => {
+    if (mapPickForForm) {
+      setMapPickCoords({ lat: latlng.lat, lng: latlng.lng });
+      setMapPickForForm(false);
+      return;
+    }
+
     if (!isAddingMode) return;
 
     if (addInputMode === 'map') {
@@ -256,6 +265,18 @@ export default function App() {
     setAddInputMode(null);
     setShowModePicker(false);
     setMapFloatingCard(null);
+    setMapPickForForm(false);
+    setMapPickCoords(null);
+  };
+
+  const handleToggleMapPickForForm = () => {
+    setMapPickForForm((prev) => !prev);
+    setMapFloatingCard(null);
+    setIsAddingMode(false);
+  };
+
+  const handleMapPickConsumed = () => {
+    setMapPickCoords(null);
   };
 
   // Floating card: quick save
@@ -362,6 +383,10 @@ export default function App() {
             onCancelAdd={handleCancelAdd}
             onPickMapMode={handlePickMapMode}
             onPickManualMode={handlePickManualMode}
+            mapPickForForm={mapPickForForm}
+            onToggleMapPickForForm={handleToggleMapPickForForm}
+            mapPickCoords={mapPickCoords}
+            onMapPickConsumed={handleMapPickConsumed}
             onResetToSample={resetToSample}
             onClearAll={clearAll}
             onOpenDetail={() => setShowDetailPanel(true)}
@@ -374,9 +399,13 @@ export default function App() {
         </div>
 
         <div className="flex-1 map-panel relative">
-          {isAddingMode && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none">
-              点击地图选择位置
+          {(isAddingMode || mapPickForForm) && (
+            <div
+              className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none ${
+                mapPickForForm ? 'bg-orange-600' : 'bg-blue-600'
+              }`}
+            >
+              {mapPickForForm ? '点击地图更新标点位置' : '点击地图选择位置'}
             </div>
           )}
           <MapView
@@ -387,7 +416,7 @@ export default function App() {
             selectedMarkerId={selectedMarkerId}
             onMarkerSelect={handleMarkerSelect}
             onMapClick={handleMapClick}
-            isAddingMode={isAddingMode}
+            isMapInteractive={isAddingMode || mapPickForForm}
           />
           {mapFloatingCard && (
             <MapFloatingCard

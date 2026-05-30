@@ -38,6 +38,10 @@ export default function AddMarkerForm({
   prefillData,
   allMarkerTags = [],
   markers = [],
+  mapPickForForm = false,
+  onToggleMapPickForForm,
+  mapPickCoords,
+  onMapPickConsumed,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [tagAutofillHint, setTagAutofillHint] = useState('');
@@ -92,6 +96,22 @@ export default function AddMarkerForm({
       }));
     }
   }, [editingMarker, initialCoords, prefillData]);
+
+  useEffect(() => {
+    if (!mapPickCoords) return;
+    const { lat, lng } = mapPickCoords;
+    setForm((prev) => ({
+      ...prev,
+      latitude: lat.toFixed(6),
+      longitude: lng.toFixed(6),
+    }));
+    if (mapRef?.current) {
+      const map = mapRef.current;
+      const zoom = Math.max(map.getZoom(), 10);
+      map.flyTo([lat, lng], Math.min(zoom, 14), { duration: 0.6 });
+    }
+    onMapPickConsumed?.();
+  }, [mapPickCoords, mapRef, onMapPickConsumed]);
 
   useEffect(() => {
     if (address && form.latitude && form.longitude) {
@@ -358,31 +378,63 @@ export default function AddMarkerForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className={labelClass}>纬度 *</label>
-            <input
-              required
-              type="number"
-              step="any"
-              className={inputClass}
-              value={form.latitude}
-              onChange={(e) => set('latitude', e.target.value)}
-              placeholder="39.9042"
-            />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className={labelClass + ' mb-0'}>坐标 *</label>
+            {onToggleMapPickForForm && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (!mapPickForForm && form.latitude && form.longitude && mapRef?.current) {
+                    const lat = parseFloat(form.latitude);
+                    const lng = parseFloat(form.longitude);
+                    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+                      mapRef.current.flyTo([lat, lng], Math.max(mapRef.current.getZoom(), 10), {
+                        duration: 0.6,
+                      });
+                    }
+                  }
+                  onToggleMapPickForForm();
+                }}
+                className={`text-xs px-2 py-1 rounded-md font-medium transition-colors ${
+                  mapPickForForm
+                    ? 'bg-orange-100 text-orange-700 ring-1 ring-orange-300'
+                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                }`}
+              >
+                {mapPickForForm ? '取消地图选点' : '📍 在地图上选点'}
+              </button>
+            )}
           </div>
-          <div>
-            <label className={labelClass}>经度 *</label>
-            <input
-              required
-              type="number"
-              step="any"
-              className={inputClass}
-              value={form.longitude}
-              onChange={(e) => set('longitude', e.target.value)}
-              placeholder="116.4074"
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] text-gray-400 mb-0.5 block">纬度</label>
+              <input
+                required
+                type="number"
+                step="any"
+                className={inputClass}
+                value={form.latitude}
+                onChange={(e) => set('latitude', e.target.value)}
+                placeholder="39.9042"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] text-gray-400 mb-0.5 block">经度</label>
+              <input
+                required
+                type="number"
+                step="any"
+                className={inputClass}
+                value={form.longitude}
+                onChange={(e) => set('longitude', e.target.value)}
+                placeholder="116.4074"
+              />
+            </div>
           </div>
+          {mapPickForForm && (
+            <p className="text-xs text-orange-600 mt-1">请在右侧地图上点击新位置</p>
+          )}
         </div>
 
         <div>
