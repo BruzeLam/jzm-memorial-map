@@ -5,10 +5,12 @@ import {
   markerMatchesRegionFilter,
 } from '../utils/regionFormat';
 import { filterBySearch, getMarkerSearchFields } from '../utils/textSearch';
+import { markerMatchesOnThisDay } from '../utils/onThisDay';
 
 export function useSearch(markers) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegionKeys, setSelectedRegionKeys] = useState(() => new Set());
+  const [onThisDayActive, setOnThisDayActive] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
     spot: true,
     event: true,
@@ -30,6 +32,10 @@ export function useSearch(markers) {
     setSelectedRegionKeys(new Set());
   }, []);
 
+  const toggleOnThisDay = useCallback(() => {
+    setOnThisDayActive((prev) => !prev);
+  }, []);
+
   const toggleFilter = useCallback((type) => {
     setActiveFilters((prev) => ({
       ...prev,
@@ -45,12 +51,13 @@ export function useSearch(markers) {
     const byTypeAndRegion = markers.filter((marker) => {
       if (!activeFilters[marker.type]) return false;
       if (!markerMatchesRegionFilter(marker, selectedRegionKeys)) return false;
+      if (onThisDayActive && !markerMatchesOnThisDay(marker)) return false;
       return true;
     });
     return filterBySearch(byTypeAndRegion, searchQuery, (marker) =>
       getMarkerSearchFields(marker, formatRegionPath(marker))
     );
-  }, [markers, searchQuery, activeFilters, selectedRegionKeys]);
+  }, [markers, searchQuery, activeFilters, selectedRegionKeys, onThisDayActive]);
 
   return {
     searchQuery,
@@ -63,5 +70,7 @@ export function useSearch(markers) {
     selectedRegionKeys,
     toggleRegionKey,
     clearRegionFilter,
+    onThisDayActive,
+    toggleOnThisDay,
   };
 }

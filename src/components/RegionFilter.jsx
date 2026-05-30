@@ -175,7 +175,7 @@ export default function RegionFilter({
     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600';
 
   return (
-    <div className="flex-1 min-w-0">
+    <div className="min-w-0">
       <button
         ref={buttonRef}
         type="button"

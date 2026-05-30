@@ -41,6 +41,8 @@ export default function App() {
     selectedRegionKeys,
     toggleRegionKey,
     clearRegionFilter,
+    onThisDayActive,
+    toggleOnThisDay,
   } = useSearch(markers);
 
   const {
@@ -395,6 +397,8 @@ export default function App() {
             selectedRegionKeys={selectedRegionKeys}
             onToggleRegion={toggleRegionKey}
             onClearRegions={clearRegionFilter}
+            onThisDayActive={onThisDayActive}
+            onToggleOnThisDay={toggleOnThisDay}
           />
         </div>
 

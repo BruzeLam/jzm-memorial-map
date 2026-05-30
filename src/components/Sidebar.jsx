@@ -9,6 +9,7 @@ import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
+import { formatOnThisDayLabel } from '../utils/onThisDay';
 
 export default function Sidebar({
   mapRef,
@@ -49,8 +50,11 @@ export default function Sidebar({
   selectedRegionKeys,
   onToggleRegion,
   onClearRegions,
+  onThisDayActive,
+  onToggleOnThisDay,
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
+  const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
   const allMarkerTags = useMemo(() => collectAllMarkerTags(markers), [markers]);
   const [showSettings, setShowSettings] = useState(false);
   const [showLanguageDrawer, setShowLanguageDrawer] = useState(false);
@@ -104,7 +108,7 @@ export default function Sidebar({
         )}
       </div>
 
-      <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-2">
+      <div className="px-3 py-2 border-b border-gray-100 grid grid-cols-3 gap-2">
         <RegionFilter
           selectedRegionKeys={selectedRegionKeys}
           regionTree={regionTree}
@@ -113,8 +117,21 @@ export default function Sidebar({
         />
         <button
           type="button"
+          onClick={onToggleOnThisDay}
+          title={t('sidebar.onThisDay', { date: onThisDayLabel })}
+          className={`min-w-0 text-xs py-1.5 px-1.5 rounded border transition-colors font-medium flex items-center justify-center gap-0.5 ${
+            onThisDayActive
+              ? 'bg-amber-50 border-amber-400 text-amber-900'
+              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-amber-50 hover:text-amber-800'
+          }`}
+        >
+          <span className="flex-shrink-0">📜</span>
+          <span className="truncate">{t('sidebar.onThisDay', { date: onThisDayLabel })}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-          className="flex-1 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1 border border-gray-200"
+          className="min-w-0 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1 border border-gray-200"
         >
           📅 {t('sidebar.sortTime')} {sortOrder === 'date-asc' ? '↑' : '↓'}
         </button>
@@ -199,12 +216,18 @@ export default function Sidebar({
           <ul className="py-1">
             {sortedMarkers.length === 0 ? (
               <li className="px-4 py-6 text-center">
-                <div className="text-sm text-gray-400 mb-3">{t('sidebar.noMarkers')}</div>
+                <div className="text-sm text-gray-400 mb-3">
+                  {onThisDayActive
+                    ? t('sidebar.noMarkersOnThisDay', { date: onThisDayLabel })
+                    : t('sidebar.noMarkers')}
+                </div>
                 <button
                   onClick={onStartAddMode}
                   className="text-sm text-blue-500 hover:text-blue-700 underline transition-colors"
                 >
-                  {t('sidebar.addMarker')}
+                  {onThisDayActive
+                    ? t('sidebar.addMarkerOnThisDay')
+                    : t('sidebar.addMarker')}
                 </button>
               </li>
             ) : (
