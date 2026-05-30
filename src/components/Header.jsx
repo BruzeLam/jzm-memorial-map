@@ -59,9 +59,9 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
       <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
-            src={`${process.env.PUBLIC_URL}/logo.png`}
+            src={`${process.env.PUBLIC_URL}/logo.png?v=3`}
             alt=""
-            className="w-9 h-9 rounded object-cover ring-1 ring-gray-300 shadow-sm"
+            className="w-10 h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
           />
           <h1 className="text-lg font-serif font-bold leading-tight">
             <a
