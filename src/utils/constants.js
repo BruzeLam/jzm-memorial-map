@@ -1061,10 +1061,95 @@ export const SAMPLE_MARKERS = [
     ],
     sources: [{ title: '公开报道', note: '2002年5月21日晚' }],
   },
+  {
+    id: 'spot_1986_children_day_sh',
+    type: 'spot',
+    name: '中国福利会少年宫',
+    latitude: 31.2203,
+    longitude: 121.4368,
+    country: '中国',
+    province: '上海市',
+    city: '',
+    date: '1986-06-01',
+    title: '六一儿童节活动',
+    description:
+      '江市长来到上海中国福利会少年宫参加六一儿童节活动，少先队员为他系上红领巾。',
+    color: '#1E88E5',
+    icon: '📍',
+    images: [
+      {
+        name: '系红领巾',
+        title: '六一儿童节活动',
+        description: '少先队员为江市长系上红领巾。',
+        data: '/markers/1986-children-day-shanghai-scarf.png',
+      },
+    ],
+    sources: [{ title: '公开报道', note: '延安西路64号·少年宫' }],
+  },
+  {
+    id: 'spot_1987_children_day_sh',
+    type: 'spot',
+    name: '中国福利会少年宫',
+    latitude: 31.2203,
+    longitude: 121.4368,
+    country: '中国',
+    province: '上海市',
+    city: '',
+    date: '1987-06-01',
+    title: '六一儿童节活动',
+    description: '江市长来到上海中国福利会少年宫参加六一儿童节活动。',
+    color: '#1E88E5',
+    icon: '📍',
+    images: [
+      {
+        name: '与少年儿童在一起',
+        title: '六一儿童节活动',
+        description: '参加六一儿童节庆祝活动，与少年儿童亲切互动。',
+        data: '/markers/1987-children-day-shanghai.png',
+      },
+    ],
+    sources: [{ title: '公开报道', note: '延安西路64号·少年宫' }],
+  },
+  {
+    id: 'spot_1990_children_day_bj',
+    type: 'spot',
+    name: '北京',
+    latitude: 39.9042,
+    longitude: 116.4074,
+    country: '中国',
+    province: '北京市',
+    city: '',
+    date: '1990-06-01',
+    title: '庆祝六一儿童节',
+    description: '江同志在北京与少年儿童共同庆祝六一国际儿童节。',
+    color: '#1E88E5',
+    icon: '📍',
+    images: [
+      {
+        name: '庆祝活动',
+        title: '庆祝六一儿童节',
+        description: '佩戴红领巾，与少年儿童一起参加活动。',
+        data: '/markers/1990-children-day-beijing-1.png',
+      },
+      {
+        name: '与少年儿童在一起',
+        title: '庆祝六一儿童节',
+        description: '在庆祝活动中与少年儿童亲切互动。',
+        data: '/markers/1990-children-day-beijing-2.png',
+      },
+      {
+        name: '活动现场',
+        title: '庆祝六一儿童节',
+        description: '六一国际儿童节庆祝活动现场。',
+        data: '/markers/1990-children-day-beijing-3.png',
+      },
+    ],
+    sources: [{ title: '公开报道', note: '1990年6月1日·北京' }],
+  },
 ];
 
 /** 已从示例库撤下的标点 ID（版本迁移时从 localStorage 同步删除） */
 export const REMOVED_MARKER_IDS = ['spot_trip_001', 'event_trip_001'];
 
-// 数据版本：条数变更或结构迁移时递增（30 = 早年求学与基层履历历史事件）
-export const DATA_VERSION = 30;
+// 数据版本：条数变更或结构迁移时递增（31 = 1986/1987/1990 六一儿童节）
+export const DATA_VERSION = 31;
