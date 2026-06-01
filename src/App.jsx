@@ -1,5 +1,5 @@
 // Cache fix: 2026-05-25 - Force Vercel rebuild
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
 import { useGallery } from './hooks/useGallery';
@@ -13,6 +13,8 @@ import DetailPanel from './components/DetailPanel';
 import ImageViewer from './components/ImageViewer';
 import GalleryPanel from './components/GalleryPanel';
 import ChangeLog from './components/ChangeLog';
+import OnThisDayModal from './components/OnThisDayModal';
+import { getOnThisDayMarkers } from './utils/onThisDay';
 import { LanguageProvider } from './i18n/LanguageContext';
 
 export default function App() {
@@ -78,9 +80,18 @@ export default function App() {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [showChangeLog, setShowChangeLog] = useState(false);
+  const [showOnThisDayModal, setShowOnThisDayModal] = useState(false);
   const [mapContainerSize, setMapContainerSize] = useState({ width: 800, height: 600 });
 
+  const todayMarkers = useMemo(() => getOnThisDayMarkers(markers), [markers]);
+
   const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (todayMarkers.length > 0) {
+      setShowOnThisDayModal(true);
+    }
+  }, [todayMarkers.length]);
 
   // 更新地图容器大小
   useEffect(() => {
@@ -324,6 +335,16 @@ export default function App() {
         onOpenGallery={() => setShowGallery(true)}
         onOpenChangeLog={() => setShowChangeLog(true)}
       />
+      {showOnThisDayModal && todayMarkers.length > 0 && (
+        <OnThisDayModal
+          markers={todayMarkers}
+          onClose={() => setShowOnThisDayModal(false)}
+          onViewOnMap={() => {
+            if (!onThisDayActive) toggleOnThisDay();
+          }}
+          onSelectMarker={handleMarkerSelect}
+        />
+      )}
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
       {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
       {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}

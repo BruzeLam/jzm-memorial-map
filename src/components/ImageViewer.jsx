@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function ImageViewer({ images, initialIndex = 0, onClose }) {
+export default function ImageViewer({ images, initialIndex = 0, onClose, overlayZClass = 'z-[6000]' }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function ImageViewer({ images, initialIndex = 0, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[6000] bg-black/90 flex items-center justify-center"
+      className={`fixed inset-0 ${overlayZClass} bg-black/90 flex items-center justify-center`}
       onClick={onClose}
     >
       <div

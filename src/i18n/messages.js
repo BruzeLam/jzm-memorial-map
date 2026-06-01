@@ -34,6 +34,14 @@ const zh = {
       confirmClearAll: '确定清空所有数据吗？',
       languageLabel: '语言',
     },
+    onThisDayModal: {
+      eyebrow: '历史上的今天',
+      title: '历史上的今天',
+      subtitle: '{date} · 共 {count} 条',
+      viewOnMap: '在地图上查看',
+      close: '关闭',
+      viewDetail: '在地图上定位',
+    },
     region: {
       label: '地区',
       searchPlaceholder: '搜索省、市…',
@@ -164,6 +172,14 @@ const en = {
       clearAll: 'Clear all data',
       confirmClearAll: 'Clear all data? This cannot be undone.',
       languageLabel: 'Language',
+    },
+    onThisDayModal: {
+      eyebrow: 'On this day',
+      title: 'On this day in history',
+      subtitle: '{date} · {count} entries',
+      viewOnMap: 'View on map',
+      close: 'Close',
+      viewDetail: 'Locate on map',
     },
     region: {
       label: 'Region',

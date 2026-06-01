@@ -52,3 +52,18 @@ export function formatOnThisDayLabel(refDate = new Date(), locale = 'zh') {
   }
   return `${month}月${day}日`;
 }
+
+/** 筛选并排序「历史上的今天」标点（按 date 升序） */
+export function getOnThisDayMarkers(markers, refDate = new Date()) {
+  if (!Array.isArray(markers)) return [];
+  return markers
+    .filter((m) => markerMatchesOnThisDay(m, refDate))
+    .sort((a, b) => {
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      if (!dateA && !dateB) return 0;
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return dateA.localeCompare(dateB);
+    });
+}
