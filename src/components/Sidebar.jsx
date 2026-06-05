@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { collectAllMarkerTags } from '../utils/markerTags';
 import { MarkerTagPills } from './MarkerTagInput';
 import SearchBar from './SearchBar';
@@ -10,6 +10,44 @@ import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
+
+function MobileScrollList({ children, scrollHint, listKey }) {
+  const scrollRef = useRef(null);
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const updateHint = () => {
+      const canScroll = el.scrollHeight > el.clientHeight + 4;
+      const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 12;
+      setShowHint(canScroll && !nearBottom);
+    };
+
+    updateHint();
+    const ro = new ResizeObserver(updateHint);
+    ro.observe(el);
+    el.addEventListener('scroll', updateHint, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener('scroll', updateHint);
+    };
+  }, [children, listKey]);
+
+  return (
+    <div className="mobile-list-scroll-wrap">
+      <div ref={scrollRef} className="mobile-list-scroll sidebar-scrollable">
+        {children}
+      </div>
+      {showHint && (
+        <div className="mobile-scroll-hint" aria-hidden>
+          <span>{scrollHint}</span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Sidebar({
   mapRef,
@@ -188,43 +226,60 @@ export default function Sidebar({
             <li key={m.id}>
               <button
                 type="button"
-                className={`marker-list-item w-full text-left px-3 py-3 md:py-2.5 border-l-2 min-h-[48px] ${
-                  isActive ? 'active' : 'border-transparent'
-                }`}
+                className={`marker-list-item w-full text-left px-2.5 md:px-3 border-l-2 ${
+                  compactMobile ? 'py-2 min-h-[42px]' : 'py-3 md:py-2.5 min-h-[48px]'
+                } ${isActive ? 'active' : 'border-transparent'}`}
                 onClick={() => onMarkerSelect(m.id)}
               >
-                <div className="flex items-start gap-2">
-                  <span
-                    className="w-7 h-7 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5"
-                    style={{ backgroundColor: typeInfo.color }}
-                  >
-                    {typeInfo.icon}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-medium text-gray-800 truncate">{m.name}</span>
-                    </div>
-                    <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-2 flex-wrap">
-                      <span
-                        className="px-1.5 py-0.5 rounded-full text-white"
-                        style={{ backgroundColor: typeInfo.color, fontSize: 10 }}
-                      >
-                        {markerTypeLabel(m.type)}
+                {compactMobile ? (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                      style={{ backgroundColor: typeInfo.color }}
+                    >
+                      {typeInfo.icon}
+                    </span>
+                    <span className="flex-1 min-w-0 text-sm font-medium text-gray-800 truncate">{m.name}</span>
+                    {m.date && (
+                      <span className="text-[10px] text-gray-400 flex-shrink-0 tabular-nums">
+                        {m.date}
                       </span>
-                      {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
-                    </div>
-                    {m.title && (
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">{m.title}</p>
-                    )}
-                    {m.tags?.length > 0 && (
-                      <MarkerTagPills
-                        tags={m.tags}
-                        onTagClick={(tag) => setSearchQuery(`#${tag}`)}
-                        className="mt-1"
-                      />
                     )}
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <span
+                      className="w-7 h-7 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5"
+                      style={{ backgroundColor: typeInfo.color }}
+                    >
+                      {typeInfo.icon}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-medium text-gray-800 truncate">{m.name}</span>
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-2 flex-wrap">
+                        <span
+                          className="px-1.5 py-0.5 rounded-full text-white"
+                          style={{ backgroundColor: typeInfo.color, fontSize: 10 }}
+                        >
+                          {markerTypeLabel(m.type)}
+                        </span>
+                        {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
+                      </div>
+                      {m.title && (
+                        <p className="text-xs text-gray-500 mt-0.5 truncate">{m.title}</p>
+                      )}
+                      {m.tags?.length > 0 && (
+                        <MarkerTagPills
+                          tags={m.tags}
+                          onTagClick={(tag) => setSearchQuery(`#${tag}`)}
+                          className="mt-1"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
               </button>
             </li>
           );
@@ -313,15 +368,18 @@ export default function Sidebar({
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain sidebar-scrollable">
+        <MobileScrollList
+          scrollHint={t('sidebar.scrollHint')}
+          listKey={`${sortedMarkers.length}-${selectedMarkerId}-${searchQuery}`}
+        >
           {markerListContent}
-        </div>
+        </MobileScrollList>
 
-        <div className="px-2 py-1.5 border-t border-gray-100 flex gap-1.5 flex-shrink-0 bg-white">
+        <div className="px-2 py-1 border-t border-gray-100 flex gap-1.5 flex-shrink-0 bg-white">
           <button
             type="button"
             onClick={inActiveAddFlow ? onCancelAdd : onStartAddMode}
-            className={`flex-1 text-xs py-2.5 rounded-lg font-medium transition-colors min-h-[44px] ${
+            className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors min-h-[40px] ${
               inActiveAddFlow
                 ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -334,7 +392,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="min-h-[44px] min-w-[44px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
+              className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
               aria-label={t('sidebar.export')}
             >
               ⬇️
@@ -362,7 +420,7 @@ export default function Sidebar({
                 setShowSettings(!showSettings);
                 if (showSettings) setShowLanguageDrawer(false);
               }}
-              className="min-h-[44px] min-w-[44px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
+              className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
               aria-label={t('sidebar.languageLabel')}
             >
               ⚙️
