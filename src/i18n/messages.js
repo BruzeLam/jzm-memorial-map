@@ -33,6 +33,8 @@ const zh = {
       clearAll: '清空所有数据',
       confirmClearAll: '确定清空所有数据吗？',
       languageLabel: '语言',
+      collapseSidebar: '收起侧边栏',
+      expandSidebar: '展开侧边栏',
     },
     onThisDayModal: {
       eyebrow: '历史上的今天',
@@ -172,6 +174,8 @@ const en = {
       clearAll: 'Clear all data',
       confirmClearAll: 'Clear all data? This cannot be undone.',
       languageLabel: 'Language',
+      collapseSidebar: 'Collapse sidebar',
+      expandSidebar: 'Expand sidebar',
     },
     onThisDayModal: {
       eyebrow: 'On this day',

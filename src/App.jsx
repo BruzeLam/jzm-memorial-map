@@ -81,6 +81,12 @@ export default function App() {
   const [showGallery, setShowGallery] = useState(false);
   const [showChangeLog, setShowChangeLog] = useState(false);
   const [showOnThisDayModal, setShowOnThisDayModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+      return false;
+    }
+    return true;
+  });
   const [mapContainerSize, setMapContainerSize] = useState({ width: 800, height: 600 });
 
   const todayMarkers = useMemo(() => getOnThisDayMarkers(markers), [markers]);
@@ -377,8 +383,64 @@ export default function App() {
           onClose={() => setViewingImageIndex(null)}
         />
       )}
-      <div className="flex flex-1 overflow-hidden app-layout">
-        <div style={{ width: `${100 / 4}%`, flexShrink: 0 }}>
+      <div className="relative flex-1 overflow-hidden app-layout">
+        <div className="absolute inset-0 map-panel z-0">
+          {(isAddingMode || mapPickForForm) && (
+            <div
+              className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none ${
+                mapPickForForm ? 'bg-orange-600' : 'bg-blue-600'
+              }`}
+            >
+              {mapPickForForm ? '点击地图更新标点位置' : '点击地图选择位置'}
+            </div>
+          )}
+          <MapView
+            mapRef={mapRef}
+            markers={filteredMarkers}
+            allMarkers={markers}
+            selectedMarker={selectedMarker}
+            selectedMarkerId={selectedMarkerId}
+            onMarkerSelect={handleMarkerSelect}
+            onMapClick={handleMapClick}
+            isMapInteractive={isAddingMode || mapPickForForm}
+          />
+          {mapFloatingCard && (
+            <MapFloatingCard
+              coords={mapFloatingCard.coords}
+              pixelPos={mapFloatingCard.pixelPos}
+              containerSize={mapContainerSize}
+              onQuickSave={handleFloatingQuickSave}
+              onMoreDetails={handleFloatingMoreDetails}
+              onCancel={handleCloseFloatingCard}
+            />
+          )}
+        </div>
+
+        {sidebarOpen && (
+          <button
+            type="button"
+            className="sidebar-backdrop md:hidden"
+            aria-hidden
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {!sidebarOpen && (
+          <button
+            type="button"
+            className="sidebar-expand-tab"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="展开侧边栏"
+            title="展开侧边栏"
+          >
+            <span aria-hidden>›</span>
+          </button>
+        )}
+
+        <aside
+          className={`sidebar-overlay ${sidebarOpen ? 'sidebar-overlay--open' : 'sidebar-overlay--closed'}`}
+          aria-hidden={!sidebarOpen}
+        >
           <Sidebar
             mapRef={mapRef}
             markers={markers}
@@ -421,39 +483,16 @@ export default function App() {
             onThisDayActive={onThisDayActive}
             onToggleOnThisDay={toggleOnThisDay}
           />
-        </div>
-
-        <div className="flex-1 map-panel relative">
-          {(isAddingMode || mapPickForForm) && (
-            <div
-              className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none ${
-                mapPickForForm ? 'bg-orange-600' : 'bg-blue-600'
-              }`}
-            >
-              {mapPickForForm ? '点击地图更新标点位置' : '点击地图选择位置'}
-            </div>
-          )}
-          <MapView
-            mapRef={mapRef}
-            markers={filteredMarkers}
-            allMarkers={markers}
-            selectedMarker={selectedMarker}
-            selectedMarkerId={selectedMarkerId}
-            onMarkerSelect={handleMarkerSelect}
-            onMapClick={handleMapClick}
-            isMapInteractive={isAddingMode || mapPickForForm}
-          />
-          {mapFloatingCard && (
-            <MapFloatingCard
-              coords={mapFloatingCard.coords}
-              pixelPos={mapFloatingCard.pixelPos}
-              containerSize={mapContainerSize}
-              onQuickSave={handleFloatingQuickSave}
-              onMoreDetails={handleFloatingMoreDetails}
-              onCancel={handleCloseFloatingCard}
-            />
-          )}
-        </div>
+          <button
+            type="button"
+            className="sidebar-collapse-btn"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="收起侧边栏"
+            title="收起侧边栏"
+          >
+            ‹
+          </button>
+        </aside>
       </div>
     </div>
     </LanguageProvider>
