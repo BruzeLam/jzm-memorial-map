@@ -483,15 +483,17 @@ export default function App() {
             onThisDayActive={onThisDayActive}
             onToggleOnThisDay={toggleOnThisDay}
           />
-          <button
-            type="button"
-            className="sidebar-collapse-btn"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="收起侧边栏"
-            title="收起侧边栏"
-          >
-            ‹
-          </button>
+          {sidebarOpen && (
+            <button
+              type="button"
+              className="sidebar-collapse-btn"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="收起侧边栏"
+              title="收起侧边栏"
+            >
+              ‹
+            </button>
+          )}
         </aside>
       </div>
     </div>

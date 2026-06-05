@@ -139,6 +139,11 @@ body {
 
 .sidebar-overlay--closed {
   transform: translateX(-100%);
+  visibility: hidden;
+}
+
+.sidebar-overlay--closed .sidebar-collapse-btn {
+  display: none;
 }
 
 .sidebar-overlay .sidebar-panel {
