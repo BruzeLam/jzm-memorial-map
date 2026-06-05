@@ -267,8 +267,8 @@ body {
 /* 手机：标题下方固定侧栏条（约 1/4 屏高） */
 .mobile-sidebar-strip {
   flex: 0 0 25vh;
-  min-height: 168px;
-  max-height: 240px;
+  min-height: 152px;
+  max-height: 220px;
   border-bottom: 1px solid #e2e8f0;
   background: #fff;
   overflow: hidden;

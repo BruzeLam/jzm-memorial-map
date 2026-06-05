@@ -62,8 +62,8 @@ function CountdownBadge({ seconds, compact = false }) {
 
   return (
     <div
-      className={`relative flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-lg cursor-default select-none ${
-        compact ? 'px-2 py-1' : 'px-3 py-1.5 gap-2'
+      className={`relative flex items-center gap-1 bg-red-50 border border-red-200 rounded-lg cursor-default select-none ${
+        compact ? 'px-1.5 py-0.5' : 'px-3 py-1.5 gap-2'
       }`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -73,7 +73,7 @@ function CountdownBadge({ seconds, compact = false }) {
           {t('nav.countdown')}
         </span>
       )}
-      <span className={`font-mono font-bold text-red-700 tabular-nums bg-red-100 px-1.5 py-0.5 rounded ${compact ? 'text-[10px]' : 'text-sm'}`}>
+      <span className={`font-mono font-bold text-red-700 tabular-nums bg-red-100 px-1 py-0.5 rounded ${compact ? 'text-[9px] leading-tight' : 'text-sm'}`}>
         {seconds.toLocaleString()}
       </span>
       {!compact && (
@@ -128,52 +128,46 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
 
   return (
     <header className="bg-gray-200 border-b border-gray-300 shadow-sm flex-shrink-0 relative z-[500] pt-safe">
-      <div className="px-3 md:px-4 py-2 md:py-3 flex items-start md:items-center gap-2 md:gap-3">
+      <div className="px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3">
         <img
           src={`${process.env.PUBLIC_URL}/logo.png?v=3`}
           alt=""
-          className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm mt-0.5"
+          className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
         />
-        <div className="flex-1 min-w-0">
-          <h1 className="text-[13px] md:text-lg font-serif font-bold leading-snug">
-            <a
-              href="https://www.news.cn/politics/2022-12/02/c_1129179786.htm"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-800 hover:text-blue-600 transition-colors"
-            >
-              江泽民同志生平纪念地图
-            </a>
-          </h1>
-          {isMobile && (
-            <div className="mt-1.5">
-              <CountdownBadge seconds={seconds} compact />
-            </div>
-          )}
-        </div>
+        <h1 className="flex-1 min-w-0 text-[13px] md:text-lg font-serif font-bold leading-snug">
+          <a
+            href="https://www.news.cn/politics/2022-12/02/c_1129179786.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
+          >
+            江泽民同志生平纪念地图
+          </a>
+        </h1>
 
         {!isMobile && <RandomQuoteDisplay />}
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {!isMobile && (
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+          {isMobile ? (
+            <>
+              <CountdownBadge seconds={seconds} compact />
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm"
+                aria-label={t('nav.openMenu')}
+                aria-expanded={menuOpen}
+              >
+                {menuOpen ? '✕' : '☰'}
+              </button>
+            </>
+          ) : (
             <div className="flex items-center gap-2">
               {navItems.map((item) => (
                 <NavButton key={item.label} {...item} />
               ))}
               <CountdownBadge seconds={seconds} />
             </div>
-          )}
-
-          {isMobile && (
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="w-11 h-11 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm"
-              aria-label={t('nav.openMenu')}
-              aria-expanded={menuOpen}
-            >
-              {menuOpen ? '✕' : '☰'}
-            </button>
           )}
         </div>
       </div>

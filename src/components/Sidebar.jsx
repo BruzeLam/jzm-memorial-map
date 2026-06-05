@@ -245,34 +245,40 @@ export default function Sidebar({
           />
         </div>
 
-        <div className="px-2 py-1.5 border-b border-gray-100 flex-shrink-0 space-y-1.5">
-          <div className="flex gap-1.5 overflow-x-auto pb-0.5 -mx-0.5 px-0.5 mobile-toolbar-scroll">
-            {Object.entries(MARKER_TYPES).map(([key, typeInfo]) => {
-              const count = stats[key] || 0;
-              const active = activeFilters[key];
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => toggleFilter(key)}
-                  className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-2 rounded-full text-xs font-medium border transition-colors min-h-[36px] ${
-                    active
-                      ? 'text-white border-transparent'
-                      : 'bg-gray-50 border-gray-200 text-gray-600'
-                  }`}
-                  style={active ? { backgroundColor: typeInfo.color, borderColor: typeInfo.color } : {}}
-                >
-                  <span>{typeInfo.icon}</span>
-                  <span>{markerTypeLabel(key)}</span>
-                  <span className={`px-1 rounded-full text-[10px] ${active ? 'bg-white/25' : 'bg-gray-200 text-gray-600'}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="px-2 py-1 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center gap-1">
+            <div className="flex gap-1 flex-shrink-0">
+              {Object.entries(MARKER_TYPES).map(([key, typeInfo]) => {
+                const count = stats[key] || 0;
+                const active = activeFilters[key];
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => toggleFilter(key)}
+                    title={markerTypeLabel(key)}
+                    aria-label={`${markerTypeLabel(key)} ${count}`}
+                    aria-pressed={active}
+                    className={`relative flex items-center justify-center w-9 h-9 rounded-lg text-sm border transition-colors ${
+                      active
+                        ? 'text-white border-transparent'
+                        : 'bg-gray-50 border-gray-200 text-gray-700'
+                    }`}
+                    style={active ? { backgroundColor: typeInfo.color, borderColor: typeInfo.color } : {}}
+                  >
+                    <span>{typeInfo.icon}</span>
+                    <span
+                      className={`absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 rounded-full text-[9px] font-bold leading-[14px] text-center ${
+                        active ? 'bg-white text-gray-800' : 'bg-gray-600 text-white'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <div className="flex items-center gap-1.5">
             <div className="flex-1 min-w-0">
               <RegionFilter
                 selectedRegionKeys={selectedRegionKeys}
@@ -281,11 +287,13 @@ export default function Sidebar({
                 onClearRegions={onClearRegions}
               />
             </div>
+
             <button
               type="button"
               onClick={onToggleOnThisDay}
               title={t('sidebar.onThisDay', { date: onThisDayLabel })}
-              className={`flex-shrink-0 min-h-[36px] min-w-[36px] px-2 text-xs rounded-lg border transition-colors font-medium flex items-center justify-center ${
+              aria-label={t('sidebar.onThisDay', { date: onThisDayLabel })}
+              className={`flex-shrink-0 w-9 h-9 text-sm rounded-lg border transition-colors flex items-center justify-center ${
                 onThisDayActive
                   ? 'bg-amber-50 border-amber-400 text-amber-900'
                   : 'bg-gray-50 border-gray-200 text-gray-600'
@@ -296,8 +304,9 @@ export default function Sidebar({
             <button
               type="button"
               onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-              className="flex-shrink-0 min-h-[36px] min-w-[36px] px-2 text-xs rounded-lg bg-gray-50 text-gray-600 border border-gray-200 font-medium flex items-center justify-center"
+              className="flex-shrink-0 w-9 h-9 text-xs rounded-lg bg-gray-50 text-gray-600 border border-gray-200 font-medium flex items-center justify-center"
               title={t('sidebar.sortTime')}
+              aria-label={t('sidebar.sortTime')}
             >
               {sortOrder === 'date-asc' ? '↑' : '↓'}
             </button>
