@@ -223,7 +223,11 @@ body {
   }
 }
 
-/* 安全区（iPhone 底部横条） */
+/* 安全区 */
+.pt-safe {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+
 .pb-safe {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
@@ -256,14 +260,38 @@ body {
 }
 
 .map-zoom-control {
-  top: 1rem;
-  right: 1rem;
+  top: max(0.75rem, env(safe-area-inset-top, 0px));
+  right: max(0.75rem, env(safe-area-inset-right, 0px));
 }
 
-@media (max-width: 768px) {
-  .map-zoom-control {
-    top: auto;
-    right: max(0.75rem, env(safe-area-inset-right, 0px));
-    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+/* 手机：标题下方固定侧栏条（约 1/4 屏高） */
+.mobile-sidebar-strip {
+  flex: 0 0 25vh;
+  min-height: 168px;
+  max-height: 240px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.mobile-sidebar-strip--expanded {
+  flex: 0 0 45vh;
+  max-height: 420px;
+}
+
+.mobile-toolbar-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-toolbar-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-sidebar-strip,
+  .mobile-sidebar-strip--expanded {
+    display: none;
   }
 }

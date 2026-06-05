@@ -16,6 +16,7 @@ import ChangeLog from './components/ChangeLog';
 import OnThisDayModal from './components/OnThisDayModal';
 import { getOnThisDayMarkers } from './utils/onThisDay';
 import { LanguageProvider } from './i18n/LanguageContext';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 export default function App() {
   const {
@@ -81,12 +82,8 @@ export default function App() {
   const [showGallery, setShowGallery] = useState(false);
   const [showChangeLog, setShowChangeLog] = useState(false);
   const [showOnThisDayModal, setShowOnThisDayModal] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
-      return false;
-    }
-    return true;
-  });
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [mapContainerSize, setMapContainerSize] = useState({ width: 800, height: 600 });
 
   const todayMarkers = useMemo(() => getOnThisDayMarkers(markers), [markers]);
@@ -331,6 +328,50 @@ export default function App() {
     }
   };
 
+  const sidebarProps = {
+    mapRef,
+    markers,
+    filteredMarkers,
+    selectedMarkerId,
+    selectedMarker,
+    stats,
+    searchQuery,
+    setSearchQuery,
+    activeFilters,
+    toggleFilter,
+    clearSearch,
+    onMarkerSelect: handleMarkerSelect,
+    onEditMarker: handleEditMarker,
+    onDeleteMarker: handleDeleteMarker,
+    onStartAddMode: handleStartAddMode,
+    isAddingMode,
+    showAddForm,
+    showModePicker,
+    editingMarker,
+    pendingCoords,
+    formPrefill,
+    onAddMarker: handleAddMarker,
+    onUpdateMarker: handleUpdateMarker,
+    onCancelAdd: handleCancelAdd,
+    onPickMapMode: handlePickMapMode,
+    onPickManualMode: handlePickManualMode,
+    mapPickForForm,
+    onToggleMapPickForForm: handleToggleMapPickForForm,
+    mapPickCoords,
+    onMapPickConsumed: handleMapPickConsumed,
+    onResetToSample: resetToSample,
+    onClearAll: clearAll,
+    onOpenDetail: () => setShowDetailPanel(true),
+    onViewImage: (index) => setViewingImageIndex(index),
+    regionTree,
+    selectedRegionKeys,
+    onToggleRegion: toggleRegionKey,
+    onClearRegions: clearRegionFilter,
+    onThisDayActive,
+    onToggleOnThisDay: toggleOnThisDay,
+  };
+
+  const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);
 
   return (
     <LanguageProvider>
@@ -383,8 +424,16 @@ export default function App() {
           onClose={() => setViewingImageIndex(null)}
         />
       )}
-      <div className="relative flex-1 overflow-hidden app-layout">
-        <div className="absolute inset-0 map-panel z-0">
+      <div className={`flex-1 min-h-0 overflow-hidden ${isMobile ? 'flex flex-col' : 'relative app-layout'}`}>
+        {isMobile && (
+          <aside
+            className={`mobile-sidebar-strip ${mobileSidebarExpanded ? 'mobile-sidebar-strip--expanded' : ''}`}
+          >
+            <Sidebar {...sidebarProps} compactMobile />
+          </aside>
+        )}
+
+        <div className={`${isMobile ? 'flex-1 min-h-0 relative' : 'absolute inset-0'} map-panel z-0`}>
           {(isAddingMode || mapPickForForm) && (
             <div
               className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none ${
@@ -416,85 +465,48 @@ export default function App() {
           )}
         </div>
 
-        {sidebarOpen && (
-          <button
-            type="button"
-            className="sidebar-backdrop md:hidden"
-            aria-hidden
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
+        {!isMobile && (
+          <>
+            {sidebarOpen && (
+              <button
+                type="button"
+                className="sidebar-backdrop md:hidden"
+                aria-hidden
+                onClick={() => setSidebarOpen(false)}
+              />
+            )}
 
-        {!sidebarOpen && (
-          <button
-            type="button"
-            className="sidebar-expand-tab"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="展开侧边栏"
-            title="展开侧边栏"
-          >
-            <span aria-hidden>›</span>
-          </button>
-        )}
+            {!sidebarOpen && (
+              <button
+                type="button"
+                className="sidebar-expand-tab"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="展开侧边栏"
+                title="展开侧边栏"
+              >
+                <span aria-hidden>›</span>
+              </button>
+            )}
 
-        <aside
-          className={`sidebar-overlay ${sidebarOpen ? 'sidebar-overlay--open' : 'sidebar-overlay--closed'}`}
-          aria-hidden={!sidebarOpen}
-        >
-          <Sidebar
-            mapRef={mapRef}
-            markers={markers}
-            filteredMarkers={filteredMarkers}
-            selectedMarkerId={selectedMarkerId}
-            selectedMarker={selectedMarker}
-            stats={stats}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            activeFilters={activeFilters}
-            toggleFilter={toggleFilter}
-            clearSearch={clearSearch}
-            onMarkerSelect={handleMarkerSelect}
-            onEditMarker={handleEditMarker}
-            onDeleteMarker={handleDeleteMarker}
-            onStartAddMode={handleStartAddMode}
-            isAddingMode={isAddingMode}
-            showAddForm={showAddForm}
-            showModePicker={showModePicker}
-            editingMarker={editingMarker}
-            pendingCoords={pendingCoords}
-            formPrefill={formPrefill}
-            onAddMarker={handleAddMarker}
-            onUpdateMarker={handleUpdateMarker}
-            onCancelAdd={handleCancelAdd}
-            onPickMapMode={handlePickMapMode}
-            onPickManualMode={handlePickManualMode}
-            mapPickForForm={mapPickForForm}
-            onToggleMapPickForForm={handleToggleMapPickForForm}
-            mapPickCoords={mapPickCoords}
-            onMapPickConsumed={handleMapPickConsumed}
-            onResetToSample={resetToSample}
-            onClearAll={clearAll}
-            onOpenDetail={() => setShowDetailPanel(true)}
-            onViewImage={(index) => setViewingImageIndex(index)}
-            regionTree={regionTree}
-            selectedRegionKeys={selectedRegionKeys}
-            onToggleRegion={toggleRegionKey}
-            onClearRegions={clearRegionFilter}
-            onThisDayActive={onThisDayActive}
-            onToggleOnThisDay={toggleOnThisDay}
-          />
-          {sidebarOpen && (
-            <button
-              type="button"
-              className="sidebar-collapse-btn"
-              onClick={() => setSidebarOpen(false)}
-              aria-label="收起侧边栏"
-              title="收起侧边栏"
+            <aside
+              className={`sidebar-overlay ${sidebarOpen ? 'sidebar-overlay--open' : 'sidebar-overlay--closed'}`}
+              aria-hidden={!sidebarOpen}
             >
-              ‹
-            </button>
-          )}
-        </aside>
+              <Sidebar {...sidebarProps} />
+              {sidebarOpen && (
+                <button
+                  type="button"
+                  className="sidebar-collapse-btn"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label="收起侧边栏"
+                  title="收起侧边栏"
+                >
+                  ‹
+                </button>
+              )}
+            </aside>
+          </>
+        )}
       </div>
     </div>
     </LanguageProvider>

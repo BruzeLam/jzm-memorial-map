@@ -127,30 +127,34 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
   ];
 
   return (
-    <header className="bg-gray-200 border-b border-gray-300 shadow-sm flex-shrink-0 relative z-[500]">
-      <div className="px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 min-h-[52px]">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-shrink">
-          <img
-            src={`${process.env.PUBLIC_URL}/logo.png?v=3`}
-            alt=""
-            className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
-          />
-          <h1 className="text-sm md:text-lg font-serif font-bold leading-tight min-w-0">
+    <header className="bg-gray-200 border-b border-gray-300 shadow-sm flex-shrink-0 relative z-[500] pt-safe">
+      <div className="px-3 md:px-4 py-2 md:py-3 flex items-start md:items-center gap-2 md:gap-3">
+        <img
+          src={`${process.env.PUBLIC_URL}/logo.png?v=3`}
+          alt=""
+          className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm mt-0.5"
+        />
+        <div className="flex-1 min-w-0">
+          <h1 className="text-[13px] md:text-lg font-serif font-bold leading-snug">
             <a
               href="https://www.news.cn/politics/2022-12/02/c_1129179786.htm"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
+              className="text-gray-800 hover:text-blue-600 transition-colors"
             >
-              <span className="md:hidden">{t('nav.shortTitle')}</span>
-              <span className="hidden md:inline">江泽民同志生平纪念地图</span>
+              江泽民同志生平纪念地图
             </a>
           </h1>
+          {isMobile && (
+            <div className="mt-1.5">
+              <CountdownBadge seconds={seconds} compact />
+            </div>
+          )}
         </div>
 
         {!isMobile && <RandomQuoteDisplay />}
 
-        <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {!isMobile && (
             <div className="flex items-center gap-2">
               {navItems.map((item) => (
@@ -161,18 +165,15 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
           )}
 
           {isMobile && (
-            <>
-              <CountdownBadge seconds={seconds} compact />
-              <button
-                type="button"
-                onClick={() => setMenuOpen((v) => !v)}
-                className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm"
-                aria-label={t('nav.openMenu')}
-                aria-expanded={menuOpen}
-              >
-                {menuOpen ? '✕' : '☰'}
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="w-11 h-11 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm"
+              aria-label={t('nav.openMenu')}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? '✕' : '☰'}
+            </button>
           )}
         </div>
       </div>
