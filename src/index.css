@@ -222,3 +222,48 @@ body {
     width: min(100%, 400px);
   }
 }
+
+/* 安全区（iPhone 底部横条） */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-header-menu {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-detail-panel {
+  max-height: min(92dvh, 900px);
+}
+
+.mobile-bottom-sheet {
+  animation: slideUpSheet 0.25s ease-out;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-detail-panel {
+    max-height: 80vh;
+  }
+}
+
+.map-zoom-control {
+  top: 1rem;
+  right: 1rem;
+}
+
+@media (max-width: 768px) {
+  .map-zoom-control {
+    top: auto;
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+  }
+}

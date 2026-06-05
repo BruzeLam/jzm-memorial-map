@@ -22,23 +22,22 @@ export default function DetailPanel({ marker, markers = [], onClose, onSelectMar
 
   return (
     <div
-      className="fixed inset-0 z-[5000] flex items-center justify-center"
+      className="fixed inset-0 z-[5000] flex items-end md:items-center justify-center p-0 md:p-4"
       style={{ background: 'rgba(0,0,0,0.5)' }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col"
-        style={{ maxHeight: '80vh' }}
+        className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full max-w-2xl mx-0 md:mx-4 flex flex-col mobile-detail-panel pb-safe"
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0"
+          className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0"
           style={{ backgroundColor: marker.color + '18' }}
         >
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{marker.icon}</span>
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">{marker.name}</h2>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl md:text-3xl flex-shrink-0">{marker.icon}</span>
+            <div className="min-w-0">
+              <h2 className="text-lg md:text-xl font-bold text-gray-800 truncate">{marker.name}</h2>
               <span
                 className="inline-block text-xs px-2 py-0.5 rounded-full text-white font-medium mt-1"
                 style={{ backgroundColor: marker.color }}
@@ -48,14 +47,16 @@ export default function DetailPanel({ marker, markers = [], onClose, onSelectMar
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none transition-colors"
+            className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 text-2xl leading-none transition-colors flex-shrink-0 -mr-1"
+            aria-label="关闭"
           >
             ✕
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 md:px-6 py-4">
           {marker.tags?.length > 0 && (
             <MarkerTagPills
               tags={marker.tags}

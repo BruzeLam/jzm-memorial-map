@@ -209,19 +209,21 @@ function ZoomControl({ mapRef }) {
   };
 
   return (
-    <div className="absolute top-4 right-4 z-[400] flex flex-col gap-1 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div className="map-zoom-control absolute z-[400] flex flex-col gap-1 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
       <button
         onClick={() => handleZoom('in')}
-        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-lg font-bold text-gray-600 hover:text-gray-800"
+        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors text-lg font-bold text-gray-600"
         title="放大"
+        aria-label="放大"
       >
         +
       </button>
       <div className="w-full h-px bg-gray-200" />
       <button
         onClick={() => handleZoom('out')}
-        className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors text-lg font-bold text-gray-600 hover:text-gray-800"
+        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors text-lg font-bold text-gray-600"
         title="缩小"
+        aria-label="缩小"
       >
         −
       </button>

@@ -9,6 +9,9 @@ const zh = {
       changelog: '更新日志',
       countdown: '距百岁诞辰',
       seconds: '秒',
+      shortTitle: '生平纪念地图',
+      openMenu: '打开菜单',
+      closeMenu: '关闭菜单',
     },
     sidebar: {
       searchPlaceholder: '搜索地点、事件、标签（如 #1993巴西国事访问）…',
@@ -150,6 +153,9 @@ const en = {
       changelog: 'Changelog',
       countdown: 'Until centenary',
       seconds: 'sec',
+      shortTitle: 'Memorial Map',
+      openMenu: 'Open menu',
+      closeMenu: 'Close menu',
     },
     sidebar: {
       searchPlaceholder: 'Search places, events, tags (e.g. #tag)…',
