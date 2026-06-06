@@ -5,8 +5,11 @@ import {
   markerImageAlreadyInGallery,
 } from '../utils/galleryUtils';
 import { filterGalleryBySearch } from '../utils/textSearch';
+import { isCloudEnabled } from '../lib/cloudConfig';
+import { fetchCloudGallery } from '../services/cloudData';
 
 const GALLERY_KEY = 'jzm_gallery_images';
+const GALLERY_CACHE_KEY = 'jzm_gallery_cache';
 const GALLERY_VERSION_KEY = 'jzm_gallery_version';
 const GALLERY_DATA_VERSION = 2;
 
@@ -68,13 +71,45 @@ function saveToStorage(gallery) {
 }
 
 export function useGallery(markers = []) {
-  const [gallery, setGallery] = useState(() => loadFromStorage(markers));
+  const cloudMode = isCloudEnabled();
+  const [gallery, setGallery] = useState(() => (cloudMode ? [] : loadFromStorage(markers)));
+  const readOnly = cloudMode;
 
   useEffect(() => {
-    saveToStorage(gallery);
-  }, [gallery]);
+    if (!cloudMode) {
+      saveToStorage(gallery);
+    }
+  }, [gallery, cloudMode]);
+
+  useEffect(() => {
+    if (!cloudMode) return undefined;
+
+    let cancelled = false;
+    fetchCloudGallery()
+      .then((rows) => {
+        if (cancelled) return;
+        const next = dedupeGallery(rows || []);
+        setGallery(next);
+        try {
+          localStorage.setItem(GALLERY_CACHE_KEY, JSON.stringify(next));
+        } catch (_) {}
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('Cloud gallery fetch failed:', err);
+        try {
+          const cached = localStorage.getItem(GALLERY_CACHE_KEY);
+          if (cached) setGallery(JSON.parse(cached));
+        } catch (_) {}
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cloudMode]);
 
   const addImage = useCallback((imageData, metadata = {}) => {
+    if (readOnly) return null;
     let result = null;
     setGallery((prev) => {
       if (prev.some((g) => isSameImageData(g.data, imageData.data))) {
@@ -101,11 +136,11 @@ export function useGallery(markers = []) {
       return [newImage, ...prev];
     });
     return result;
-  }, []);
+  }, [readOnly]);
 
   /** 地点图片 → 影像馆（单向，按数据去重） */
   const syncImagesFromMarker = useCallback((markerId, markerName, images = [], region = {}) => {
-    if (!images.length) return;
+    if (readOnly || !images.length) return;
     setGallery((prev) => {
       let next = [...prev];
       let changed = false;
@@ -132,25 +167,28 @@ export function useGallery(markers = []) {
       });
       return changed ? dedupeGallery(next) : prev;
     });
-  }, []);
+  }, [readOnly]);
 
   const updateImage = useCallback((id, updates) => {
+    if (readOnly) return;
     setGallery((prev) =>
       prev.map((img) => (img.id === id ? { ...img, ...updates } : img))
     );
-  }, []);
+  }, [readOnly]);
 
   const deleteImage = useCallback((id) => {
+    if (readOnly) return;
     setGallery((prev) => prev.filter((img) => img.id !== id));
-  }, []);
+  }, [readOnly]);
 
   const removeMarkerRelation = useCallback((markerId) => {
+    if (readOnly) return;
     setGallery((prev) =>
       prev.map((img) =>
         img.relatedMarker === markerId ? { ...img, relatedMarker: null } : img
       )
     );
-  }, []);
+  }, [readOnly]);
 
   const searchImages = useCallback(
     (query, markersList = []) => filterGalleryBySearch(gallery, query, markersList),
@@ -170,5 +208,6 @@ export function useGallery(markers = []) {
     removeMarkerRelation,
     searchImages,
     dedupeAll,
+    readOnly,
   };
 }

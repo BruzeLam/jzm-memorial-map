@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS, REMOVED_MARKER_IDS } from '../utils/constants';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
+import { isCloudEnabled } from '../lib/cloudConfig';
+import { fetchCloudMarkers } from '../services/cloudData';
+
+const CACHE_KEY = 'jzm_memorial_markers_cache';
 
 const removedIdSet = new Set(REMOVED_MARKER_IDS);
 
@@ -57,14 +61,62 @@ function saveToStorage(markers) {
 }
 
 export function useMarkers() {
-  const [markers, setMarkers] = useState(() => loadFromStorage());
+  const cloudMode = isCloudEnabled();
+  const [markers, setMarkers] = useState(() => (cloudMode ? [] : loadFromStorage()));
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
+  const [cloudLoading, setCloudLoading] = useState(cloudMode);
+  const [cloudError, setCloudError] = useState(null);
 
   useEffect(() => {
-    saveToStorage(markers);
-  }, [markers]);
+    if (!cloudMode) {
+      saveToStorage(markers);
+    }
+  }, [markers, cloudMode]);
+
+  useEffect(() => {
+    if (!cloudMode) return undefined;
+
+    let cancelled = false;
+    setCloudLoading(true);
+    fetchCloudMarkers()
+      .then((rows) => {
+        if (cancelled) return;
+        if (rows?.length) {
+          setMarkers(rows);
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
+          } catch (_) {}
+        } else {
+          const fallback = applyMarkerMigrations(SAMPLE_MARKERS);
+          setMarkers(fallback);
+        }
+        setCloudError(null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('Cloud markers fetch failed:', err);
+        setCloudError(err.message);
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) setMarkers(JSON.parse(cached));
+          else setMarkers(applyMarkerMigrations(SAMPLE_MARKERS));
+        } catch (_) {
+          setMarkers(applyMarkerMigrations(SAMPLE_MARKERS));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCloudLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cloudMode]);
+
+  const readOnly = cloudMode;
 
   const addMarker = useCallback((markerData) => {
+    if (readOnly) return null;
     const normalized = normalizeMarkerFields(migrateAllMarkerRegions([markerData])[0]);
     const newMarker = {
       ...normalized,
@@ -73,9 +125,10 @@ export function useMarkers() {
     registerMarkerTags(newMarker.tags);
     setMarkers((prev) => [...prev, newMarker]);
     return newMarker.id;
-  }, []);
+  }, [readOnly]);
 
   const updateMarker = useCallback((id, updates) => {
+    if (readOnly) return;
     setMarkers((prev) => {
       const next = prev.map((m) => {
         if (m.id !== id) return m;
@@ -85,22 +138,25 @@ export function useMarkers() {
       registerMarkerTags(collectAllMarkerTags(next));
       return next;
     });
-  }, []);
+  }, [readOnly]);
 
   const deleteMarker = useCallback((id) => {
+    if (readOnly) return;
     setMarkers((prev) => prev.filter((m) => m.id !== id));
     setSelectedMarkerId((prev) => (prev === id ? null : prev));
-  }, []);
+  }, [readOnly]);
 
   const resetToSample = useCallback(() => {
+    if (readOnly) return;
     setMarkers(SAMPLE_MARKERS);
     setSelectedMarkerId(null);
-  }, []);
+  }, [readOnly]);
 
   const clearAll = useCallback(() => {
+    if (readOnly) return;
     setMarkers([]);
     setSelectedMarkerId(null);
-  }, []);
+  }, [readOnly]);
 
   const selectedMarker = markers.find((m) => m.id === selectedMarkerId) || null;
 
@@ -131,5 +187,8 @@ export function useMarkers() {
     deselectMarker,
     resetToSample,
     clearAll,
+    cloudLoading,
+    cloudError,
+    readOnly,
   };
 }

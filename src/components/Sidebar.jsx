@@ -91,6 +91,7 @@ export default function Sidebar({
   onThisDayActive,
   onToggleOnThisDay,
   compactMobile = false,
+  dataReadOnly = false,
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
@@ -186,11 +187,11 @@ export default function Sidebar({
   ) : selectedMarker ? (
     /* ── Marker Details ──────────────────────────────────── */
     <div className="p-2">
-      <MarkerDetails
-        marker={selectedMarker}
-        markers={markers}
-        onEdit={onEditMarker}
-        onDelete={onDeleteMarker}
+            <MarkerDetails
+              marker={selectedMarker}
+              markers={markers}
+              onEdit={dataReadOnly ? undefined : onEditMarker}
+              onDelete={dataReadOnly ? undefined : onDeleteMarker}
         onClose={() => onMarkerSelect(selectedMarkerId)}
         onOpenDetail={onOpenDetail}
         onViewImage={onViewImage}
@@ -376,6 +377,7 @@ export default function Sidebar({
         </MobileScrollList>
 
         <div className="px-2 py-1 border-t border-gray-100 flex gap-1.5 flex-shrink-0 bg-white">
+          {!dataReadOnly && (
           <button
             type="button"
             onClick={inActiveAddFlow ? onCancelAdd : onStartAddMode}
@@ -387,6 +389,7 @@ export default function Sidebar({
           >
             {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
           </button>
+          )}
 
           <div className="relative">
             <button
@@ -454,6 +457,8 @@ export default function Sidebar({
                     ))}
                   </div>
                 )}
+                {!dataReadOnly && (
+                <>
                 <button
                   type="button"
                   onClick={() => { onResetToSample(); setShowSettings(false); setShowLanguageDrawer(false); }}
@@ -474,6 +479,11 @@ export default function Sidebar({
                 >
                   🗑️ {t('sidebar.clearAll')}
                 </button>
+                </>
+                )}
+                {dataReadOnly && (
+                <p className="px-4 py-2 text-xs text-gray-500">☁️ 数据来自云端（只读）</p>
+                )}
               </div>
             )}
           </div>
@@ -539,6 +549,7 @@ export default function Sidebar({
       </div>
 
       <div className="px-3 py-2 border-t border-gray-100 flex gap-1.5">
+        {!dataReadOnly && (
         <button
           onClick={inActiveAddFlow ? onCancelAdd : onStartAddMode}
           className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors ${
@@ -549,6 +560,7 @@ export default function Sidebar({
         >
           {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
         </button>
+        )}
 
         <div className="relative">
           <button
@@ -611,6 +623,7 @@ export default function Sidebar({
                   ))}
                 </div>
               )}
+              {!dataReadOnly && (
               <button
                 type="button"
                 onClick={() => { onResetToSample(); setShowSettings(false); setShowLanguageDrawer(false); }}
@@ -618,6 +631,8 @@ export default function Sidebar({
               >
                 🔄 {t('sidebar.restoreSample')}
               </button>
+              )}
+              {!dataReadOnly && (
               <button
                 type="button"
                 onClick={() => {
@@ -631,6 +646,16 @@ export default function Sidebar({
               >
                 🗑️ {t('sidebar.clearAll')}
               </button>
+              )}
+              {dataReadOnly && (
+              <button
+                type="button"
+                onClick={() => { setShowSettings(false); setShowLanguageDrawer(false); }}
+                className="block w-full text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-50"
+              >
+                ☁️ 数据来自云端（只读）
+              </button>
+              )}
             </div>
           )}
         </div>

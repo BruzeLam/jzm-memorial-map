@@ -31,6 +31,7 @@ export default function App() {
     deselectMarker,
     resetToSample,
     clearAll,
+    readOnly: dataReadOnly,
   } = useMarkers();
 
   const {
@@ -55,6 +56,7 @@ export default function App() {
     updateImage,
     deleteImage,
     removeMarkerRelation,
+    readOnly: galleryReadOnly,
   } = useGallery(markers);
 
   const [isAddingMode, setIsAddingMode] = useState(false);
@@ -369,6 +371,7 @@ export default function App() {
     onClearRegions: clearRegionFilter,
     onThisDayActive,
     onToggleOnThisDay: toggleOnThisDay,
+    dataReadOnly,
   };
 
   const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);
@@ -403,6 +406,7 @@ export default function App() {
           onUpdateImage={updateImage}
           onDeleteImage={deleteImage}
           onClose={() => setShowGallery(false)}
+          readOnly={galleryReadOnly}
         />
       )}
       {showDetailPanel && (

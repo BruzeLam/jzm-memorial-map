@@ -13,6 +13,7 @@ export default function GalleryPanel({
   onDeleteImage,
   onClose,
   markers,
+  readOnly = false,
 }) {
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,7 +127,7 @@ export default function GalleryPanel({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
             />
-            {!showUploadArea && (
+            {!readOnly && !showUploadArea && (
               <button
                 onClick={() => setShowUploadArea(true)}
                 disabled={uploading}
@@ -136,7 +137,7 @@ export default function GalleryPanel({
               </button>
             )}
           </div>
-          {showUploadArea && (
+          {!readOnly && showUploadArea && (
             <div className="space-y-2">
               <ImageUploadInput
                 onUpload={handleImageUpload}

@@ -106,18 +106,22 @@ export default function MarkerDetails({
           >
             📖 详情
           </button>
+          {onEdit && (
           <button
             onClick={() => onEdit(marker)}
             className="flex-1 text-sm py-1.5 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
           >
             ✏️ 编辑
           </button>
+          )}
+          {onDelete && (
           <button
             onClick={() => onDelete(marker.id)}
             className="flex-1 text-sm py-1.5 px-3 rounded-lg border border-red-200 hover:bg-red-50 text-red-500 transition-colors"
           >
             🗑️ 删除
           </button>
+          )}
         </div>
       </div>
     </div>

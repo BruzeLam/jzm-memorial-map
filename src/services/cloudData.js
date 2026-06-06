@@ -1,0 +1,167 @@
+import { getSupabase } from '../lib/supabase';
+import { migrateAllMarkerRegions } from '../utils/regionFormat';
+import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
+import { REMOVED_MARKER_IDS } from '../utils/constants';
+
+const removedIdSet = new Set(REMOVED_MARKER_IDS);
+
+function normalizeMarkerFields(marker) {
+  return {
+    ...marker,
+    tags: normalizeMarkerTagList(marker.tags),
+    tripSummary: marker.tripSummary?.trim() || null,
+    images: marker.images || [],
+    sources: marker.sources || [],
+  };
+}
+
+function applyMarkerMigrations(markers) {
+  const withoutRemoved = markers.filter((m) => !removedIdSet.has(m.id));
+  const migrated = migrateAllMarkerRegions(withoutRemoved).map(normalizeMarkerFields);
+  registerMarkerTags(collectAllMarkerTags(migrated));
+  return migrated;
+}
+
+function rowToMarker(row) {
+  return normalizeMarkerFields(row.payload);
+}
+
+export async function fetchCloudMarkers() {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('markers')
+    .select('id, payload, updated_at')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+  return applyMarkerMigrations((data || []).map(rowToMarker));
+}
+
+export async function upsertCloudMarker(marker) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+
+  const normalized = normalizeMarkerFields(migrateAllMarkerRegions([marker])[0]);
+  const { error } = await supabase.from('markers').upsert({
+    id: normalized.id,
+    payload: normalized,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+  return normalized;
+}
+
+export async function upsertCloudMarkersBatch(markers) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+
+  const rows = applyMarkerMigrations(markers).map((m) => ({
+    id: m.id,
+    payload: m,
+    updated_at: new Date().toISOString(),
+  }));
+
+  const chunkSize = 50;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+    const { error } = await supabase.from('markers').upsert(chunk);
+    if (error) throw error;
+  }
+  registerMarkerTags(collectAllMarkerTags(rows.map((r) => r.payload)));
+  return rows.length;
+}
+
+export async function deleteCloudMarker(id) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+  const { error } = await supabase.from('markers').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function fetchCloudGallery() {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('gallery')
+    .select('id, payload')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []).map((row) => row.payload);
+}
+
+export async function upsertCloudGalleryBatch(items) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+
+  if (!items.length) return 0;
+
+  const rows = items.map((item) => ({
+    id: item.id,
+    payload: item,
+    updated_at: new Date().toISOString(),
+  }));
+
+  const chunkSize = 50;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const { error } = await supabase.from('gallery').upsert(rows.slice(i, i + chunkSize));
+    if (error) throw error;
+  }
+  return rows.length;
+}
+
+export async function setCloudDataVersion(version) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+  const { error } = await supabase.from('site_meta').upsert({
+    key: 'data_version',
+    value: { version },
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+export async function fetchCloudDataVersion() {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from('site_meta')
+    .select('value')
+    .eq('key', 'data_version')
+    .maybeSingle();
+  if (error) throw error;
+  return data?.value?.version ?? null;
+}
+
+/** 从 markers 构建 gallery 条目（与 useGallery 迁移逻辑一致） */
+export function buildGalleryFromMarkers(markers) {
+  const gallery = [];
+  markers.forEach((marker) => {
+    if (!marker.images?.length) return;
+    marker.images.forEach((img, idx) => {
+      gallery.push({
+        id: `img_${marker.id}_${idx}`,
+        data: img.data,
+        name: img.name || `${marker.name}-${idx}`,
+        title: img.title || marker.name,
+        description: img.description || '',
+        location: {
+          country: marker.country || '',
+          province: marker.province || '',
+          city: marker.city || '',
+          address: '',
+          latitude: marker.latitude ?? '',
+          longitude: marker.longitude ?? '',
+        },
+        relatedMarker: marker.id,
+        uploadTime: new Date().toISOString(),
+      });
+    });
+  });
+  return gallery;
+}
+
+export { applyMarkerMigrations, normalizeMarkerFields };
