@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { collectAllMarkerTags } from '../utils/markerTags';
 import { MarkerTagPills } from './MarkerTagInput';
 import SearchBar from './SearchBar';
@@ -482,7 +483,16 @@ export default function Sidebar({
                 </>
                 )}
                 {dataReadOnly && (
-                <p className="px-4 py-2 text-xs text-gray-500">☁️ 数据来自云端（只读）</p>
+                <div className="px-4 py-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 mb-2">{t('sidebar.cloudReadOnly')}</p>
+                  <Link
+                    to="/admin"
+                    onClick={() => { setShowSettings(false); setShowLanguageDrawer(false); }}
+                    className="block w-full text-center px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {t('sidebar.openAdmin')}
+                  </Link>
+                </div>
                 )}
               </div>
             )}
@@ -648,13 +658,16 @@ export default function Sidebar({
               </button>
               )}
               {dataReadOnly && (
-              <button
-                type="button"
-                onClick={() => { setShowSettings(false); setShowLanguageDrawer(false); }}
-                className="block w-full text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-50"
-              >
-                ☁️ 数据来自云端（只读）
-              </button>
+              <div className="px-4 py-2 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">{t('sidebar.cloudReadOnly')}</p>
+                <Link
+                  to="/admin"
+                  onClick={() => { setShowSettings(false); setShowLanguageDrawer(false); }}
+                  className="block w-full text-center px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {t('sidebar.openAdmin')}
+                </Link>
+              </div>
               )}
             </div>
           )}

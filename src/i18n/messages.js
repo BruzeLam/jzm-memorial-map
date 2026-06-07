@@ -39,6 +39,8 @@ const zh = {
       languageLabel: '语言',
       collapseSidebar: '收起侧边栏',
       expandSidebar: '展开侧边栏',
+      cloudReadOnly: '☁️ 数据来自云端，访客仅可浏览',
+      openAdmin: '前往管理后台编辑 →',
     },
     onThisDayModal: {
       eyebrow: '历史上的今天',
@@ -185,6 +187,8 @@ const en = {
       languageLabel: 'Language',
       collapseSidebar: 'Collapse sidebar',
       expandSidebar: 'Expand sidebar',
+      cloudReadOnly: '☁️ Cloud data — visitors can browse only',
+      openAdmin: 'Open admin to edit →',
     },
     onThisDayModal: {
       eyebrow: 'On this day',
