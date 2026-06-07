@@ -17,6 +17,7 @@ import OnThisDayModal from './components/OnThisDayModal';
 import { getOnThisDayMarkers } from './utils/onThisDay';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { QuotesProvider } from './context/QuotesContext';
+import { ArchivesProvider } from './context/ArchivesContext';
 import { useMediaQuery } from './hooks/useMediaQuery';
 
 export default function App() {
@@ -380,6 +381,7 @@ export default function App() {
   return (
     <LanguageProvider>
     <QuotesProvider>
+    <ArchivesProvider>
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
@@ -515,6 +517,7 @@ export default function App() {
         )}
       </div>
     </div>
+    </ArchivesProvider>
     </QuotesProvider>
     </LanguageProvider>
   );

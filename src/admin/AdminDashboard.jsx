@@ -10,27 +10,43 @@ import {
   parseQuotesImport,
 } from '../utils/quotesStorage';
 import {
+  BUILTIN_ARCHIVES,
+  loadLegacyLocalArchives,
+  classifyArchives,
+  exportArchivesBackup,
+  parseArchivesImport,
+} from '../utils/archivesStorage';
+import {
   upsertCloudMarkersBatch,
   upsertCloudGalleryBatch,
   buildGalleryFromMarkers,
   setCloudDataVersion,
   fetchCloudMarkers,
   fetchCloudQuotes,
+  fetchCloudArchives,
   upsertCloudQuotesBatch,
+  upsertCloudArchivesBatch,
   parseMarkersImport,
 } from '../services/cloudData';
 
 export default function AdminDashboard() {
   const [status, setStatus] = useState('');
   const [quoteStatus, setQuoteStatus] = useState('');
+  const [archiveStatus, setArchiveStatus] = useState('');
+  const [syncAllStatus, setSyncAllStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const [quoteBusy, setQuoteBusy] = useState(false);
+  const [archiveBusy, setArchiveBusy] = useState(false);
+  const [syncAllBusy, setSyncAllBusy] = useState(false);
   const [count, setCount] = useState(null);
   const [quoteCount, setQuoteCount] = useState(null);
+  const [archiveCount, setArchiveCount] = useState(null);
   const [localMarkerCount] = useState(() => loadLegacyLocalMarkers().length);
   const [localGalleryCount] = useState(() => loadLegacyLocalGallery().length);
   const [localQuotes] = useState(() => loadLegacyLocalQuotes());
+  const [localArchives] = useState(() => loadLegacyLocalArchives());
   const localQuoteStats = classifyQuotes(localQuotes);
+  const localArchiveStats = classifyArchives(localArchives);
 
   React.useEffect(() => {
     fetchCloudMarkers()
@@ -39,6 +55,9 @@ export default function AdminDashboard() {
     fetchCloudQuotes()
       .then((rows) => setQuoteCount(rows?.length ?? 0))
       .catch(() => setQuoteCount(null));
+    fetchCloudArchives()
+      .then((rows) => setArchiveCount(rows?.length ?? 0))
+      .catch(() => setArchiveCount(null));
   }, []);
 
   const syncMarkersToCloud = async (markers, label, extraGallery = []) => {
@@ -58,6 +77,62 @@ export default function AdminDashboard() {
     const total = await upsertCloudQuotesBatch(quotes);
     setQuoteCount(total);
     setQuoteStatus(`完成（${label}）：${total} 条语录已同步至云端（内置 ${classifyQuotes(quotes).builtin} · 自添 ${classifyQuotes(quotes).userAdded}）。`);
+  };
+
+  const syncArchivesToCloud = async (archives, label) => {
+    const total = await upsertCloudArchivesBatch(archives);
+    setArchiveCount(total);
+    const stats = classifyArchives(archives);
+    setArchiveStatus(
+      `完成（${label}）：${total} 条档案已同步至云端（内置 ${stats.builtin} · 自添 ${stats.userAdded}）。`
+    );
+  };
+
+  const handleSyncAllLocal = async () => {
+    const markers = loadLegacyLocalMarkers();
+    const gallery = loadLegacyLocalGallery();
+    const quotes = loadLegacyLocalQuotes();
+    const archives = loadLegacyLocalArchives();
+    const parts = [];
+    if (markers.length) parts.push(`${markers.length} 条地点`);
+    if (gallery.length) parts.push(`${gallery.length} 条影像`);
+    if (quotes.length) parts.push(`${quotes.length} 条语录`);
+    if (archives.length) parts.push(`${archives.length} 条档案`);
+
+    if (!parts.length) {
+      setSyncAllStatus('失败：本浏览器未找到可同步的 localStorage 数据。');
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `将本浏览器全部数据一次性上传到云端：${parts.join('、')}（相同 id 会覆盖）。继续？`
+      )
+    ) {
+      return;
+    }
+
+    setSyncAllBusy(true);
+    setSyncAllStatus('');
+    setStatus('');
+    setQuoteStatus('');
+    setArchiveStatus('');
+    try {
+      if (markers.length) {
+        await syncMarkersToCloud(markers, '全部同步', gallery);
+      }
+      if (quotes.length) {
+        await syncQuotesToCloud(quotes, '全部同步');
+      }
+      if (archives.length) {
+        await syncArchivesToCloud(archives, '全部同步');
+      }
+      setSyncAllStatus(`全部完成：${parts.join('、')} 已同步至云端。`);
+    } catch (err) {
+      setSyncAllStatus(`失败：${err.message}`);
+    } finally {
+      setSyncAllBusy(false);
+    }
   };
 
   const handleSeed = async () => {
@@ -189,6 +264,64 @@ export default function AdminDashboard() {
     setQuoteStatus(`已下载备份：共 ${localQuoteStats.total} 条（内置 ${localQuoteStats.builtin} · 自添 ${localQuoteStats.userAdded}）。`);
   };
 
+  const handleArchivesLocalImport = async () => {
+    const archives = loadLegacyLocalArchives();
+    if (!archives.length) {
+      setArchiveStatus('失败：本浏览器未找到档案馆数据（jzm_all_archives）。');
+      return;
+    }
+    const stats = classifyArchives(archives);
+    if (
+      !window.confirm(
+        `将本浏览器 ${stats.total} 条档案上传到云端（内置 ${stats.builtin} · 自添 ${stats.userAdded}）。继续？`
+      )
+    ) {
+      return;
+    }
+    setArchiveBusy(true);
+    setArchiveStatus('');
+    try {
+      await syncArchivesToCloud(archives, '浏览器本地恢复');
+    } catch (err) {
+      setArchiveStatus(`失败：${err.message}`);
+    } finally {
+      setArchiveBusy(false);
+    }
+  };
+
+  const handleArchivesJsonImport = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setArchiveBusy(true);
+    setArchiveStatus('');
+    try {
+      const text = await file.text();
+      const parsed = parseArchivesImport(text);
+      if (!parsed.length) throw new Error('文件中没有档案');
+
+      if (!window.confirm(`从 JSON 导入 ${parsed.length} 条档案到云端。继续？`)) {
+        return;
+      }
+      await syncArchivesToCloud(parsed, 'JSON 导入');
+    } catch (err) {
+      setArchiveStatus(`失败：${err.message}`);
+    } finally {
+      setArchiveBusy(false);
+    }
+  };
+
+  const handleArchivesExport = () => {
+    exportArchivesBackup(localArchives);
+    setArchiveStatus(
+      `已下载备份：共 ${localArchiveStats.total} 条（内置 ${localArchiveStats.builtin} · 自添 ${localArchiveStats.userAdded}）。`
+    );
+  };
+
+  const hasLocalData =
+    localMarkerCount > 0 || localQuoteStats.total > 0 || localArchiveStats.total > 0;
+
   return (
     <div className="space-y-6">
       <div>
@@ -196,7 +329,30 @@ export default function AdminDashboard() {
         <p className="text-sm text-gray-600 mt-1">MVP：仅超级管理员可编辑云端主数据；访客从云端只读加载。</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {hasLocalData && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 space-y-3">
+          <h2 className="text-sm font-semibold text-green-900">一键同步本浏览器全部数据</h2>
+          <p className="text-sm text-green-800">
+            地点 {localMarkerCount} · 影像 {localGalleryCount} · 语录 {localQuoteStats.total} · 档案{' '}
+            {localArchiveStats.total}
+          </p>
+          <button
+            type="button"
+            onClick={handleSyncAllLocal}
+            disabled={syncAllBusy || busy || quoteBusy || archiveBusy}
+            className="px-4 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-sm font-medium disabled:opacity-50"
+          >
+            {syncAllBusy ? '同步中…' : '全部上云（地点 + 影像 + 语录 + 档案）'}
+          </button>
+          {syncAllStatus && (
+            <p className={`text-sm ${syncAllStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
+              {syncAllStatus}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-xs text-gray-500">云端地点</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{count ?? '—'}</p>
@@ -214,6 +370,17 @@ export default function AdminDashboard() {
           <p className="text-2xl font-bold text-gray-900 mt-1">{localQuoteStats.total}</p>
           <p className="text-xs text-gray-400 mt-1">
             内置 {localQuoteStats.builtin} · 自添 {localQuoteStats.userAdded}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-xs text-gray-500">云端档案</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{archiveCount ?? '—'}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <p className="text-xs text-gray-500">本浏览器档案</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{localArchiveStats.total}</p>
+          <p className="text-xs text-gray-400 mt-1">
+            内置 {localArchiveStats.builtin} · 自添 {localArchiveStats.userAdded}
           </p>
         </div>
       </div>
@@ -307,6 +474,54 @@ export default function AdminDashboard() {
         {quoteStatus && (
           <p className={`text-sm ${quoteStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
             {quoteStatus}
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-gray-800">档案馆 · 恢复 / 上云</h2>
+        <p className="text-sm text-gray-600">
+          Git 内置档案 <strong>{BUILTIN_ARCHIVES.length} 条</strong>；你本浏览器现有{' '}
+          <strong>{localArchiveStats.total}</strong> 条（自添 {localArchiveStats.userAdded} 条）。
+          首次上云档案需先在 Supabase 执行{' '}
+          <code className="text-xs bg-gray-100 px-1 rounded">supabase/migration-archives.sql</code>。
+        </p>
+        {localArchiveStats.userAdded > 0 && (
+          <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            检测到 {localArchiveStats.userAdded} 条自添档案，可一键上传到云端，所有人可见。
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleArchivesLocalImport}
+            disabled={archiveBusy || !localArchiveStats.total}
+            className="px-4 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-sm font-medium disabled:opacity-50"
+          >
+            {archiveBusy ? '上传中…' : `上传本浏览器档案（${localArchiveStats.total} 条）`}
+          </button>
+          <button
+            type="button"
+            onClick={handleArchivesExport}
+            disabled={!localArchiveStats.total}
+            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium disabled:opacity-50"
+          >
+            下载档案备份 JSON
+          </button>
+          <label className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium cursor-pointer disabled:opacity-50">
+            档案 JSON 导入
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              disabled={archiveBusy}
+              onChange={handleArchivesJsonImport}
+            />
+          </label>
+        </div>
+        {archiveStatus && (
+          <p className={`text-sm ${archiveStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
+            {archiveStatus}
           </p>
         )}
       </div>

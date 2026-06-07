@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { ARCHIVES } from '../data/archives';
 import { compressImage } from '../utils/imageCompression';
 import { filterBySearch, getArchiveSearchFields } from '../utils/textSearch';
 import {
@@ -7,75 +6,10 @@ import {
   collectAllTags,
   registerTags,
 } from '../utils/archiveTags';
+import { normalizeArchiveRecord } from '../utils/archivesStorage';
 import ArchiveTagInput from './ArchiveTagInput';
 import { useI18n } from '../i18n/LanguageContext';
-
-const STORAGE_KEY = 'jzm_all_archives';
-const MIGRATED_KEY = 'jzm_archives_migrated_v1';
-const TAGS_SEED_KEY = 'jzm_archives_tags_seeded_v2';
-
-function normalizeArchive(item, index) {
-  let tags = normalizeTagList(item.tags);
-  if (!tags.length && item.context?.trim()) {
-    tags = normalizeTagList([item.context]);
-  }
-  return {
-    id: item.id || `archive_${index}`,
-    title: item.title || '',
-    text: item.text || '',
-    source: item.source || null,
-    tags,
-    links: Array.isArray(item.links) ? item.links : [],
-    images: Array.isArray(item.images) ? item.images : [],
-    isUserAdded: item.isUserAdded !== false,
-  };
-}
-
-function seedBuiltinTags(list) {
-  if (localStorage.getItem(TAGS_SEED_KEY)) return list;
-  const seedById = Object.fromEntries(
-    ARCHIVES.filter((a) => a.tags?.length).map((a) => [a.id, a.tags])
-  );
-  const updated = list.map((item) => {
-    const seedTags = seedById[item.id];
-    if (!seedTags?.length) return item;
-    const merged = normalizeTagList([...(item.tags || []), ...seedTags]);
-    return merged.length ? { ...item, tags: merged } : item;
-  });
-  localStorage.setItem(TAGS_SEED_KEY, 'true');
-  return updated;
-}
-
-function initializeArchives() {
-  try {
-    const migrated = localStorage.getItem(MIGRATED_KEY);
-    if (!migrated) {
-      let all = ARCHIVES.map(normalizeArchive).filter((a) => a.text.trim());
-      all = seedBuiltinTags(all);
-      registerTags(collectAllTags(all));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-      localStorage.setItem(MIGRATED_KEY, 'true');
-      return all;
-    }
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    let list = JSON.parse(raw).map((a, i) => normalizeArchive(a, i));
-    const beforeSeed = JSON.stringify(list);
-    list = seedBuiltinTags(list);
-    if (JSON.stringify(list) !== beforeSeed) {
-      saveArchives(list);
-      registerTags(collectAllTags(list));
-    }
-    return list;
-  } catch (e) {
-    console.error('Failed to initialize archives:', e);
-    return ARCHIVES.map(normalizeArchive);
-  }
-}
-
-function saveArchives(archives) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(archives));
-}
+import { useArchivesContext } from '../context/ArchivesContext';
 
 function TextWithLinks({ text, className = '' }) {
   if (!text) return null;
@@ -360,12 +294,12 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
 
 export default function ArchivePanel({ onClose }) {
   const { t } = useI18n();
+  const { archives, readOnly, addArchive, updateArchive, deleteArchive } = useArchivesContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const [archives, setArchives] = useState(initializeArchives);
 
   const allTags = useMemo(() => collectAllTags(archives), [archives]);
 
@@ -374,26 +308,21 @@ export default function ArchivePanel({ onClose }) {
     [archives, searchQuery]
   );
 
-  const handleSave = (item) => {
-    const normalized = { ...item, tags: normalizeTagList(item.tags) };
+  const handleSave = async (item) => {
+    const normalized = normalizeArchiveRecord({ ...item, tags: normalizeTagList(item.tags) });
     registerTags(normalized.tags);
-    let updated;
     if (editingItem) {
-      updated = archives.map((a) => (a.id === normalized.id ? normalized : a));
+      await updateArchive(normalized);
       setEditingItem(null);
     } else {
-      updated = [...archives, normalized];
+      await addArchive(normalized);
     }
-    setArchives(updated);
-    saveArchives(updated);
     setShowForm(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('确定删除这条文献吗？')) return;
-    const updated = archives.filter((a) => a.id !== id);
-    setArchives(updated);
-    saveArchives(updated);
+    await deleteArchive(id);
     if (expandedId === id) setExpandedId(null);
   };
 
@@ -418,13 +347,15 @@ export default function ArchivePanel({ onClose }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowForm(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs font-medium rounded-lg"
-              >
-                <span>＋</span>
-                <span>{t('archive.addDoc')}</span>
-              </button>
+              {!readOnly && (
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs font-medium rounded-lg"
+                >
+                  <span>＋</span>
+                  <span>{t('archive.addDoc')}</span>
+                </button>
+              )}
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 text-lg leading-none ml-1"
@@ -453,6 +384,9 @@ export default function ArchivePanel({ onClose }) {
                 </button>
               )}
             </div>
+            {readOnly && (
+              <p className="text-xs text-gray-500 mt-2">☁️ 档案馆来自云端（只读）。编辑请前往 /admin</p>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
@@ -496,25 +430,27 @@ export default function ArchivePanel({ onClose }) {
 
                     {expanded && (
                       <div className="px-4 pb-4 pt-1 border-t border-amber-100/80">
-                        <div className="flex justify-end gap-1 mb-2">
-                          <button
-                            onClick={() => {
-                              setEditingItem(item);
-                              setShowForm(true);
-                            }}
-                            className="w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50"
-                            title="编辑"
-                          >
-                            ✎
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className="w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50"
-                            title="删除"
-                          >
-                            🗑
-                          </button>
-                        </div>
+                        {!readOnly && (
+                          <div className="flex justify-end gap-1 mb-2">
+                            <button
+                              onClick={() => {
+                                setEditingItem(item);
+                                setShowForm(true);
+                              }}
+                              className="w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50"
+                              title="编辑"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50"
+                              title="删除"
+                            >
+                              🗑
+                            </button>
+                          </div>
+                        )}
 
                         <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap mb-3">
                           <TextWithLinks text={item.text} />

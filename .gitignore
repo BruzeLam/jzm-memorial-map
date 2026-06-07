@@ -4,4 +4,5 @@ build/
 .env.local
 supabase/schema-ready.sql
 supabase/migration-quotes-ready.sql
+supabase/migration-archives-ready.sql
 public/changelog.json
