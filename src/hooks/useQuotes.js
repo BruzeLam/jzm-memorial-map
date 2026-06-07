@@ -10,12 +10,12 @@ import {
   BUILTIN_QUOTES,
 } from '../utils/quotesStorage';
 
-export function useQuotes() {
+export function useQuotes({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
   const [quotes, setQuotes] = useState(() => (cloudMode ? [] : loadLocalQuotes()));
   const [loading, setLoading] = useState(cloudMode);
   const [error, setError] = useState(null);
-  const readOnly = cloudMode;
+  const readOnly = cloudMode && !isEditor;
 
   const stats = useMemo(() => classifyQuotes(quotes), [quotes]);
 

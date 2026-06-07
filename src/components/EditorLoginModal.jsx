@@ -17,7 +17,7 @@ export default function EditorLoginModal({ onClose }) {
     setError('');
     setSubmitting(true);
     try {
-      await signInWithEmail(email);
+      await signInWithEmail(email, { redirectTo: `${window.location.origin}/` });
       setSent(true);
     } catch (err) {
       setError(err.message || t('editorLogin.sendFailed'));

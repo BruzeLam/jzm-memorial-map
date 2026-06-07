@@ -6,7 +6,7 @@ import {
 } from '../utils/galleryUtils';
 import { filterGalleryBySearch } from '../utils/textSearch';
 import { isCloudEnabled } from '../lib/cloudConfig';
-import { fetchCloudGallery } from '../services/cloudData';
+import { fetchCloudGallery, upsertCloudGalleryBatch } from '../services/cloudData';
 
 const GALLERY_KEY = 'jzm_gallery_images';
 const GALLERY_CACHE_KEY = 'jzm_gallery_cache';
@@ -70,10 +70,21 @@ function saveToStorage(gallery) {
   }
 }
 
-export function useGallery(markers = []) {
+export function useGallery(markers = [], { isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
   const [gallery, setGallery] = useState(() => (cloudMode ? [] : loadFromStorage(markers)));
-  const readOnly = cloudMode;
+  const readOnly = cloudMode && !isEditor;
+
+  const persistGallery = useCallback(
+    (items) => {
+      if (cloudMode && isEditor && items.length) {
+        upsertCloudGalleryBatch(items).catch((err) =>
+          console.error('Cloud gallery save failed:', err)
+        );
+      }
+    },
+    [cloudMode, isEditor]
+  );
 
   useEffect(() => {
     if (!cloudMode) {
@@ -133,10 +144,13 @@ export function useGallery(markers = []) {
         uploadTime: new Date().toISOString(),
       };
       result = newImage;
+      if (cloudMode && isEditor) {
+        persistGallery([newImage]);
+      }
       return [newImage, ...prev];
     });
     return result;
-  }, [readOnly]);
+  }, [readOnly, cloudMode, isEditor, persistGallery]);
 
   /** 地点图片 → 影像馆（单向，按数据去重） */
   const syncImagesFromMarker = useCallback((markerId, markerName, images = [], region = {}) => {
@@ -144,9 +158,10 @@ export function useGallery(markers = []) {
     setGallery((prev) => {
       let next = [...prev];
       let changed = false;
+      const added = [];
       images.forEach((img, idx) => {
         if (markerImageAlreadyInGallery(next, img.data, markerId)) return;
-        next.unshift({
+        const entry = {
           id: `img_${markerId}_${Date.now()}_${idx}`,
           data: img.data,
           name: img.name || `${markerName}-${idx}`,
@@ -162,23 +177,41 @@ export function useGallery(markers = []) {
           },
           relatedMarker: markerId,
           uploadTime: new Date().toISOString(),
-        });
+        };
+        added.push(entry);
+        next.unshift(entry);
         changed = true;
       });
-      return changed ? dedupeGallery(next) : prev;
+      if (changed) {
+        const deduped = dedupeGallery(next);
+        if (cloudMode && isEditor && added.length) {
+          persistGallery(added);
+        }
+        return deduped;
+      }
+      return prev;
     });
-  }, [readOnly]);
+  }, [readOnly, cloudMode, isEditor, persistGallery]);
 
   const updateImage = useCallback((id, updates) => {
     if (readOnly) return;
-    setGallery((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, ...updates } : img))
-    );
-  }, [readOnly]);
+    setGallery((prev) => {
+      const next = prev.map((img) => {
+        if (img.id !== id) return img;
+        const merged = { ...img, ...updates };
+        if (cloudMode && isEditor) {
+          persistGallery([merged]);
+        }
+        return merged;
+      });
+      return next;
+    });
+  }, [readOnly, cloudMode, isEditor, persistGallery]);
 
   const deleteImage = useCallback((id) => {
     if (readOnly) return;
     setGallery((prev) => prev.filter((img) => img.id !== id));
+    // 云端删除暂不在首页暴露；后台可补全
   }, [readOnly]);
 
   const removeMarkerRelation = useCallback((markerId) => {

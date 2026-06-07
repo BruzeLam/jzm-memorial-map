@@ -41,6 +41,7 @@ const zh = {
       expandSidebar: '展开侧边栏',
       cloudReadOnly: '☁️ 数据来自云端，访客仅可浏览',
       openAdmin: '前往管理后台编辑 →',
+      editorSignedIn: '管理员已登录（{email}），可直接添加编辑',
     },
     editorLogin: {
       title: '登录以添加内容',
@@ -202,6 +203,7 @@ const en = {
       expandSidebar: 'Expand sidebar',
       cloudReadOnly: '☁️ Cloud data — visitors can browse only',
       openAdmin: 'Open admin to edit →',
+      editorSignedIn: 'Signed in as {email} — you can add and edit',
     },
     editorLogin: {
       title: 'Sign in to add content',

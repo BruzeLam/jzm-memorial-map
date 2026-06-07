@@ -1,4 +1,30 @@
 {
+  "2026-6-7": [
+    {
+      "type": "feature",
+      "emoji": "☁️",
+      "title": "全站数据上云（Supabase）",
+      "description": "地点、影像、语录、档案馆统一存入云端；访客只读浏览，刷新后全员看到同一份数据。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🔐",
+      "title": "邮箱魔法链接登录",
+      "description": "点击「添加」可发送登录链接；授权管理员登录后可在地图页直接添加、编辑地点，变更实时写入云端。"
+    },
+    {
+      "type": "feature",
+      "emoji": "⚙️",
+      "title": "管理后台 /admin",
+      "description": "概览统计、一键从浏览器恢复历史数据、JSON 导入备份，以及地点 CRUD 管理。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "➕",
+      "title": "侧栏「添加」与设置交互",
+      "description": "保留底部添加按钮；未登录弹出登录流程；设置改为内联展开，避免浮层被裁切。"
+    }
+  ],
   "2026-6-3": [
     {
       "type": "feature",

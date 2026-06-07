@@ -1,6 +1,5 @@
 // Cache fix: 2026-05-25 - Force Vercel rebuild
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
 import { useGallery } from './hooks/useGallery';
@@ -20,12 +19,11 @@ import { LanguageProvider } from './i18n/LanguageContext';
 import { QuotesProvider } from './context/QuotesContext';
 import { ArchivesProvider } from './context/ArchivesContext';
 import { useMediaQuery } from './hooks/useMediaQuery';
-import { useAdminAuth } from './admin/useAdminAuth';
+import { useAuth } from './context/AuthContext';
 import EditorLoginModal from './components/EditorLoginModal';
 
 export default function App() {
-  const navigate = useNavigate();
-  const { isAdmin } = useAdminAuth();
+  const { isAdmin, user } = useAuth();
   const {
     markers,
     selectedMarkerId,
@@ -39,7 +37,7 @@ export default function App() {
     resetToSample,
     clearAll,
     readOnly: dataReadOnly,
-  } = useMarkers();
+  } = useMarkers({ isEditor: isAdmin });
 
   const {
     searchQuery,
@@ -64,7 +62,7 @@ export default function App() {
     deleteImage,
     removeMarkerRelation,
     readOnly: galleryReadOnly,
-  } = useGallery(markers);
+  } = useGallery(markers, { isEditor: isAdmin });
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   // 'map' | 'manual' | null
@@ -340,7 +338,7 @@ export default function App() {
 
   const handleAddWhenReadOnly = () => {
     if (isAdmin) {
-      navigate('/admin/markers/new');
+      handleStartAddMode();
       return;
     }
     setShowEditorLogin(true);
@@ -389,14 +387,16 @@ export default function App() {
     onToggleOnThisDay: toggleOnThisDay,
     dataReadOnly,
     onAddWhenReadOnly: handleAddWhenReadOnly,
+    isEditorLoggedIn: isAdmin,
+    editorEmail: user?.email || '',
   };
 
   const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);
 
   return (
     <LanguageProvider>
-    <QuotesProvider>
-    <ArchivesProvider>
+    <QuotesProvider isEditor={isAdmin}>
+    <ArchivesProvider isEditor={isAdmin}>
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}

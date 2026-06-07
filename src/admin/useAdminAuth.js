@@ -29,10 +29,12 @@ export function useAdminAuth() {
   const user = session?.user ?? null;
   const isAdmin = isAdminUser(user);
 
-  const signInWithEmail = useCallback(async (email) => {
+  const signInWithEmail = useCallback(async (email, options = {}) => {
     const supabase = getSupabase();
     if (!supabase) throw new Error('未配置 Supabase');
-    const redirectTo = `${window.location.origin}/admin`;
+    const redirectTo =
+      options.redirectTo ||
+      `${window.location.origin}${window.location.pathname.startsWith('/admin') ? '/admin' : '/'}`;
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: redirectTo },

@@ -9,6 +9,7 @@ import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
+import { isCloudEnabled } from '../lib/cloudConfig';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
 
 function MobileScrollList({ children, scrollHint, listKey }) {
@@ -93,6 +94,8 @@ export default function Sidebar({
   compactMobile = false,
   dataReadOnly = false,
   onAddWhenReadOnly,
+  isEditorLoggedIn = false,
+  editorEmail = '',
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
@@ -165,7 +168,7 @@ export default function Sidebar({
           ))}
         </div>
       )}
-      {!dataReadOnly && (
+      {!dataReadOnly && !isCloudEnabled() && (
         <>
           <button
             type="button"
@@ -195,6 +198,11 @@ export default function Sidebar({
       )}
       {dataReadOnly && (
         <p className="text-xs text-gray-500 px-2 pt-2">{t('sidebar.cloudReadOnly')}</p>
+      )}
+      {isEditorLoggedIn && (
+        <p className="text-xs text-green-700 px-2 pt-2">
+          ✓ {t('sidebar.editorSignedIn', { email: editorEmail })}
+        </p>
       )}
     </div>
   ) : null;

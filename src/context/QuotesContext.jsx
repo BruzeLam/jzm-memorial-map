@@ -3,8 +3,8 @@ import { useQuotes } from '../hooks/useQuotes';
 
 const QuotesContext = createContext(null);
 
-export function QuotesProvider({ children }) {
-  const value = useQuotes();
+export function QuotesProvider({ children, isEditor = false }) {
+  const value = useQuotes({ isEditor });
   return <QuotesContext.Provider value={value}>{children}</QuotesContext.Provider>;
 }
 

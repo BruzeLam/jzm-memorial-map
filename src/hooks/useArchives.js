@@ -15,12 +15,12 @@ import {
 } from '../utils/archivesStorage';
 import { collectAllTags, registerTags } from '../utils/archiveTags';
 
-export function useArchives() {
+export function useArchives({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
   const [archives, setArchives] = useState(() => (cloudMode ? [] : loadLocalArchives()));
   const [loading, setLoading] = useState(cloudMode);
   const [error, setError] = useState(null);
-  const readOnly = cloudMode;
+  const readOnly = cloudMode && !isEditor;
 
   const stats = useMemo(() => classifyArchives(archives), [archives]);
 

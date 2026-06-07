@@ -3,7 +3,7 @@ import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS, REMOVED_MARKER_
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 import { isCloudEnabled } from '../lib/cloudConfig';
-import { fetchCloudMarkers } from '../services/cloudData';
+import { fetchCloudMarkers, upsertCloudMarker, deleteCloudMarker } from '../services/cloudData';
 
 const CACHE_KEY = 'jzm_memorial_markers_cache';
 
@@ -60,7 +60,7 @@ function saveToStorage(markers) {
   }
 }
 
-export function useMarkers() {
+export function useMarkers({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
   const [markers, setMarkers] = useState(() => (cloudMode ? [] : loadFromStorage()));
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
@@ -113,7 +113,7 @@ export function useMarkers() {
     };
   }, [cloudMode]);
 
-  const readOnly = cloudMode;
+  const readOnly = cloudMode && !isEditor;
 
   const addMarker = useCallback((markerData) => {
     if (readOnly) return null;
@@ -124,8 +124,11 @@ export function useMarkers() {
     };
     registerMarkerTags(newMarker.tags);
     setMarkers((prev) => [...prev, newMarker]);
+    if (cloudMode && isEditor) {
+      upsertCloudMarker(newMarker).catch((err) => console.error('Cloud marker save failed:', err));
+    }
     return newMarker.id;
-  }, [readOnly]);
+  }, [readOnly, cloudMode, isEditor]);
 
   const updateMarker = useCallback((id, updates) => {
     if (readOnly) return;
@@ -133,18 +136,24 @@ export function useMarkers() {
       const next = prev.map((m) => {
         if (m.id !== id) return m;
         const merged = normalizeMarkerFields(migrateAllMarkerRegions([{ ...m, ...updates }])[0]);
+        if (cloudMode && isEditor) {
+          upsertCloudMarker(merged).catch((err) => console.error('Cloud marker save failed:', err));
+        }
         return merged;
       });
       registerMarkerTags(collectAllMarkerTags(next));
       return next;
     });
-  }, [readOnly]);
+  }, [readOnly, cloudMode, isEditor]);
 
   const deleteMarker = useCallback((id) => {
     if (readOnly) return;
     setMarkers((prev) => prev.filter((m) => m.id !== id));
     setSelectedMarkerId((prev) => (prev === id ? null : prev));
-  }, [readOnly]);
+    if (cloudMode && isEditor) {
+      deleteCloudMarker(id).catch((err) => console.error('Cloud marker delete failed:', err));
+    }
+  }, [readOnly, cloudMode, isEditor]);
 
   const resetToSample = useCallback(() => {
     if (readOnly) return;
