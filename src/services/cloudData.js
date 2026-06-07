@@ -136,6 +136,62 @@ export async function fetchCloudDataVersion() {
   return data?.value?.version ?? null;
 }
 
+function rowToQuote(row) {
+  return row.payload;
+}
+
+export async function fetchCloudQuotes() {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('quotes')
+    .select('id, payload, updated_at')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []).map(rowToQuote);
+}
+
+export async function upsertCloudQuote(quote) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+
+  const { error } = await supabase.from('quotes').upsert({
+    id: quote.id,
+    payload: quote,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+  return quote;
+}
+
+export async function upsertCloudQuotesBatch(quotes) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+  if (!quotes.length) return 0;
+
+  const rows = quotes.map((q) => ({
+    id: q.id,
+    payload: q,
+    updated_at: new Date().toISOString(),
+  }));
+
+  const chunkSize = 50;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const { error } = await supabase.from('quotes').upsert(rows.slice(i, i + chunkSize));
+    if (error) throw error;
+  }
+  return rows.length;
+}
+
+export async function deleteCloudQuote(id) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+  const { error } = await supabase.from('quotes').delete().eq('id', id);
+  if (error) throw error;
+}
+
 /** 从 markers 构建 gallery 条目（与 useGallery 迁移逻辑一致） */
 export function buildGalleryFromMarkers(markers) {
   const gallery = [];

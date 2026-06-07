@@ -1,56 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { QUOTES } from '../data/quotes';
 import { filterBySearch, getQuoteSearchFields } from '../utils/textSearch';
 import { useI18n } from '../i18n/LanguageContext';
-
-const STORAGE_KEY = 'jzm_all_quotes';
-const MIGRATED_KEY = 'jzm_quotes_migrated_v2';
-
-function initializeAllQuotes() {
-  try {
-    // 只在第一次加载时，把内置语录迁移进 localStorage
-    const migrated = localStorage.getItem(MIGRATED_KEY);
-    if (!migrated) {
-      // 先读取已有的用户自添加语录
-      const oldRaw = localStorage.getItem('jzm_user_quotes');
-      const oldUserQuotes = oldRaw ? JSON.parse(oldRaw) : [];
-
-      // 合并：内置语录 + 旧用户语录，全部标记为可编辑
-      const allQuotes = [
-        ...QUOTES.map((q, i) => ({
-          id: q.id || `builtin_${i}`,
-          text: q.text || '',
-          source: q.source || null,
-          context: q.context || null,
-          isUserAdded: true,
-        })),
-        ...oldUserQuotes.map((q, i) => ({
-          id: q.id || `user_migrated_${i}`,
-          text: q.text || '',
-          source: q.source || null,
-          context: q.context || null,
-          isUserAdded: true,
-        })),
-      ].filter(q => q.text.trim());
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(allQuotes));
-      localStorage.setItem(MIGRATED_KEY, 'true');
-      return allQuotes;
-    }
-
-    // 已迁移过，直接读取
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw).map(q => ({ ...q, isUserAdded: true }));
-  } catch (e) {
-    console.error('Failed to initialize quotes:', e);
-    return QUOTES.map((q, i) => ({ ...q, id: q.id || `builtin_${i}`, isUserAdded: true }));
-  }
-}
-
-function saveUserQuotes(quotes) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(quotes));
-}
+import { useQuotesContext } from '../context/QuotesContext';
+import { exportQuotesBackup } from '../utils/quotesStorage';
 
 function UploadForm({ onSave, onCancel, initialData }) {
   const { t } = useI18n();
@@ -67,11 +19,11 @@ function UploadForm({ onSave, onCancel, initialData }) {
       return;
     }
     onSave({
-      id: initialData?.id || 'user_' + Date.now(),
+      id: initialData?.id || `user_${Date.now()}`,
       text: text.trim(),
       source: source.trim() || null,
       context: context.trim() || null,
-      isUserAdded: true,
+      isUserAdded: initialData?.isUserAdded ?? true,
     });
   };
 
@@ -100,7 +52,6 @@ function UploadForm({ onSave, onCancel, initialData }) {
             <textarea
               value={text}
               onChange={(e) => { setText(e.target.value); setError(''); }}
-              placeholder=""
               rows={3}
               maxLength={200}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
@@ -114,7 +65,6 @@ function UploadForm({ onSave, onCancel, initialData }) {
               type="text"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              placeholder=""
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
@@ -125,7 +75,6 @@ function UploadForm({ onSave, onCancel, initialData }) {
               type="text"
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              placeholder=""
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
@@ -154,40 +103,33 @@ function UploadForm({ onSave, onCancel, initialData }) {
 
 export default function QuotesPanel({ onClose }) {
   const { t } = useI18n();
+  const { quotes, stats, readOnly, updateQuote, deleteQuote, addQuote } = useQuotesContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [editingQuote, setEditingQuote] = useState(null);
-  const [userQuotes, setUserQuotes] = useState(initializeAllQuotes);
-
-  const allQuotes = useMemo(() => userQuotes, [userQuotes]);
 
   const filteredQuotes = useMemo(
-    () => filterBySearch(allQuotes, searchQuery, getQuoteSearchFields),
-    [allQuotes, searchQuery]
+    () => filterBySearch(quotes, searchQuery, getQuoteSearchFields),
+    [quotes, searchQuery]
   );
 
-  const handleSaveQuote = (quote) => {
-    let updated;
+  const handleSaveQuote = async (quote) => {
     if (editingQuote) {
-      updated = userQuotes.map((q) => (q.id === quote.id ? quote : q));
+      await updateQuote(quote);
       setEditingQuote(null);
     } else {
-      updated = [...userQuotes, quote];
+      await addQuote(quote);
     }
-    setUserQuotes(updated);
-    saveUserQuotes(updated);
     setShowUploadForm(false);
   };
 
-  const handleEditUserQuote = (quote) => {
+  const handleEditQuote = (quote) => {
     setEditingQuote(quote);
     setShowUploadForm(true);
   };
 
-  const handleDeleteUserQuote = (id) => {
-    const updated = userQuotes.filter((q) => q.id !== id);
-    setUserQuotes(updated);
-    saveUserQuotes(updated);
+  const handleDeleteQuote = async (id) => {
+    await deleteQuote(id);
   };
 
   return (
@@ -202,7 +144,6 @@ export default function QuotesPanel({ onClose }) {
           style={{ maxHeight: '85vh' }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <span className="text-xl">📚</span>
@@ -212,13 +153,24 @@ export default function QuotesPanel({ onClose }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowUploadForm(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
-              >
-                <span>＋</span>
-                <span>{t('quotes.upload')}</span>
-              </button>
+              {!readOnly && (
+                <button
+                  onClick={() => setShowUploadForm(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white text-xs font-medium rounded-lg transition-colors"
+                >
+                  <span>＋</span>
+                  <span>{t('quotes.upload')}</span>
+                </button>
+              )}
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => exportQuotesBackup(quotes)}
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
+                >
+                  导出备份
+                </button>
+              )}
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 text-lg leading-none transition-colors ml-1"
@@ -228,7 +180,6 @@ export default function QuotesPanel({ onClose }) {
             </div>
           </div>
 
-          {/* Search bar */}
           <div className="px-6 py-3 border-b border-gray-100">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
@@ -248,10 +199,11 @@ export default function QuotesPanel({ onClose }) {
                 </button>
               )}
             </div>
+            {readOnly && (
+              <p className="text-xs text-gray-500 mt-2">☁️ 语录来自云端（只读）。编辑请前往 /admin</p>
+            )}
           </div>
 
-
-          {/* Quotes list */}
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
             {filteredQuotes.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
@@ -260,49 +212,55 @@ export default function QuotesPanel({ onClose }) {
               </div>
             ) : (
               filteredQuotes.map((quote) => (
-                  <div
-                    key={quote.id}
-                    className="border border-gray-100 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-gray-800 font-medium text-sm leading-relaxed mb-2 flex-1">
-                        "{quote.text}"
-                      </p>
-                      {quote.isUserAdded && (
-                        <div className="flex gap-1 flex-shrink-0 mt-0.5">
-                          <button
-                            onClick={() => handleEditUserQuote(quote)}
-                            className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                            title="编辑"
-                          >
-                            ✎
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUserQuote(quote.id)}
-                            className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            title="删除"
-                          >
-                            🗑
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    {quote.source && (
-                      <p className="text-xs text-gray-500 mb-1.5">—— {quote.source}</p>
-                    )}
-                    {quote.context && (
-                      <p className="text-xs text-gray-400 leading-relaxed">{quote.context}</p>
+                <div
+                  key={quote.id}
+                  className="border border-gray-100 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-gray-800 font-medium text-sm leading-relaxed mb-2 flex-1">
+                      "{quote.text}"
+                    </p>
+                    {!readOnly && (
+                      <div className="flex gap-1 flex-shrink-0 mt-0.5">
+                        <button
+                          onClick={() => handleEditQuote(quote)}
+                          className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                          title="编辑"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuote(quote.id)}
+                          className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          title="删除"
+                        >
+                          🗑
+                        </button>
+                      </div>
                     )}
                   </div>
+                  {quote.source && (
+                    <p className="text-xs text-gray-500 mb-1.5">—— {quote.source}</p>
+                  )}
+                  {quote.context && (
+                    <p className="text-xs text-gray-400 leading-relaxed">{quote.context}</p>
+                  )}
+                  {!quote.isUserAdded && (
+                    <span className="inline-block mt-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+                      内置
+                    </span>
+                  )}
+                </div>
               ))
             )}
           </div>
 
-          {/* Footer */}
-          <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
-            <span className="text-xs text-gray-400">
-              {t('quotes.total', { count: filteredQuotes.length })}
-            </span>
+          <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between gap-3">
+            <div className="text-xs text-gray-400">
+              <span>{t('quotes.total', { count: filteredQuotes.length })}</span>
+              <span className="mx-1">·</span>
+              <span>{t('quotes.statsBreakdown', { builtin: stats.builtin, user: stats.userAdded })}</span>
+            </div>
             <button
               onClick={onClose}
               className="px-4 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
