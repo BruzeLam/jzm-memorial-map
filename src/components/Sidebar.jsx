@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { collectAllMarkerTags } from '../utils/markerTags';
 import { MarkerTagPills } from './MarkerTagInput';
 import SearchBar from './SearchBar';
@@ -93,6 +92,7 @@ export default function Sidebar({
   onToggleOnThisDay,
   compactMobile = false,
   dataReadOnly = false,
+  onAddWhenReadOnly,
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
@@ -125,6 +125,79 @@ export default function Sidebar({
 
   // Determine what the add button shows
   const inActiveAddFlow = isAddingMode || showAddForm || showModePicker;
+
+  const handleAddButtonClick = () => {
+    if (inActiveAddFlow) {
+      onCancelAdd();
+      return;
+    }
+    if (dataReadOnly) {
+      onAddWhenReadOnly?.();
+      return;
+    }
+    onStartAddMode();
+  };
+
+  const settingsPanel = showSettings ? (
+    <div className={`${compactMobile ? 'px-2' : 'px-3'} py-2 border-b border-gray-100 bg-gray-50`}>
+      <button
+        type="button"
+        onClick={() => setShowLanguageDrawer((v) => !v)}
+        className="flex w-full items-center justify-between py-2 text-xs text-gray-700 hover:bg-white rounded-md px-2"
+      >
+        <span>🌐 {t('sidebar.languageLabel')}</span>
+        <span className="text-gray-400">{showLanguageDrawer ? '▲' : '▼'}</span>
+      </button>
+      {showLanguageDrawer && (
+        <div className="max-h-40 overflow-y-auto mt-1 rounded-md border border-gray-200 bg-white">
+          {localeOptions.map((opt) => (
+            <button
+              key={opt.code}
+              type="button"
+              onClick={() => setLocale(opt.code)}
+              className={`flex w-full items-center justify-between px-3 py-2 text-xs text-left hover:bg-gray-50 ${
+                locale === opt.code ? 'text-blue-700 font-semibold bg-blue-50/80' : 'text-gray-700'
+              }`}
+            >
+              <span>{opt.native}</span>
+              {locale === opt.code && <span className="text-blue-600">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+      {!dataReadOnly && (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              onResetToSample();
+              setShowSettings(false);
+              setShowLanguageDrawer(false);
+            }}
+            className="block w-full text-left px-2 py-2 text-xs text-gray-700 hover:bg-white rounded-md mt-1"
+          >
+            🔄 {t('sidebar.restoreSample')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm(t('sidebar.confirmClearAll'))) {
+                onClearAll();
+                setShowSettings(false);
+                setShowLanguageDrawer(false);
+              }
+            }}
+            className="block w-full text-left px-2 py-2 text-xs text-red-500 hover:bg-red-50 rounded-md"
+          >
+            🗑️ {t('sidebar.clearAll')}
+          </button>
+        </>
+      )}
+      {dataReadOnly && (
+        <p className="text-xs text-gray-500 px-2 pt-2">{t('sidebar.cloudReadOnly')}</p>
+      )}
+    </div>
+  ) : null;
 
   const markerListContent = showModePicker ? (
     /* ── Mode Picker ─────────────────────────────────────── */
@@ -377,125 +450,61 @@ export default function Sidebar({
           {markerListContent}
         </MobileScrollList>
 
-        <div className="px-2 py-1 border-t border-gray-100 flex gap-1.5 flex-shrink-0 bg-white">
-          {!dataReadOnly && (
-          <button
-            type="button"
-            onClick={inActiveAddFlow ? onCancelAdd : onStartAddMode}
-            className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors min-h-[40px] ${
-              inActiveAddFlow
-                ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
-          </button>
-          )}
-
-          <div className="relative">
+        <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+          {settingsPanel}
+          <div className="px-2 py-1 flex gap-1.5">
             <button
               type="button"
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
-              aria-label={t('sidebar.export')}
+              onClick={handleAddButtonClick}
+              className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors min-h-[40px] ${
+                inActiveAddFlow
+                  ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
-              ⬇️
+              {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
             </button>
-            {showExportMenu && (
-              <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10">
-                {['json', 'csv', 'geojson'].map((fmt) => (
-                  <button
-                    key={fmt}
-                    type="button"
-                    onClick={() => handleExport(fmt)}
-                    className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 uppercase"
-                  >
-                    {fmt}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <div className="relative">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
+                aria-label={t('sidebar.export')}
+              >
+                ⬇️
+              </button>
+              {showExportMenu && (
+                <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-20 min-w-[7rem]">
+                  {['json', 'csv', 'geojson'].map((fmt) => (
+                    <button
+                      key={fmt}
+                      type="button"
+                      onClick={() => handleExport(fmt)}
+                      className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 uppercase"
+                    >
+                      {fmt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button
               type="button"
               onClick={() => {
                 setShowSettings(!showSettings);
                 if (showSettings) setShowLanguageDrawer(false);
               }}
-              className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
+              className={`min-h-[40px] min-w-[40px] text-xs rounded-lg border transition-colors flex items-center justify-center ${
+                showSettings
+                  ? 'border-blue-300 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+              }`}
               aria-label={t('sidebar.languageLabel')}
             >
               ⚙️
             </button>
-            {showSettings && (
-              <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-48">
-                <button
-                  type="button"
-                  onClick={() => setShowLanguageDrawer((v) => !v)}
-                  className="flex w-full items-center justify-between px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 border-b border-gray-100"
-                >
-                  <span>🌐 {t('sidebar.languageLabel')}</span>
-                  <span className="text-gray-400">{showLanguageDrawer ? '▲' : '▼'}</span>
-                </button>
-                {showLanguageDrawer && (
-                  <div className="max-h-52 overflow-y-auto border-b border-gray-100 bg-gray-50/80">
-                    {localeOptions.map((opt) => (
-                      <button
-                        key={opt.code}
-                        type="button"
-                        onClick={() => setLocale(opt.code)}
-                        className={`flex w-full items-center justify-between px-4 py-2 text-xs text-left hover:bg-white ${
-                          locale === opt.code
-                            ? 'text-blue-700 font-semibold bg-blue-50/80'
-                            : 'text-gray-700'
-                        }`}
-                      >
-                        <span>{opt.native}</span>
-                        {locale === opt.code && <span className="text-blue-600">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {!dataReadOnly && (
-                <>
-                <button
-                  type="button"
-                  onClick={() => { onResetToSample(); setShowSettings(false); setShowLanguageDrawer(false); }}
-                  className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
-                >
-                  🔄 {t('sidebar.restoreSample')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm(t('sidebar.confirmClearAll'))) {
-                      onClearAll();
-                      setShowSettings(false);
-                      setShowLanguageDrawer(false);
-                    }
-                  }}
-                  className="block w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-red-50"
-                >
-                  🗑️ {t('sidebar.clearAll')}
-                </button>
-                </>
-                )}
-                {dataReadOnly && (
-                <div className="px-4 py-2 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-2">{t('sidebar.cloudReadOnly')}</p>
-                  <Link
-                    to="/admin"
-                    onClick={() => { setShowSettings(false); setShowLanguageDrawer(false); }}
-                    className="block w-full text-center px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {t('sidebar.openAdmin')}
-                  </Link>
-                </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -558,119 +567,55 @@ export default function Sidebar({
         {markerListContent}
       </div>
 
-      <div className="px-3 py-2 border-t border-gray-100 flex gap-1.5">
-        {!dataReadOnly && (
-        <button
-          onClick={inActiveAddFlow ? onCancelAdd : onStartAddMode}
-          className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors ${
-            inActiveAddFlow
-              ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-        >
-          {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
-        </button>
-        )}
-
-        <div className="relative">
+      <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+        {settingsPanel}
+        <div className="px-3 py-2 flex gap-1.5">
           <button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+            onClick={handleAddButtonClick}
+            className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors ${
+              inActiveAddFlow
+                ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
           >
-            ⬇️ {t('sidebar.export')}
+            {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
           </button>
-          {showExportMenu && (
-            <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10">
-              {['json', 'csv', 'geojson'].map((fmt) => (
-                <button
-                  key={fmt}
-                  onClick={() => handleExport(fmt)}
-                  className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 uppercase"
-                >
-                  {fmt}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
-        <div className="relative">
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+            >
+              ⬇️ {t('sidebar.export')}
+            </button>
+            {showExportMenu && (
+              <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-20 min-w-[7rem]">
+                {['json', 'csv', 'geojson'].map((fmt) => (
+                  <button
+                    key={fmt}
+                    onClick={() => handleExport(fmt)}
+                    className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 uppercase"
+                  >
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => {
               setShowSettings(!showSettings);
               if (showSettings) setShowLanguageDrawer(false);
             }}
-            className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+            className={`text-xs py-2 px-3 rounded-lg border transition-colors ${
+              showSettings
+                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+            }`}
           >
             ⚙️
           </button>
-          {showSettings && (
-            <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10 w-48">
-              <button
-                type="button"
-                onClick={() => setShowLanguageDrawer((v) => !v)}
-                className="flex w-full items-center justify-between px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 border-b border-gray-100"
-              >
-                <span>🌐 {t('sidebar.languageLabel')}</span>
-                <span className="text-gray-400">{showLanguageDrawer ? '▲' : '▼'}</span>
-              </button>
-              {showLanguageDrawer && (
-                <div className="max-h-52 overflow-y-auto border-b border-gray-100 bg-gray-50/80">
-                  {localeOptions.map((opt) => (
-                    <button
-                      key={opt.code}
-                      type="button"
-                      onClick={() => setLocale(opt.code)}
-                      className={`flex w-full items-center justify-between px-4 py-2 text-xs text-left hover:bg-white ${
-                        locale === opt.code
-                          ? 'text-blue-700 font-semibold bg-blue-50/80'
-                          : 'text-gray-700'
-                      }`}
-                    >
-                      <span>{opt.native}</span>
-                      {locale === opt.code && <span className="text-blue-600">✓</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {!dataReadOnly && (
-              <button
-                type="button"
-                onClick={() => { onResetToSample(); setShowSettings(false); setShowLanguageDrawer(false); }}
-                className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50"
-              >
-                🔄 {t('sidebar.restoreSample')}
-              </button>
-              )}
-              {!dataReadOnly && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (window.confirm(t('sidebar.confirmClearAll'))) {
-                    onClearAll();
-                    setShowSettings(false);
-                    setShowLanguageDrawer(false);
-                  }
-                }}
-                className="block w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-red-50"
-              >
-                🗑️ {t('sidebar.clearAll')}
-              </button>
-              )}
-              {dataReadOnly && (
-              <div className="px-4 py-2 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">{t('sidebar.cloudReadOnly')}</p>
-                <Link
-                  to="/admin"
-                  onClick={() => { setShowSettings(false); setShowLanguageDrawer(false); }}
-                  className="block w-full text-center px-3 py-2 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {t('sidebar.openAdmin')}
-                </Link>
-              </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

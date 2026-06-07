@@ -1,5 +1,6 @@
 // Cache fix: 2026-05-25 - Force Vercel rebuild
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
 import { useGallery } from './hooks/useGallery';
@@ -19,8 +20,12 @@ import { LanguageProvider } from './i18n/LanguageContext';
 import { QuotesProvider } from './context/QuotesContext';
 import { ArchivesProvider } from './context/ArchivesContext';
 import { useMediaQuery } from './hooks/useMediaQuery';
+import { useAdminAuth } from './admin/useAdminAuth';
+import EditorLoginModal from './components/EditorLoginModal';
 
 export default function App() {
+  const navigate = useNavigate();
+  const { isAdmin } = useAdminAuth();
   const {
     markers,
     selectedMarkerId,
@@ -87,6 +92,7 @@ export default function App() {
   const [showChangeLog, setShowChangeLog] = useState(false);
   const [showOnThisDayModal, setShowOnThisDayModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showEditorLogin, setShowEditorLogin] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [mapContainerSize, setMapContainerSize] = useState({ width: 800, height: 600 });
 
@@ -332,6 +338,14 @@ export default function App() {
     }
   };
 
+  const handleAddWhenReadOnly = () => {
+    if (isAdmin) {
+      navigate('/admin/markers/new');
+      return;
+    }
+    setShowEditorLogin(true);
+  };
+
   const sidebarProps = {
     mapRef,
     markers,
@@ -374,6 +388,7 @@ export default function App() {
     onThisDayActive,
     onToggleOnThisDay: toggleOnThisDay,
     dataReadOnly,
+    onAddWhenReadOnly: handleAddWhenReadOnly,
   };
 
   const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);
@@ -401,6 +416,7 @@ export default function App() {
       )}
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
       {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
+      {showEditorLogin && <EditorLoginModal onClose={() => setShowEditorLogin(false)} />}
       {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
       {showGallery && (
         <GalleryPanel
