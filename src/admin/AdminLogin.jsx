@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from './useAdminAuth';
 import { isCloudEnabled, getAdminEmail } from '../lib/cloudConfig';
+import { getBranding } from '../config/branding';
 
 export default function AdminLogin() {
   const { signInWithEmail } = useAdminAuth();
@@ -43,9 +44,9 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full border border-gray-200">
-        <p className="text-xs text-gray-500 mb-1">江迹 · 管理后台</p>
+        <p className="text-xs text-gray-500 mb-1">{getBranding().adminTitle}</p>
         <h1 className="text-xl font-serif font-bold text-gray-900 mb-1">超级管理员登录</h1>
-        <p className="text-sm text-gray-600 mb-6">使用邮箱魔法链接登录，仅授权邮箱可写入云端数据。</p>
+        <p className="text-sm text-gray-600 mb-6">{getBranding().adminSubtitle}</p>
 
         {sent ? (
           <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 mb-4">

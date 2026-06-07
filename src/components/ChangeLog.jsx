@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import updates from '../data/updates.json';
+import updatesDefault from '../data/updates.json';
+import portfolioUpdates from '../data/portfolio/updates.json';
+import { isPortfolioMode } from '../config/branding';
 import { useI18n } from '../i18n/LanguageContext';
+
+const updates = isPortfolioMode() ? portfolioUpdates : updatesDefault;
 
 const typeStyle = {
   feature: { emoji: '✨', color: 'bg-blue-50 border-blue-200' },

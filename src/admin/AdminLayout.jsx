@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from './useAdminAuth';
+import { getBranding } from '../config/branding';
 
 export default function AdminLayout() {
   const { user, isAdmin, loading, signOut } = useAdminAuth();
@@ -44,7 +45,7 @@ export default function AdminLayout() {
       <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-4 min-w-0">
           <Link to="/admin" className="font-serif font-bold text-gray-900 text-sm shrink-0">
-            江迹后台
+            {getBranding().adminTitle}
           </Link>
           <nav className="flex gap-3 text-xs text-gray-600">
             <Link to="/admin" className="hover:text-blue-600">概览</Link>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { filterBySearch, getQuoteSearchFields } from '../utils/textSearch';
 import { useI18n } from '../i18n/LanguageContext';
+import { getBranding } from '../config/branding';
 import { useQuotesContext } from '../context/QuotesContext';
 import { exportQuotesBackup } from '../utils/quotesStorage';
 
@@ -149,7 +150,7 @@ export default function QuotesPanel({ onClose }) {
               <span className="text-xl">📚</span>
               <div>
                 <h2 className="text-base font-bold text-gray-800">{t('quotes.title')}</h2>
-                <p className="text-xs text-gray-400">The Yangtze Quotes Library</p>
+                <p className="text-xs text-gray-400">{getBranding().quotesPanelSubtitle}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

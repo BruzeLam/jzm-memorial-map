@@ -1,6 +1,8 @@
 /** 地图地点标签词库（与档案馆标签独立） */
 
-export const MARKER_TAG_REGISTRY_KEY = 'jzm_marker_tag_registry';
+import { getStorageKeys } from '../config/branding';
+
+export const MARKER_TAG_REGISTRY_KEY = getStorageKeys().markerTags;
 
 const MAX_TAG_LEN = 40;
 const MAX_TAGS_PER_MARKER = 30;

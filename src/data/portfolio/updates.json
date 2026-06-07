@@ -1,0 +1,28 @@
+{
+  "2026-6-7": [
+    {
+      "type": "feature",
+      "emoji": "☁️",
+      "title": "全栈云端数据（Supabase）",
+      "description": "地点、影像、语录、档案馆统一上云；RLS 公开只读 + 管理员可写。React Hooks 抽象读写层。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🔐",
+      "title": "邮箱魔法链接登录",
+      "description": "Supabase Auth OTP；登录后地图页直接 CRUD，变更实时同步云端。"
+    },
+    {
+      "type": "feature",
+      "emoji": "⚙️",
+      "title": "管理后台 /admin",
+      "description": "概览统计、JSON 导入导出、浏览器 localStorage 一键迁移、地点 CRUD。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "🗺️",
+      "title": "交互式纪念地图",
+      "description": "Leaflet 地图、侧栏筛选、历史上的今天、影像馆与文献模块。本页为作品集演示版。"
+    }
+  ]
+}

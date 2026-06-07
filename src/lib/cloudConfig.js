@@ -1,8 +1,11 @@
+import { isPortfolioDemoData } from '../config/branding';
+
 const url = process.env.REACT_APP_SUPABASE_URL || '';
 const anonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 const adminEmail = (process.env.REACT_APP_ADMIN_EMAIL || '').trim().toLowerCase();
 
 export function isCloudEnabled() {
+  if (isPortfolioDemoData()) return false;
   return Boolean(url && anonKey);
 }
 

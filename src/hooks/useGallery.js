@@ -6,11 +6,13 @@ import {
 } from '../utils/galleryUtils';
 import { filterGalleryBySearch } from '../utils/textSearch';
 import { isCloudEnabled } from '../lib/cloudConfig';
+import { getStorageKeys } from '../config/branding';
 import { fetchCloudGallery, upsertCloudGalleryBatch } from '../services/cloudData';
 
-const GALLERY_KEY = 'jzm_gallery_images';
-const GALLERY_CACHE_KEY = 'jzm_gallery_cache';
-const GALLERY_VERSION_KEY = 'jzm_gallery_version';
+const _sk = getStorageKeys();
+const GALLERY_KEY = _sk.gallery;
+const GALLERY_CACHE_KEY = _sk.galleryCache;
+const GALLERY_VERSION_KEY = _sk.galleryVersion;
 const GALLERY_DATA_VERSION = 2;
 
 function migrateGallery(gallery) {

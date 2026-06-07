@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import RandomQuoteDisplay from './RandomQuoteDisplay';
 import { useI18n } from '../i18n/LanguageContext';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { getBranding, isPortfolioMode } from '../config/branding';
 
-const CENTENARY = new Date('2026-08-17T00:00:00');
+function getMilestoneDate() {
+  return new Date(`${getBranding().milestoneDate}T00:00:00`);
+}
 
 function useCountdown() {
+  const milestone = getMilestoneDate();
   const [seconds, setSeconds] = useState(() =>
-    Math.max(0, Math.floor((CENTENARY - Date.now()) / 1000))
+    Math.max(0, Math.floor((milestone - Date.now()) / 1000))
   );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const remaining = Math.floor((CENTENARY - Date.now()) / 1000);
+      const remaining = Math.floor((milestone - Date.now()) / 1000);
       if (remaining <= 0) {
         setSeconds(0);
         clearInterval(timer);
@@ -47,13 +51,15 @@ function Glasses({ size = 32 }) {
 
 function CountdownBadge({ seconds, compact = false }) {
   const { t } = useI18n();
+  const branding = getBranding();
   const [hovered, setHovered] = useState(false);
-  const showCountdown = Date.now() < CENTENARY;
+  const milestone = getMilestoneDate();
+  const showCountdown = Date.now() < milestone;
 
   if (!showCountdown) {
     return (
       <div className={`flex items-center gap-2 text-gray-700 font-medium ${compact ? 'text-[10px] px-2 py-1' : 'text-xs px-3 py-1.5'}`}>
-        <span>1926/8/17</span>
+        <span>{branding.milestoneDisplay}</span>
         <span className="text-gray-400">-</span>
         <span>♾️</span>
       </div>
@@ -82,7 +88,7 @@ function CountdownBadge({ seconds, compact = false }) {
 
       {hovered && !compact && (
         <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-4 py-3 bg-white/90 backdrop-blur-sm text-gray-800 rounded-lg shadow-2xl whitespace-nowrap flex items-center gap-2 text-sm font-medium border border-gray-100 z-[99999]">
-          <span className="font-semibold">1926.8.17</span>
+          <span className="font-semibold">{branding.milestoneDisplay}</span>
           <span className="text-gray-400 mx-0.5">—</span>
           <span className="text-red-600">
             <Glasses size={28} />
@@ -108,6 +114,7 @@ function NavButton({ emoji, label, onClick, className }) {
 
 export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onOpenChangeLog }) {
   const { t } = useI18n();
+  const branding = getBranding();
   const seconds = useCountdown();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -135,14 +142,23 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
           className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
         />
         <h1 className="flex-1 min-w-0 text-[13px] md:text-lg font-serif font-bold leading-snug">
-          <a
-            href="https://www.news.cn/politics/2022-12/02/c_1129179786.htm"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
-          >
-            江泽民同志生平纪念地图
-          </a>
+          {branding.headerLink ? (
+            <a
+              href={branding.headerLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
+            >
+              {branding.siteTitle}
+            </a>
+          ) : (
+            <span className="text-gray-800 line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
+          )}
+          {isPortfolioMode() && (
+            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-slate-100 text-slate-600 align-middle">
+              作品集
+            </span>
+          )}
         </h1>
 
         {!isMobile && <RandomQuoteDisplay />}

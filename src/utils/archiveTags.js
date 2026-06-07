@@ -1,6 +1,8 @@
 /** 档案馆全局标签词库（localStorage） */
 
-export const TAG_REGISTRY_KEY = 'jzm_archive_tag_registry';
+import { getStorageKeys } from '../config/branding';
+
+export const TAG_REGISTRY_KEY = getStorageKeys().archiveTags;
 
 const MAX_TAG_LEN = 40;
 const MAX_TAGS_PER_DOC = 30;

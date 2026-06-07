@@ -3,9 +3,10 @@ import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS, REMOVED_MARKER_
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 import { isCloudEnabled } from '../lib/cloudConfig';
+import { getStorageKeys } from '../config/branding';
 import { fetchCloudMarkers, upsertCloudMarker, deleteCloudMarker } from '../services/cloudData';
 
-const CACHE_KEY = 'jzm_memorial_markers_cache';
+const CACHE_KEY = getStorageKeys().markersCache;
 
 const removedIdSet = new Set(REMOVED_MARKER_IDS);
 

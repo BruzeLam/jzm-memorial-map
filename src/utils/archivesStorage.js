@@ -1,4 +1,6 @@
 import { ARCHIVES } from '../data/archives';
+import { PORTFOLIO_ARCHIVES } from '../data/portfolio/archives';
+import { isPortfolioDemoData, getStorageKeys, getBranding } from '../config/branding';
 import { downloadFile } from './dataExport';
 import {
   normalizeTagList,
@@ -6,12 +8,14 @@ import {
   registerTags,
 } from './archiveTags';
 
-export const ARCHIVES_STORAGE_KEY = 'jzm_all_archives';
-export const ARCHIVES_MIGRATED_KEY = 'jzm_archives_migrated_v1';
-export const ARCHIVES_TAGS_SEED_KEY = 'jzm_archives_tags_seeded_v2';
-export const ARCHIVES_CACHE_KEY = 'jzm_all_archives_cache';
+const _sk = getStorageKeys();
+export const ARCHIVES_STORAGE_KEY = _sk.archives;
+export const ARCHIVES_MIGRATED_KEY = _sk.archivesMigrated;
+export const ARCHIVES_TAGS_SEED_KEY = _sk.archivesTagsSeed;
+export const ARCHIVES_CACHE_KEY = _sk.archivesCache;
 
-const BUILTIN_IDS = new Set(ARCHIVES.map((a) => a.id));
+const BUILTIN_SOURCE = isPortfolioDemoData() ? PORTFOLIO_ARCHIVES : ARCHIVES;
+const BUILTIN_IDS = new Set(BUILTIN_SOURCE.map((a) => a.id));
 
 export function isBuiltinArchiveId(id) {
   return BUILTIN_IDS.has(id) || (typeof id === 'string' && id.startsWith('archive_') && BUILTIN_IDS.has(id));
@@ -38,7 +42,7 @@ export function normalizeArchiveRecord(item, index = 0) {
 function seedBuiltinTags(list) {
   if (localStorage.getItem(ARCHIVES_TAGS_SEED_KEY)) return list;
   const seedById = Object.fromEntries(
-    ARCHIVES.filter((a) => a.tags?.length).map((a) => [a.id, a.tags])
+    BUILTIN_SOURCE.filter((a) => a.tags?.length).map((a) => [a.id, a.tags])
   );
   const updated = list.map((item) => {
     const seedTags = seedById[item.id];
@@ -65,7 +69,7 @@ export function loadLocalArchives() {
   try {
     const migrated = localStorage.getItem(ARCHIVES_MIGRATED_KEY);
     if (!migrated) {
-      let all = ARCHIVES.map(normalizeArchiveRecord).filter((a) => a.text);
+      let all = BUILTIN_SOURCE.map(normalizeArchiveRecord).filter((a) => a.text);
       all = seedBuiltinTags(all);
       registerTags(collectAllTags(all));
       localStorage.setItem(ARCHIVES_STORAGE_KEY, JSON.stringify(all));
@@ -73,7 +77,7 @@ export function loadLocalArchives() {
       return all;
     }
     const raw = localStorage.getItem(ARCHIVES_STORAGE_KEY);
-    if (!raw) return ARCHIVES.map(normalizeArchiveRecord).filter((a) => a.text);
+    if (!raw) return BUILTIN_SOURCE.map(normalizeArchiveRecord).filter((a) => a.text);
     let list = JSON.parse(raw).map((a, i) => normalizeArchiveRecord(a, i));
     const beforeSeed = JSON.stringify(list);
     list = seedBuiltinTags(list);
@@ -84,7 +88,7 @@ export function loadLocalArchives() {
     return list.filter((a) => a.text);
   } catch (e) {
     console.error('Failed to load archives from localStorage:', e);
-    return ARCHIVES.map(normalizeArchiveRecord).filter((a) => a.text);
+    return BUILTIN_SOURCE.map(normalizeArchiveRecord).filter((a) => a.text);
   }
 }
 
@@ -96,16 +100,17 @@ export function loadLegacyLocalArchives() {
   return loadLocalArchives();
 }
 
-export function exportArchivesBackup(archives, filenamePrefix = 'jzm-archives') {
+export function exportArchivesBackup(archives, filenamePrefix) {
+  const prefix = filenamePrefix || `${getBranding().exportFilePrefix}-archives`;
   const timestamp = new Date().toISOString().slice(0, 10);
   const stats = classifyArchives(archives);
   const payload = {
-    title: '江迹 · 档案馆备份',
+    title: `${getBranding().siteTitle} · 档案馆备份`,
     exportedAt: new Date().toISOString(),
     stats,
     archives,
   };
-  downloadFile(JSON.stringify(payload, null, 2), `${filenamePrefix}-${timestamp}.json`, 'application/json');
+  downloadFile(JSON.stringify(payload, null, 2), `${prefix}-${timestamp}.json`, 'application/json');
 }
 
 export function parseArchivesImport(raw) {
@@ -128,4 +133,4 @@ export function parseArchivesImport(raw) {
     .filter((a) => a.text);
 }
 
-export { ARCHIVES as BUILTIN_ARCHIVES };
+export { BUILTIN_SOURCE as BUILTIN_ARCHIVES };

@@ -1,11 +1,15 @@
 import { QUOTES } from '../data/quotes';
+import { PORTFOLIO_QUOTES } from '../data/portfolio/quotes';
+import { isPortfolioDemoData, getStorageKeys, getBranding } from '../config/branding';
 import { downloadFile } from './dataExport';
 
-export const QUOTES_STORAGE_KEY = 'jzm_all_quotes';
-export const QUOTES_MIGRATED_KEY = 'jzm_quotes_migrated_v2';
-export const QUOTES_CACHE_KEY = 'jzm_all_quotes_cache';
+const _sk = getStorageKeys();
+export const QUOTES_STORAGE_KEY = _sk.quotes;
+export const QUOTES_MIGRATED_KEY = _sk.quotesMigrated;
+export const QUOTES_CACHE_KEY = _sk.quotesCache;
 
-const BUILTIN_IDS = new Set(QUOTES.map((q) => q.id));
+const BUILTIN_SOURCE = isPortfolioDemoData() ? PORTFOLIO_QUOTES : QUOTES;
+const BUILTIN_IDS = new Set(BUILTIN_SOURCE.map((q) => q.id));
 
 export function isBuiltinQuoteId(id) {
   return BUILTIN_IDS.has(id) || (typeof id === 'string' && id.startsWith('builtin_'));
@@ -41,7 +45,7 @@ export function loadLocalQuotes() {
       const oldUserQuotes = oldRaw ? JSON.parse(oldRaw) : [];
 
       const allQuotes = [
-        ...QUOTES.map((q, i) =>
+        ...BUILTIN_SOURCE.map((q, i) =>
           normalizeQuoteRecord({
             id: q.id || `builtin_${i}`,
             text: q.text,
@@ -66,11 +70,11 @@ export function loadLocalQuotes() {
     }
 
     const raw = localStorage.getItem(QUOTES_STORAGE_KEY);
-    if (!raw) return QUOTES.map((q, i) => normalizeQuoteRecord({ ...q, id: q.id || `builtin_${i}` }));
+    if (!raw) return BUILTIN_SOURCE.map((q, i) => normalizeQuoteRecord({ ...q, id: q.id || `builtin_${i}` }));
     return JSON.parse(raw).map(normalizeQuoteRecord).filter((q) => q.text);
   } catch (e) {
     console.error('Failed to load quotes from localStorage:', e);
-    return QUOTES.map((q, i) => normalizeQuoteRecord({ ...q, id: q.id || `builtin_${i}` }));
+    return BUILTIN_SOURCE.map((q, i) => normalizeQuoteRecord({ ...q, id: q.id || `builtin_${i}` }));
   }
 }
 
@@ -82,16 +86,17 @@ export function loadLegacyLocalQuotes() {
   return loadLocalQuotes();
 }
 
-export function exportQuotesBackup(quotes, filenamePrefix = 'jzm-quotes') {
+export function exportQuotesBackup(quotes, filenamePrefix) {
+  const prefix = filenamePrefix || getBranding().exportFilePrefix + '-quotes';
   const timestamp = new Date().toISOString().slice(0, 10);
   const stats = classifyQuotes(quotes);
   const payload = {
-    title: '江迹 · 长者语录备份',
+    title: `${getBranding().siteTitle} · 文献摘录备份`,
     exportedAt: new Date().toISOString(),
     stats,
     quotes,
   };
-  downloadFile(JSON.stringify(payload, null, 2), `${filenamePrefix}-${timestamp}.json`, 'application/json');
+  downloadFile(JSON.stringify(payload, null, 2), `${prefix}-${timestamp}.json`, 'application/json');
 }
 
 export function parseQuotesImport(raw) {
@@ -114,4 +119,4 @@ export function parseQuotesImport(raw) {
     .filter((q) => q.text);
 }
 
-export { QUOTES as BUILTIN_QUOTES };
+export { BUILTIN_SOURCE as BUILTIN_QUOTES };

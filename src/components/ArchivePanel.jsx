@@ -9,6 +9,7 @@ import {
 import { normalizeArchiveRecord } from '../utils/archivesStorage';
 import ArchiveTagInput from './ArchiveTagInput';
 import { useI18n } from '../i18n/LanguageContext';
+import { getBranding } from '../config/branding';
 import { useArchivesContext } from '../context/ArchivesContext';
 
 function TextWithLinks({ text, className = '' }) {
@@ -343,7 +344,7 @@ export default function ArchivePanel({ onClose }) {
               <span className="text-xl">📁</span>
               <div>
                 <h2 className="text-base font-bold text-gray-800">{t('archive.title')}</h2>
-                <p className="text-xs text-gray-400">Historical Archives</p>
+                <p className="text-xs text-gray-400">{getBranding().archivePanelSubtitle}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { STORAGE_KEY } from './constants';
+import { getStorageKeys } from '../config/branding';
 
-const GALLERY_KEY = 'jzm_gallery_images';
+const GALLERY_KEY = getStorageKeys().gallery;
 
 /** 读取上云前保存在浏览器里的地点（未被云端模式清除） */
 export function loadLegacyLocalMarkers() {

@@ -1,9 +1,11 @@
 /**
  * Export markers as JSON string
  */
+import { getBranding } from '../config/branding';
+
 export function exportAsJSON(markers) {
   const data = {
-    title: '江泽民同志生平纪念地图',
+    title: getBranding().exportProjectName,
     exportedAt: new Date().toISOString(),
     total: markers.length,
     markers,
@@ -88,7 +90,7 @@ export function exportAsGeoJSON(markers) {
 
   const geojson = {
     type: 'FeatureCollection',
-    name: '江泽民同志生平纪念地图',
+    name: getBranding().exportProjectName,
     exportedAt: new Date().toISOString(),
     features,
   };
@@ -116,20 +118,21 @@ export function downloadFile(content, filename, mimeType) {
  */
 export function exportMarkers(markers, format) {
   const timestamp = new Date().toISOString().slice(0, 10);
+  const prefix = getBranding().exportFilePrefix;
   switch (format) {
     case 'json': {
       const content = exportAsJSON(markers);
-      downloadFile(content, `jzm-memorial-${timestamp}.json`, 'application/json');
+      downloadFile(content, `${prefix}-${timestamp}.json`, 'application/json');
       break;
     }
     case 'csv': {
       const content = exportAsCSV(markers);
-      downloadFile(content, `jzm-memorial-${timestamp}.csv`, 'text/csv;charset=utf-8;');
+      downloadFile(content, `${prefix}-${timestamp}.csv`, 'text/csv;charset=utf-8;');
       break;
     }
     case 'geojson': {
       const content = exportAsGeoJSON(markers);
-      downloadFile(content, `jzm-memorial-${timestamp}.geojson`, 'application/geo+json');
+      downloadFile(content, `${prefix}-${timestamp}.geojson`, 'application/geo+json');
       break;
     }
     default:

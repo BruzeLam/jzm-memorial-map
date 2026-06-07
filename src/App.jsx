@@ -21,9 +21,17 @@ import { ArchivesProvider } from './context/ArchivesContext';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useAuth } from './context/AuthContext';
 import EditorLoginModal from './components/EditorLoginModal';
+import { getBranding } from './config/branding';
 
 export default function App() {
   const { isAdmin, user } = useAuth();
+  const branding = getBranding();
+
+  useEffect(() => {
+    document.title = branding.siteTitle;
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', branding.siteDescription);
+  }, [branding.siteTitle, branding.siteDescription]);
   const {
     markers,
     selectedMarkerId,

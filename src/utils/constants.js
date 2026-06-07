@@ -1,3 +1,6 @@
+import { isPortfolioDemoData, getStorageKeys } from '../config/branding';
+import { PORTFOLIO_SAMPLE_MARKERS } from '../data/portfolio/markers';
+
 export const MARKER_TYPES = {
   spot: {
     key: 'spot',
@@ -28,13 +31,14 @@ export const MARKER_TYPES = {
   },
 };
 
-export const STORAGE_KEY = 'jzm_memorial_markers';
-export const VERSION_KEY = 'jzm_memorial_data_version';
+const _sk = getStorageKeys();
+export const STORAGE_KEY = _sk.markers;
+export const VERSION_KEY = _sk.markersVersion;
 
 export const DEFAULT_CENTER = [35.8617, 104.1954];
 export const DEFAULT_ZOOM = 4;
 
-export const SAMPLE_MARKERS = [
+const SAMPLE_MARKERS_RAW = [
   {
     id: 'spot_001',
     type: 'spot',
@@ -1153,3 +1157,5 @@ export const REMOVED_MARKER_IDS = ['spot_trip_001', 'event_trip_001'];
 
 // 数据版本：条数变更或结构迁移时递增（31 = 1986/1987/1990 六一儿童节）
 export const DATA_VERSION = 31;
+
+export const SAMPLE_MARKERS = isPortfolioDemoData() ? PORTFOLIO_SAMPLE_MARKERS : SAMPLE_MARKERS_RAW;

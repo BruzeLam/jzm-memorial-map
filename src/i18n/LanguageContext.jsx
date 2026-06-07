@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { messages } from './messages';
+import { portfolioMessageOverrides } from './portfolioMessages';
+import { isPortfolioMode } from '../config/branding';
 import { MARKER_TYPES } from '../utils/constants';
 import {
   DEFAULT_LOCALE,
@@ -7,8 +9,9 @@ import {
   LOCALE_OPTIONS,
   VALID_LOCALES,
 } from './localeConfig';
+import { getStorageKeys } from '../config/branding';
 
-const LOCALE_KEY = 'jzm_locale';
+const LOCALE_KEY = getStorageKeys().locale;
 const LanguageContext = createContext(null);
 
 function getNested(obj, path) {
@@ -23,6 +26,11 @@ function interpolate(template, vars = {}) {
 }
 
 function resolveMessage(locale, key) {
+  if (isPortfolioMode()) {
+    const override = getNested(portfolioMessageOverrides[locale], key)
+      ?? getNested(portfolioMessageOverrides.zh, key);
+    if (override != null) return override;
+  }
   const chain = LOCALE_FALLBACK[locale] || LOCALE_FALLBACK[DEFAULT_LOCALE];
   for (const loc of chain) {
     const raw = getNested(messages[loc], key);
