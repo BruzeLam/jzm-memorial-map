@@ -7,6 +7,7 @@ import {
   buildGalleryFromMarkers,
   setCloudDataVersion,
   fetchCloudMarkers,
+  parseMarkersImport,
 } from '../services/cloudData';
 
 export default function AdminDashboard() {
@@ -20,19 +21,55 @@ export default function AdminDashboard() {
       .catch(() => setCount(null));
   }, []);
 
+  const syncMarkersToCloud = async (markers, label) => {
+    const markerCount = await upsertCloudMarkersBatch(markers);
+    const galleryItems = buildGalleryFromMarkers(markers);
+    const galleryCount = await upsertCloudGalleryBatch(galleryItems);
+    await setCloudDataVersion(DATA_VERSION);
+    setCount(markerCount);
+    setStatus(`完成（${label}）：${markerCount} 条地点，${galleryCount} 条影像已同步至云端。`);
+  };
+
   const handleSeed = async () => {
-    if (!window.confirm(`将内置 ${SAMPLE_MARKERS.length} 条地点及关联影像写入云端（已存在 id 会覆盖）。继续？`)) {
+    if (
+      !window.confirm(
+        `将 Git 内置 ${SAMPLE_MARKERS.length} 条地点写入云端（不含浏览器里曾单独添加的数据；已存在 id 会覆盖）。继续？`
+      )
+    ) {
       return;
     }
     setBusy(true);
     setStatus('');
     try {
-      const markerCount = await upsertCloudMarkersBatch(SAMPLE_MARKERS);
-      const galleryItems = buildGalleryFromMarkers(SAMPLE_MARKERS);
-      const galleryCount = await upsertCloudGalleryBatch(galleryItems);
-      await setCloudDataVersion(DATA_VERSION);
-      setCount(markerCount);
-      setStatus(`完成：${markerCount} 条地点，${galleryCount} 条影像已同步至云端。`);
+      await syncMarkersToCloud(SAMPLE_MARKERS, '内置样本');
+    } catch (err) {
+      setStatus(`失败：${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleJsonImport = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    setBusy(true);
+    setStatus('');
+    try {
+      const text = await file.text();
+      const parsed = parseMarkersImport(text);
+      if (!parsed.length) throw new Error('文件中没有地点数据');
+
+      if (
+        !window.confirm(
+          `从 JSON 导入 ${parsed.length} 条地点到云端（相同 id 会覆盖，不会删除云端多余 id）。继续？`
+        )
+      ) {
+        return;
+      }
+
+      await syncMarkersToCloud(parsed, 'JSON 导入');
     } catch (err) {
       setStatus(`失败：${err.message}`);
     } finally {
@@ -62,17 +99,29 @@ export default function AdminDashboard() {
       <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
         <h2 className="text-sm font-semibold text-gray-800">首次上云</h2>
         <p className="text-sm text-gray-600">
-          在 Supabase 执行 <code className="text-xs bg-gray-100 px-1 rounded">supabase/schema.sql</code> 并配置环境变量后，
-          点击下方按钮将当前内置数据导入云端。
+          「导入内置数据」只写入 Git 仓库里的 <strong>{SAMPLE_MARKERS.length} 条</strong>官方样本。
+          若你之前在浏览器里录入过更多地点（存在 localStorage），请用下方 JSON 导入恢复。
         </p>
-        <button
-          type="button"
-          onClick={handleSeed}
-          disabled={busy}
-          className="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium disabled:opacity-50"
-        >
-          {busy ? '导入中…' : '导入内置数据到云端'}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleSeed}
+            disabled={busy}
+            className="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium disabled:opacity-50"
+          >
+            {busy ? '导入中…' : '导入内置数据到云端'}
+          </button>
+          <label className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium cursor-pointer disabled:opacity-50">
+            从 JSON 文件导入
+            <input
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              disabled={busy}
+              onChange={handleJsonImport}
+            />
+          </label>
+        </div>
         {status && (
           <p className={`text-sm ${status.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>{status}</p>
         )}

@@ -164,4 +164,26 @@ export function buildGalleryFromMarkers(markers) {
   return gallery;
 }
 
+/** 解析侧栏导出的 JSON / GeoJSON / 纯数组 */
+export function parseMarkersImport(raw) {
+  const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+  if (Array.isArray(data)) return data;
+
+  if (Array.isArray(data?.markers)) return data.markers;
+
+  if (data?.type === 'FeatureCollection' && Array.isArray(data.features)) {
+    return data.features.map((feature) => {
+      const [longitude, latitude] = feature.geometry?.coordinates || [];
+      return {
+        ...feature.properties,
+        latitude,
+        longitude,
+      };
+    });
+  }
+
+  throw new Error('无法识别 JSON 格式（支持侧栏导出的 JSON 或 markers 数组）');
+}
+
 export { applyMarkerMigrations, normalizeMarkerFields };
