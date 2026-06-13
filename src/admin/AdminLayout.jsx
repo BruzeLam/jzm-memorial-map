@@ -50,6 +50,7 @@ export default function AdminLayout() {
           <nav className="flex gap-3 text-xs text-gray-600">
             <Link to="/admin" className="hover:text-blue-600">概览</Link>
             <Link to="/admin/markers" className="hover:text-blue-600">地点</Link>
+            <Link to="/admin/review" className="hover:text-blue-600">审核</Link>
             {isSuperAdmin && (
               <Link to="/admin/collaborators" className="hover:text-blue-600">协作者</Link>
             )}

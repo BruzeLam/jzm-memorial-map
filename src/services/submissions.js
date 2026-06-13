@@ -1,6 +1,11 @@
 import { getSupabase } from '../lib/supabase';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList } from '../utils/markerTags';
+import {
+  upsertCloudMarker,
+  upsertCloudGalleryBatch,
+  buildGalleryFromMarkers,
+} from './cloudData';
 
 function normalizeEmail(email) {
   return (email || '').trim().toLowerCase();
@@ -44,4 +49,79 @@ export async function submitMarkerForReview(markerData) {
 
   if (error) throw error;
   return data;
+}
+
+export async function fetchSubmissions(status = 'pending') {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('云端未配置');
+
+  let query = supabase.from('submissions').select('*').order('created_at', { ascending: false });
+  if (status && status !== 'all') {
+    query = query.eq('status', status);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+async function getReviewerEmail() {
+  const supabase = getSupabase();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error) throw error;
+  if (!user?.email) throw new Error('未登录');
+  return normalizeEmail(user.email);
+}
+
+export async function approveSubmission(submissionId) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('云端未配置');
+
+  const { data: row, error: fetchError } = await supabase
+    .from('submissions')
+    .select('*')
+    .eq('id', submissionId)
+    .single();
+  if (fetchError) throw fetchError;
+  if (row.status !== 'pending') throw new Error('该条目已处理');
+
+  if (row.type === 'marker') {
+    await upsertCloudMarker(row.payload);
+    const gallery = buildGalleryFromMarkers([row.payload]);
+    if (gallery.length) await upsertCloudGalleryBatch(gallery);
+  } else {
+    throw new Error(`暂不支持审核类型：${row.type}`);
+  }
+
+  const reviewerEmail = await getReviewerEmail();
+  const { error } = await supabase
+    .from('submissions')
+    .update({
+      status: 'approved',
+      reviewer_email: reviewerEmail,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', submissionId);
+  if (error) throw error;
+}
+
+export async function rejectSubmission(submissionId, reviewNote = '') {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('云端未配置');
+
+  const reviewerEmail = await getReviewerEmail();
+  const { error } = await supabase
+    .from('submissions')
+    .update({
+      status: 'rejected',
+      reviewer_email: reviewerEmail,
+      review_note: reviewNote?.trim() || null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', submissionId)
+    .eq('status', 'pending');
+  if (error) throw error;
 }

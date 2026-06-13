@@ -75,6 +75,7 @@ Vercel：**Settings → Environment Variables** 同样配置三项（Production 
 | `/` | 公众地图（云端只读） |
 | `/admin` | 后台概览、导入、统计 |
 | `/admin/markers` | 地点列表 / 编辑 / 删除 / 新建 |
+| `/admin/review` | 用户提交审核（通过/驳回） |
 | `/admin/collaborators` | 协作者邀请与管理（仅超级管理员） |
 
 Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次「导入」覆盖同 id 记录，或直接在后台编辑。
@@ -109,7 +110,9 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 
 测试：用**未加入 collaborators 的邮箱**魔法链接登录 → 添加地点 → 应看到「已提交审核」弹窗；数据在 Supabase `submissions` 表，**不会**立刻出现在公开地图。
 
-下一阶段：后台 `/admin/review` 审核看板（通过/驳回后上架）。
+**审核**：登录协作者账号 → **`/admin/review`** → 预览待审内容 → **通过并发布**（写入正式 markers + 影像）或 **驳回**。
+
+下一阶段：开放公众注册 UI（阶段 C）。
 
 ## 9. 安全说明
 

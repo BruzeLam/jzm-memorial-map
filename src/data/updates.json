@@ -2,6 +2,12 @@
   "2026-6-13": [
     {
       "type": "feature",
+      "emoji": "✅",
+      "title": "后台审核看板 /admin/review",
+      "description": "协作者可预览待审地点，通过并发布到正式地图（含影像同步），或填写理由驳回。"
+    },
+    {
+      "type": "feature",
       "emoji": "📝",
       "title": "用户提交待审（地点）",
       "description": "登录用户（非协作者）添加地点写入 submissions 待审队列，不直接上架；协作者仍可直接发布。需执行 migration-submissions.sql。"
