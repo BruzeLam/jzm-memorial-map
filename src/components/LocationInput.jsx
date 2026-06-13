@@ -18,14 +18,16 @@ export default function LocationInput({ value, onChange, onSelect, placeholder, 
   };
 
   const handleSelect = (item) => {
-    const name = item.name || item.display_name.split(',')[0].trim();
+    const name = item.name || item.display_name?.split(',')[0]?.trim() || '';
     const adminInfo = extractAdminInfo(item.address);
+    const lat = parseFloat(item.lat);
+    const lng = parseFloat(item.lng ?? item.lon);
     setQuery(name);
     onChange(name);
     onSelect({
       name,
-      lat: parseFloat(item.lat),
-      lng: parseFloat(item.lon),
+      lat,
+      lng,
       country: adminInfo.country,
       province: adminInfo.province,
       city: adminInfo.city,
@@ -43,7 +45,7 @@ export default function LocationInput({ value, onChange, onSelect, placeholder, 
         onChange={handleChange}
         onFocus={() => setFocused(true)}
         onBlur={() => setTimeout(() => setFocused(false), 180)}
-        placeholder={placeholder || '如：北京、虎门大桥'}
+        placeholder={placeholder || '如：中国联合工程、滨安路1060、北京'}
       />
       {showDropdown && (
         <div className="absolute z-[10000] left-0 right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-xl max-h-52 overflow-y-auto">
@@ -53,17 +55,24 @@ export default function LocationInput({ value, onChange, onSelect, placeholder, 
               搜索中…
             </div>
           )}
-          {!loading && results.map((item, i) => {
-            const shortName = (item.name || item.display_name.split(',')[0].trim()).slice(0, 22);
-            const region = formatRegion(item.address);
+          {!loading && results.map((item) => {
+            const shortName = (item.name || item.display_name || '').slice(0, 28);
+            const region = formatRegion(item.address) || item.display_name;
             return (
               <button
-                key={i}
+                key={item.id}
                 type="button"
                 onMouseDown={() => handleSelect(item)}
                 className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-0"
               >
-                <div className="text-sm font-medium text-gray-800 truncate">{shortName}</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-800 truncate flex-1">{shortName}</span>
+                  {item.source === 'amap' && (
+                    <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">
+                      高德
+                    </span>
+                  )}
+                </div>
                 {region && (
                   <div className="text-xs text-gray-400 truncate">{region}</div>
                 )}

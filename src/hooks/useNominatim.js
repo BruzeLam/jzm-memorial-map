@@ -6,6 +6,7 @@ import {
   pickChinesePlaceName,
   isChina,
 } from '../utils/regionFormat';
+import { searchPlaces, reversePlace } from '../services/geocoding';
 
 function isMacauOrHongKongAddress(address, state, city) {
   const blob = [state, city, address?.state, address?.city, address?.county]
@@ -102,12 +103,8 @@ export function useReverseGeocoding(lat, lng) {
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=zh-CN`,
-          { headers: { 'Accept-Language': 'zh-CN,zh;q=0.9' } }
-        );
-        const data = await res.json();
-        setAddress(data.address || null);
+        const addr = await reversePlace(lat, lng);
+        setAddress(addr);
       } catch (e) {
         setAddress(null);
       } finally {
@@ -132,11 +129,7 @@ export function useLocationSearch(query) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1&accept-language=zh-CN`,
-          { headers: { 'Accept-Language': 'zh-CN,zh;q=0.9' } }
-        );
-        const data = await res.json();
+        const data = await searchPlaces(query);
         setResults(data);
       } catch (e) {
         setResults([]);

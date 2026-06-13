@@ -295,7 +295,7 @@ export default function AddMarkerForm({
                 mapRef.current.flyTo([lat, lng], 11, { duration: 1 });
               }
             }}
-            placeholder="如：北京、虎门大桥"
+            placeholder="如：中国联合工程、滨安路1060、北京"
             inputClass={inputClass}
           />
         </div>
