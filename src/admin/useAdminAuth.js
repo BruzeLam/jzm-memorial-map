@@ -59,7 +59,7 @@ export function useAdminAuth() {
     }
     setCollaboratorsLoaded(false);
     reloadCollaborators();
-  }, [session?.user?.id, reloadCollaborators]);
+  }, [session?.user, reloadCollaborators]);
 
   const user = session?.user ?? null;
   const userEmail = user?.email || '';
