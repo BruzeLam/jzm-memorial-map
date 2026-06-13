@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from './useAdminAuth';
 import { addCollaborator, removeCollaborator } from '../services/collaborators';
+import { formatAuthEmailErrorZh } from '../utils/authErrors';
 
 const ROLE_LABEL = { admin: '超级管理员', editor: '协作者' };
 
@@ -71,7 +72,7 @@ export default function AdminCollaborators() {
       await signInWithEmail(targetEmail, { redirectTo: `${window.location.origin}/admin` });
       setStatus(`已向 ${targetEmail} 发送登录链接（可用于首次登录）。`);
     } catch (err) {
-      setStatus(`发送失败：${err.message || '未知错误'}`);
+      setStatus(`发送失败：${formatAuthEmailErrorZh(err)}`);
     }
   };
 

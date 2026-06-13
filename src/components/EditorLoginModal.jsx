@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../admin/useAdminAuth';
 import { isCloudEnabled } from '../lib/cloudConfig';
 import { useI18n } from '../i18n/LanguageContext';
+import { formatAuthEmailError } from '../utils/authErrors';
 
 export default function EditorLoginModal({ onClose }) {
   const { t } = useI18n();
@@ -20,7 +21,7 @@ export default function EditorLoginModal({ onClose }) {
       await signInWithEmail(email, { redirectTo: `${window.location.origin}/` });
       setSent(true);
     } catch (err) {
-      setError(err.message || t('editorLogin.sendFailed'));
+      setError(formatAuthEmailError(err, t));
     } finally {
       setSubmitting(false);
     }

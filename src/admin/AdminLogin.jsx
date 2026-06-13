@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAdminAuth } from './useAdminAuth';
 import { isCloudEnabled, getAdminEmail } from '../lib/cloudConfig';
 import { getBranding } from '../config/branding';
+import { formatAuthEmailErrorZh } from '../utils/authErrors';
 
 export default function AdminLogin() {
   const { signInWithEmail } = useAdminAuth();
@@ -35,7 +36,7 @@ export default function AdminLogin() {
       await signInWithEmail(email);
       setSent(true);
     } catch (err) {
-      setError(err.message || '发送失败');
+      setError(formatAuthEmailErrorZh(err));
     } finally {
       setSubmitting(false);
     }

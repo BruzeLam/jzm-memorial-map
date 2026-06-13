@@ -119,3 +119,95 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 - 写权限由 Supabase **RLS** 按 JWT 邮箱约束，务必保证 SQL 中 admin 邮箱正确  
 - 勿将 `service_role` key 放入前端环境变量  
 - 后台路径 `/admin` 无 obscurity 保护，依赖 Auth + RLS；后续可加 IP 限制或二次验证
+
+## 10. 登录邮件频率与自定义 SMTP
+
+首页 / 后台的魔法链接由 **Supabase Auth 发信**。免费项目默认使用 **内置 SMTP**，全项目大约只有 **每小时 2～4 封**，多人登录或反复点「发送登录链接」会触发：
+
+`email rate limit exceeded`（429）
+
+前端已将该错误显示为中文提示；**根本解决办法**是在 Supabase 配置 **自定义 SMTP**，并在 **Rate Limits** 里调高上限。
+
+### 需要额外花钱吗？
+
+| 项目 | 费用 |
+|------|------|
+| **Supabase 免费版** | 继续可用，**不必**为解除发信限制而升级 Pro |
+| **Vercel 托管** | 不变（你已在用） |
+| **自定义 SMTP** | 多数有 **免费额度**，朋友小规模贡献通常 **0 元** |
+| **自有域名**（可选） | 若要用 `no-reply@你的域名.com` 发信，域名约 **¥50～80/年**；也可用 Resend 等提供的测试域名先跑通 |
+
+**结论**：给几个朋友用，**可以先 0 元**（Resend 免费档约 3000 封/月）；只有用户量上来或要专业发信域名时才可能需要付费。
+
+### 推荐：Resend + Supabase（约 10 分钟）
+
+1. 注册 [resend.com](https://resend.com)（免费档即可）  
+2. 创建 API Key；若有自己的域名，在 Resend 添加域名并按提示配 **DNS（SPF/DKIM）**  
+3. 打开 Supabase → **Project Settings → Authentication → SMTP Settings**  
+4. 开启 **Enable Custom SMTP**，示例填写：
+
+   | 字段 | Resend 示例值 |
+   |------|----------------|
+   | Host | `smtp.resend.com` |
+   | Port | `587` |
+   | Username | `resend` |
+   | Password | 你的 Resend API Key |
+   | Sender email | `onboarding@resend.dev`（测试）或 `no-reply@你的域名` |
+   | Sender name | `江泽民同志生平纪念地图` |
+
+5. 保存后，到 **Authentication → Rate Limits** 调整（需已启用自定义 SMTP）：
+   - **Email sent**：例如 `30`～`100` / 小时（按实际人数）  
+   - **OTP requests per hour**：同上量级  
+   - **OTP period**：同一邮箱两次请求间隔，默认 60 秒，测试可略降，生产勿太低  
+
+6. 用朋友邮箱再试一次「发送登录链接」，确认不再 429。
+
+### 其他 SMTP 服务
+
+Brevo、SendGrid、AWS SES、腾讯/阿里企业邮等均可，只要提供标准 SMTP 主机、端口、账号密码。配置路径相同。
+
+### 仍被限流时
+
+1. 查 **Authentication → Logs** 是否仍为 `over_email_send_rate_limit`  
+2. 确认 **Custom SMTP** 已保存且发信测试成功  
+3. 查邮箱是否已有 **未过期魔法链接**（通常约 1 小时内有效），可直接点开，无需重发  
+4. Resend / 发信服务商控制台查看是否因配额或域名未验证被拒
+
+### Management API（可选）
+
+```bash
+curl -X PATCH "https://api.supabase.com/v1/projects/你的PROJECT_REF/config/auth" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "external_email_enabled": true,
+    "smtp_admin_email": "no-reply@example.com",
+    "smtp_host": "smtp.resend.com",
+    "smtp_port": 587,
+    "smtp_user": "resend",
+    "smtp_pass": "你的Resend_API_Key",
+    "smtp_sender_name": "江泽民同志生平纪念地图"
+  }'
+```
+
+Rate Limits 建议在 Dashboard 图形界面调整，更直观。
+
+### Dashboard 打不开时（国内网络常见）
+
+`supabase.com` 控制台在部分地区无法访问，可改用 **Management API + 本仓库脚本**（无需打开 Auth → SMTP 页面）：
+
+1. **Resend API Key**：在 Resend 控制台已生成（`re_...`）  
+2. **Supabase Personal Access Token**：需能访问一次  
+   https://supabase.com/dashboard/account/tokens  
+   （若打不开，请开 **VPN** 或换网络/DNS `1.1.1.1` 后再试）  
+3. 在本项目根目录终端执行（**勿把 Key 写进代码或 commit**）：
+
+```bash
+SUPABASE_ACCESS_TOKEN=sbp_你的SupabaseToken \
+RESEND_API_KEY=re_你的ResendKey \
+node scripts/configure-supabase-smtp.mjs
+```
+
+脚本会写入 Resend SMTP，并把 `rate_limit_email_sent` / `rate_limit_otp` 调到 50/小时（可用环境变量 `RATE_LIMIT_EMAIL` 覆盖）。
+
+若 `api.supabase.com` 也连不上，只能 VPN 后再跑上述命令。
