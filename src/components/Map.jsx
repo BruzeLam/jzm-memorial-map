@@ -3,48 +3,8 @@ import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MARKER_TYPES } from '../utils/constants';
 import { getTripMateIds } from '../utils/markerTrips';
-
-// 计算两点间距离（Haversine公式）单位：km
-function calculateDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371; // 地球半径（km）
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return (R * c).toFixed(2);
-}
-
-// 地理定位hook
-function useUserLocation() {
-  const [location, setLocation] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setError('浏览器不支持地理定位');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (err) => {
-        setError(err.message);
-      }
-    );
-  }, []);
-
-  return { location, error };
-}
+import { useUserLocation } from '../hooks/useUserLocation';
+import { calculateDistanceKm, formatDistance } from '../utils/geo';
 
 // 放大时保持原始标点大小；仅在缩小到较大尺度（世界/区域视图）时适度缩小
 function getMarkerDimensions(zoom, isSelected) {
@@ -161,7 +121,9 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
       const leafletMarker = L.marker([m.latitude, m.longitude], { icon });
 
       const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
-      const distance = location ? calculateDistance(location.lat, location.lng, m.latitude, m.longitude) : null;
+      const distance = location
+        ? formatDistance(calculateDistanceKm(location.lat, location.lng, m.latitude, m.longitude))
+        : null;
 
       const popupContent = `
         <div style="min-width:160px;font-family:system-ui,sans-serif">

@@ -9,6 +9,7 @@ import {
 import { MarkerTagPills } from './MarkerTagInput';
 import TripSiblingsSection from './TripSiblingsSection';
 import ImageViewer from './ImageViewer';
+import MarkerDistance from './MarkerDistance';
 
 export default function DetailPanel({ marker, markers = [], onClose, onSelectMarker, onTagSearch }) {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
@@ -85,11 +86,18 @@ export default function DetailPanel({ marker, markers = [], onClose, onSelectMar
                   <span className="text-gray-800">{formatRegionPath(marker)}</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-600 min-w-16">📍 坐标:</span>
-                <span className="text-gray-800 font-mono">
-                  {marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}
-                </span>
+              <div className="flex items-center justify-between gap-2 text-sm flex-wrap">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-gray-600 min-w-16">📍 坐标:</span>
+                  <span className="text-gray-800 font-mono">
+                    {marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}
+                  </span>
+                </div>
+                <MarkerDistance
+                  latitude={marker.latitude}
+                  longitude={marker.longitude}
+                  className="text-sm"
+                />
               </div>
             </div>
 
