@@ -12,7 +12,7 @@
 作品集模式会：
 
 - 站点标题改为「伟人足迹互动地图 / ElderMap」
-- UI 文案淡化「长者语录」等表述
+- UI 文案淡化人物专属表述（如语录模块标题等）
 - localStorage 使用 `elder_*` 前缀，与主站数据隔离
 - 默认加载 `src/data/portfolio/` 下的中性演示标点、语录、档案
 - 默认不连接生产 Supabase（`isCloudEnabled()` 返回 false）
@@ -33,8 +33,8 @@ npm run build:portfolio
 
 | 站点 | 分支 | 域名 |
 |------|------|------|
-| 主站 | `main` | https://jzm-memorial-map.vercel.app |
-| 作品集 | `portfolio` | **https://elder-legacy-map.vercel.app** |
+| 主站 | `main` | 见 [README](../README.md) 在线演示链接 |
+| 作品集 | `portfolio` | 中性品牌预览站（域名按 Vercel 配置） |
 
 作品集分支的 Preview 环境变量（仅 `portfolio` 分支）：
 
@@ -45,7 +45,7 @@ REACT_APP_PORTFOLIO_DEMO_DATA=true
 
 推送 `portfolio` 分支会自动更新作品集站；`main` 生产环境不受影响。
 
-备用预览 URL：`https://jzm-memorial-map-git-portfolio-bruzelams-projects.vercel.app`
+备用预览 URL：Vercel 为 `portfolio` 分支自动生成的 Preview 域名（见 Dashboard → Deployments）
 
 ## Vercel 部署（同一项目 + 分支）
 
