@@ -113,7 +113,16 @@ function NavButton({ emoji, label, onClick, className }) {
   );
 }
 
-export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onOpenChangeLog, onLoginClick }) {
+export default function Header({
+  onOpenQuotes,
+  onOpenArchive,
+  onOpenGallery,
+  onOpenChangeLog,
+  onLoginClick,
+  dataReadOnly,
+  onResetToSample,
+  onClearAll,
+}) {
   const { t } = useI18n();
   const branding = getBranding();
   const seconds = useCountdown();
@@ -137,33 +146,36 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
   return (
     <header className="bg-gray-200 border-b border-gray-300 shadow-sm flex-shrink-0 relative z-[500] pt-safe">
       <div className="px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3">
+        <AccountMenu
+          onLoginClick={onLoginClick}
+          dataReadOnly={dataReadOnly}
+          onResetToSample={onResetToSample}
+          onClearAll={onClearAll}
+        />
         <img
           src={`${process.env.PUBLIC_URL}/logo.png?v=3`}
           alt=""
           className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
         />
-        <div className="flex-1 min-w-0 flex items-center gap-2 md:gap-3">
-          <h1 className="min-w-0 flex-1 text-[13px] md:text-lg font-serif font-bold leading-snug">
-            {branding.headerLink ? (
-              <a
-                href={branding.headerLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
-              >
-                {branding.siteTitle}
-              </a>
-            ) : (
-              <span className="text-gray-800 line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
-            )}
-            {isPortfolioMode() && (
-              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-slate-100 text-slate-600 align-middle">
-                作品集
-              </span>
-            )}
-          </h1>
-          <AccountMenu onLoginClick={onLoginClick} />
-        </div>
+        <h1 className="flex-1 min-w-0 text-[13px] md:text-lg font-serif font-bold leading-snug">
+          {branding.headerLink ? (
+            <a
+              href={branding.headerLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
+            >
+              {branding.siteTitle}
+            </a>
+          ) : (
+            <span className="text-gray-800 line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
+          )}
+          {isPortfolioMode() && (
+            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-slate-100 text-slate-600 align-middle">
+              作品集
+            </span>
+          )}
+        </h1>
 
         {!isMobile && <RandomQuoteDisplay />}
 

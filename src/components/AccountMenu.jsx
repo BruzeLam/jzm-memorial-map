@@ -53,8 +53,88 @@ function MenuRow({ icon, label, onClick, to, danger = false }) {
   );
 }
 
-export default function AccountMenu({ onLoginClick }) {
+function LanguageSection({ onPick }) {
+  const { t, locale, setLocale, localeOptions } = useI18n();
+  const [expanded, setExpanded] = useState(false);
+  const current = localeOptions.find((o) => o.code === locale);
+
+  return (
+    <div className="px-1.5 pb-1.5">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2.5 text-sm rounded-lg text-gray-700 hover:bg-gray-50"
+      >
+        <span className="flex items-center gap-2.5">
+          <span className="w-5 text-center" aria-hidden>🌐</span>
+          <span>{t('sidebar.languageLabel')}</span>
+        </span>
+        <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <span>{current?.native || locale}</span>
+          <span className="text-gray-400">{expanded ? '▲' : '›'}</span>
+        </span>
+      </button>
+      {expanded && (
+        <div className="mx-1 mt-0.5 max-h-44 overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/80">
+          {localeOptions.map((opt) => (
+            <button
+              key={opt.code}
+              type="button"
+              onClick={() => {
+                setLocale(opt.code);
+                onPick?.();
+              }}
+              className={`flex w-full items-center justify-between px-3 py-2.5 text-sm text-left hover:bg-white ${
+                locale === opt.code ? 'text-blue-700 font-medium bg-blue-50/80' : 'text-gray-700'
+              }`}
+            >
+              <span>{opt.native}</span>
+              {locale === opt.code && <span className="text-blue-600 text-xs">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LocalDataSection({ dataReadOnly, onResetToSample, onClearAll, onClose }) {
   const { t } = useI18n();
+  if (dataReadOnly || isCloudEnabled() || !onResetToSample) return null;
+
+  return (
+    <div className="px-1.5 pb-1 border-t border-gray-100 pt-1">
+      <MenuRow
+        icon="🔄"
+        label={t('sidebar.restoreSample')}
+        onClick={() => {
+          onResetToSample();
+          onClose();
+        }}
+      />
+      <MenuRow
+        icon="🗑️"
+        label={t('sidebar.clearAll')}
+        onClick={() => {
+          if (window.confirm(t('sidebar.confirmClearAll'))) {
+            onClearAll?.();
+            onClose();
+          }
+        }}
+        danger
+      />
+    </div>
+  );
+}
+
+export default function AccountMenu({
+  onLoginClick,
+  dataReadOnly = false,
+  onResetToSample,
+  onClearAll,
+}) {
+  const { t } = useI18n();
+  const cloudOn = isCloudEnabled();
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
@@ -73,7 +153,7 @@ export default function AccountMenu({ onLoginClick }) {
         : '';
 
   const loadStats = useCallback(async () => {
-    if (!user) return;
+    if (!user || !cloudOn) return;
     setStatsLoading(true);
     try {
       const next = await fetchMySubmissionStats();
@@ -83,13 +163,13 @@ export default function AccountMenu({ onLoginClick }) {
     } finally {
       setStatsLoading(false);
     }
-  }, [user]);
+  }, [user, cloudOn]);
 
   useEffect(() => {
-    if (!open || !user) return undefined;
+    if (!open || !user || !cloudOn) return undefined;
     loadStats();
     return undefined;
-  }, [open, user, loadStats]);
+  }, [open, user, cloudOn, loadStats]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -111,8 +191,6 @@ export default function AccountMenu({ onLoginClick }) {
     };
   }, [open]);
 
-  if (!isCloudEnabled()) return null;
-
   const close = () => setOpen(false);
 
   const handleSignOut = async () => {
@@ -125,52 +203,40 @@ export default function AccountMenu({ onLoginClick }) {
     onLoginClick?.();
   };
 
-  const triggerLabel = user ? getDisplayName(email) : t('account.guest');
+  const avatarClass = user
+    ? isEditor
+      ? 'bg-red-700'
+      : 'bg-blue-600'
+    : 'bg-gray-400';
 
   return (
     <div ref={rootRef} className="relative shrink-0">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-1.5 rounded-xl border transition-all ${
-          open
-            ? 'border-blue-300 bg-white shadow-sm ring-2 ring-blue-100'
-            : 'border-gray-200/80 bg-white/80 hover:bg-white hover:border-gray-300 hover:shadow-sm'
-        } ${user ? 'pl-1 pr-2 py-1' : 'p-1.5'}`}
+        className={`flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg font-semibold text-white shrink-0 transition-all ring-1 ring-gray-300 shadow-sm ${
+          avatarClass
+        } ${open ? 'ring-2 ring-blue-300 ring-offset-1' : 'hover:brightness-95'}`}
         aria-label={t('account.openMenu')}
         aria-expanded={open}
         aria-haspopup="dialog"
         disabled={loading}
       >
-        <span
-          className={`flex items-center justify-center rounded-lg font-semibold text-white shrink-0 ${
-            user ? 'w-8 h-8 text-sm' : 'w-7 h-7 text-base bg-gray-400'
-          } ${user ? (isEditor ? 'bg-red-700' : 'bg-blue-600') : ''}`}
-          aria-hidden
-        >
-          {user ? getInitial(email) : '👤'}
-        </span>
-        {user && (
-          <span className="hidden sm:block max-w-[72px] truncate text-xs font-medium text-gray-700">
-            {triggerLabel}
-          </span>
-        )}
+        {user ? getInitial(email) : '👤'}
       </button>
 
       {open && (
         <div
-          className="absolute top-full right-0 mt-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-200 bg-white shadow-xl z-[1000] overflow-hidden account-menu-panel"
+          className="absolute top-full left-0 mt-2 w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-200 bg-white shadow-xl z-[1000] overflow-hidden account-menu-panel"
           role="dialog"
           aria-label={t('account.menuTitle')}
         >
-          {user ? (
+          {user && cloudOn ? (
             <>
               <div className="px-4 pt-4 pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <span
-                    className={`flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-base shrink-0 ${
-                      isEditor ? 'bg-red-700' : 'bg-blue-600'
-                    }`}
+                    className={`flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-base shrink-0 ${avatarClass}`}
                     aria-hidden
                   >
                     {getInitial(email)}
@@ -205,7 +271,7 @@ export default function AccountMenu({ onLoginClick }) {
                 )}
               </div>
 
-              <div className="p-1.5">
+              <div className="p-1.5 border-b border-gray-100">
                 {isEditor && (
                   <>
                     <MenuRow icon="⚙️" label={t('account.adminPanel')} to="/admin" onClick={close} />
@@ -215,8 +281,8 @@ export default function AccountMenu({ onLoginClick }) {
                 <MenuRow icon="↩" label={t('account.logout')} onClick={handleSignOut} danger />
               </div>
             </>
-          ) : (
-            <div className="p-4">
+          ) : cloudOn ? (
+            <div className="p-4 border-b border-gray-100">
               <p className="text-sm font-semibold text-gray-900">{t('account.menuTitle')}</p>
               <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{t('account.loginHint')}</p>
               <button
@@ -227,7 +293,19 @@ export default function AccountMenu({ onLoginClick }) {
                 {t('account.login')}
               </button>
             </div>
+          ) : (
+            <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+              <p className="text-sm font-semibold text-gray-900">{t('account.menuTitle')}</p>
+            </div>
           )}
+
+          <LanguageSection />
+          <LocalDataSection
+            dataReadOnly={dataReadOnly}
+            onResetToSample={onResetToSample}
+            onClearAll={onClearAll}
+            onClose={close}
+          />
         </div>
       )}
     </div>

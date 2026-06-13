@@ -9,7 +9,6 @@ import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
-import { isCloudEnabled } from '../lib/cloudConfig';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
 
 function MobileScrollList({ children, scrollHint, listKey }) {
@@ -95,11 +94,9 @@ export default function Sidebar({
   dataReadOnly = false,
   onAddWhenReadOnly,
 }) {
-  const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
+  const { t, locale, markerTypeLabel } = useI18n();
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
   const allMarkerTags = useMemo(() => collectAllMarkerTags(markers), [markers]);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showLanguageDrawer, setShowLanguageDrawer] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [sortOrder, setSortOrder] = useState('date-asc');
 
@@ -138,64 +135,6 @@ export default function Sidebar({
     }
     onStartAddMode();
   };
-
-  const settingsPanel = showSettings ? (
-    <div className={`${compactMobile ? 'px-2' : 'px-3'} py-2 border-b border-gray-100 bg-gray-50`}>
-      <button
-        type="button"
-        onClick={() => setShowLanguageDrawer((v) => !v)}
-        className="flex w-full items-center justify-between py-2 text-xs text-gray-700 hover:bg-white rounded-md px-2"
-      >
-        <span>🌐 {t('sidebar.languageLabel')}</span>
-        <span className="text-gray-400">{showLanguageDrawer ? '▲' : '▼'}</span>
-      </button>
-      {showLanguageDrawer && (
-        <div className="max-h-40 overflow-y-auto mt-1 rounded-md border border-gray-200 bg-white">
-          {localeOptions.map((opt) => (
-            <button
-              key={opt.code}
-              type="button"
-              onClick={() => setLocale(opt.code)}
-              className={`flex w-full items-center justify-between px-3 py-2 text-xs text-left hover:bg-gray-50 ${
-                locale === opt.code ? 'text-blue-700 font-semibold bg-blue-50/80' : 'text-gray-700'
-              }`}
-            >
-              <span>{opt.native}</span>
-              {locale === opt.code && <span className="text-blue-600">✓</span>}
-            </button>
-          ))}
-        </div>
-      )}
-      {!dataReadOnly && !isCloudEnabled() && (
-        <>
-          <button
-            type="button"
-            onClick={() => {
-              onResetToSample();
-              setShowSettings(false);
-              setShowLanguageDrawer(false);
-            }}
-            className="block w-full text-left px-2 py-2 text-xs text-gray-700 hover:bg-white rounded-md mt-1"
-          >
-            🔄 {t('sidebar.restoreSample')}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (window.confirm(t('sidebar.confirmClearAll'))) {
-                onClearAll();
-                setShowSettings(false);
-                setShowLanguageDrawer(false);
-              }
-            }}
-            className="block w-full text-left px-2 py-2 text-xs text-red-500 hover:bg-red-50 rounded-md"
-          >
-            🗑️ {t('sidebar.clearAll')}
-          </button>
-        </>
-      )}
-    </div>
-  ) : null;
 
   const markerListContent = showModePicker ? (
     /* ── Mode Picker ─────────────────────────────────────── */
@@ -449,7 +388,6 @@ export default function Sidebar({
         </MobileScrollList>
 
         <div className="flex-shrink-0 border-t border-gray-100 bg-white">
-          {settingsPanel}
           <div className="px-2 py-1 flex gap-1.5">
             <button
               type="button"
@@ -487,22 +425,6 @@ export default function Sidebar({
                 </div>
               )}
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowSettings(!showSettings);
-                if (showSettings) setShowLanguageDrawer(false);
-              }}
-              className={`min-h-[40px] min-w-[40px] text-xs rounded-lg border transition-colors flex items-center justify-center ${
-                showSettings
-                  ? 'border-blue-300 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:bg-gray-50 text-gray-600'
-              }`}
-              aria-label={t('sidebar.languageLabel')}
-            >
-              ⚙️
-            </button>
           </div>
         </div>
       </div>
@@ -566,7 +488,6 @@ export default function Sidebar({
       </div>
 
       <div className="flex-shrink-0 border-t border-gray-100 bg-white">
-        {settingsPanel}
         <div className="px-3 py-2 flex gap-1.5">
           <button
             onClick={handleAddButtonClick}
@@ -600,20 +521,6 @@ export default function Sidebar({
               </div>
             )}
           </div>
-
-          <button
-            onClick={() => {
-              setShowSettings(!showSettings);
-              if (showSettings) setShowLanguageDrawer(false);
-            }}
-            className={`text-xs py-2 px-3 rounded-lg border transition-colors ${
-              showSettings
-                ? 'border-blue-300 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:bg-gray-50 text-gray-600'
-            }`}
-          >
-            ⚙️
-          </button>
         </div>
       </div>
     </div>

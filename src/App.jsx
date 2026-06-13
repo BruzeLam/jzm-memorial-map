@@ -450,6 +450,9 @@ export default function App() {
         onOpenGallery={() => setShowGallery(true)}
         onOpenChangeLog={() => setShowChangeLog(true)}
         onLoginClick={() => setShowEditorLogin(true)}
+        dataReadOnly={dataReadOnly}
+        onResetToSample={resetToSample}
+        onClearAll={clearAll}
       />
       {showOnThisDayModal && todayMarkers.length > 0 && (
         <OnThisDayModal
