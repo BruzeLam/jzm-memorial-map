@@ -24,7 +24,7 @@ import EditorLoginModal from './components/EditorLoginModal';
 import { getBranding } from './config/branding';
 
 export default function App() {
-  const { isAdmin, user } = useAuth();
+  const { isEditor, user } = useAuth();
   const branding = getBranding();
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function App() {
     resetToSample,
     clearAll,
     readOnly: dataReadOnly,
-  } = useMarkers({ isEditor: isAdmin });
+  } = useMarkers({ isEditor: isEditor });
 
   const {
     searchQuery,
@@ -70,7 +70,7 @@ export default function App() {
     deleteImage,
     removeMarkerRelation,
     readOnly: galleryReadOnly,
-  } = useGallery(markers, { isEditor: isAdmin });
+  } = useGallery(markers, { isEditor: isEditor });
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   // 'map' | 'manual' | null
@@ -345,7 +345,7 @@ export default function App() {
   };
 
   const handleAddWhenReadOnly = () => {
-    if (isAdmin) {
+    if (isEditor) {
       handleStartAddMode();
       return;
     }
@@ -395,7 +395,7 @@ export default function App() {
     onToggleOnThisDay: toggleOnThisDay,
     dataReadOnly,
     onAddWhenReadOnly: handleAddWhenReadOnly,
-    isEditorLoggedIn: isAdmin,
+    isEditorLoggedIn: isEditor,
     editorEmail: user?.email || '',
   };
 
@@ -403,8 +403,8 @@ export default function App() {
 
   return (
     <LanguageProvider>
-    <QuotesProvider isEditor={isAdmin}>
-    <ArchivesProvider isEditor={isAdmin}>
+    <QuotesProvider isEditor={isEditor}>
+    <ArchivesProvider isEditor={isEditor}>
     <div className="flex flex-col h-screen bg-gray-100">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}

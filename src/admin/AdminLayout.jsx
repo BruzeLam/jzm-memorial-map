@@ -4,7 +4,7 @@ import { useAdminAuth } from './useAdminAuth';
 import { getBranding } from '../config/branding';
 
 export default function AdminLayout() {
-  const { user, isAdmin, loading, signOut } = useAdminAuth();
+  const { user, isEditor, isSuperAdmin, loading, signOut } = useAdminAuth();
   const navigate = useNavigate();
 
   if (loading) {
@@ -15,14 +15,14 @@ export default function AdminLayout() {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user || !isEditor) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
         <div className="bg-white rounded-xl shadow p-6 max-w-md w-full border border-gray-200 text-center">
           <p className="text-sm text-gray-700 mb-4">
-            {user && !isAdmin
-              ? `当前账号 ${user.email} 无管理员权限。`
-              : '请先登录管理员账号。'}
+            {user && !isEditor
+              ? `当前账号 ${user.email} 不在协作者列表中，无法编辑。请联系超级管理员邀请。`
+              : '请先登录协作者账号。'}
           </p>
           <Link
             to="/admin/login"
@@ -50,6 +50,9 @@ export default function AdminLayout() {
           <nav className="flex gap-3 text-xs text-gray-600">
             <Link to="/admin" className="hover:text-blue-600">概览</Link>
             <Link to="/admin/markers" className="hover:text-blue-600">地点</Link>
+            {isSuperAdmin && (
+              <Link to="/admin/collaborators" className="hover:text-blue-600">协作者</Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-3 shrink-0">

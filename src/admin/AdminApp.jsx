@@ -6,6 +6,7 @@ import AdminLayout from './AdminLayout';
 import AdminDashboard from './AdminDashboard';
 import AdminMarkers from './AdminMarkers';
 import AdminMarkerEdit from './AdminMarkerEdit';
+import AdminCollaborators from './AdminCollaborators';
 
 export default function AdminApp() {
   return (
@@ -17,6 +18,7 @@ export default function AdminApp() {
           <Route path="markers" element={<AdminMarkers />} />
           <Route path="markers/new" element={<AdminMarkerEdit />} />
           <Route path="markers/:id" element={<AdminMarkerEdit />} />
+          <Route path="collaborators" element={<AdminCollaborators />} />
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
