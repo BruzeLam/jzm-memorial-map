@@ -6,6 +6,9 @@
 
 export function imageDataFingerprint(data) {
   if (!data || typeof data !== 'string') return '';
+  if (data.startsWith('http://') || data.startsWith('https://') || data.startsWith('/')) {
+    return data;
+  }
   if (data.length <= 256) return data;
   return `${data.length}:${data.slice(0, 128)}:${data.slice(-128)}`;
 }

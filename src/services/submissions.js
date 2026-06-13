@@ -6,6 +6,7 @@ import {
   upsertCloudGalleryBatch,
   buildGalleryFromMarkers,
 } from './cloudData';
+import { ensureMarkerImagesUploaded } from './imageStorage';
 
 function normalizeEmail(email) {
   return (email || '').trim().toLowerCase();
@@ -35,7 +36,8 @@ export async function submitMarkerForReview(markerData) {
   if (userError) throw userError;
   if (!user?.email) throw new Error('请先登录后再提交');
 
-  const payload = normalizeMarkerSubmissionPayload(markerData);
+  let payload = normalizeMarkerSubmissionPayload(markerData);
+  payload = await ensureMarkerImagesUploaded(payload);
   const { data, error } = await supabase
     .from('submissions')
     .insert({
@@ -89,8 +91,9 @@ export async function approveSubmission(submissionId) {
   if (row.status !== 'pending') throw new Error('该条目已处理');
 
   if (row.type === 'marker') {
-    await upsertCloudMarker(row.payload);
-    const gallery = buildGalleryFromMarkers([row.payload]);
+    const payload = await ensureMarkerImagesUploaded(row.payload);
+    await upsertCloudMarker(payload);
+    const gallery = buildGalleryFromMarkers([payload]);
     if (gallery.length) await upsertCloudGalleryBatch(gallery);
   } else {
     throw new Error(`暂不支持审核类型：${row.type}`);

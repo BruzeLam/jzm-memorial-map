@@ -2,6 +2,11 @@ import { getSupabase } from '../lib/supabase';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 import { REMOVED_MARKER_IDS } from '../utils/constants';
+import {
+  ensureMarkerImagesUploaded,
+  ensureGalleryImageUploaded,
+  ensureArchiveImagesUploaded,
+} from './imageStorage';
 
 const removedIdSet = new Set(REMOVED_MARKER_IDS);
 
@@ -43,7 +48,8 @@ export async function upsertCloudMarker(marker) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Cloud not configured');
 
-  const normalized = normalizeMarkerFields(migrateAllMarkerRegions([marker])[0]);
+  let normalized = normalizeMarkerFields(migrateAllMarkerRegions([marker])[0]);
+  normalized = await ensureMarkerImagesUploaded(normalized);
   const { error } = await supabase.from('markers').upsert({
     id: normalized.id,
     payload: normalized,
@@ -57,7 +63,9 @@ export async function upsertCloudMarkersBatch(markers) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Cloud not configured');
 
-  const rows = applyMarkerMigrations(markers).map((m) => ({
+  const migrated = applyMarkerMigrations(markers);
+  const uploaded = await Promise.all(migrated.map((m) => ensureMarkerImagesUploaded(m)));
+  const rows = uploaded.map((m) => ({
     id: m.id,
     payload: m,
     updated_at: new Date().toISOString(),
@@ -99,7 +107,8 @@ export async function upsertCloudGalleryBatch(items) {
 
   if (!items.length) return 0;
 
-  const rows = items.map((item) => ({
+  const uploaded = await Promise.all(items.map((item) => ensureGalleryImageUploaded(item)));
+  const rows = uploaded.map((item) => ({
     id: item.id,
     payload: item,
     updated_at: new Date().toISOString(),
@@ -209,13 +218,14 @@ export async function upsertCloudArchive(archive) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Cloud not configured');
 
+  const normalized = await ensureArchiveImagesUploaded(archive);
   const { error } = await supabase.from('archives').upsert({
-    id: archive.id,
-    payload: archive,
+    id: normalized.id,
+    payload: normalized,
     updated_at: new Date().toISOString(),
   });
   if (error) throw error;
-  return archive;
+  return normalized;
 }
 
 export async function upsertCloudArchivesBatch(archives) {
@@ -223,7 +233,8 @@ export async function upsertCloudArchivesBatch(archives) {
   if (!supabase) throw new Error('Cloud not configured');
   if (!archives.length) return 0;
 
-  const rows = archives.map((a) => ({
+  const uploaded = await Promise.all(archives.map((a) => ensureArchiveImagesUploaded(a)));
+  const rows = uploaded.map((a) => ({
     id: a.id,
     payload: a,
     updated_at: new Date().toISOString(),

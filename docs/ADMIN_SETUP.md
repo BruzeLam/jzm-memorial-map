@@ -211,3 +211,27 @@ node scripts/configure-supabase-smtp.mjs
 脚本会写入 Resend SMTP，并把 `rate_limit_email_sent` / `rate_limit_otp` 调到 50/小时（可用环境变量 `RATE_LIMIT_EMAIL` 覆盖）。
 
 若 `api.supabase.com` 也连不上，只能 VPN 后再跑上述命令。
+
+## 11. 图片对象存储（P2-05）
+
+地点 / 影像馆 / 档案馆 / 待审提交中的图片，保存时会自动上传到 Supabase **Storage**（bucket `images`），数据库 `payload` 里只存公开 URL，不再把 Base64 塞进 JSONB。
+
+### 首次启用（必做）
+
+1. 在 Supabase **SQL Editor** 执行（需已执行 `migration-collaborators.sql`，依赖 `public.is_editor()`）：
+
+   `supabase/migration-storage.sql`
+
+2. 部署含本功能的代码后，用**协作者账号**登录 → **`/admin`** → 点击 **「迁移云端 Base64 图片 → Storage」**，把已有 Base64 批量迁出（新保存的数据会自动上传，无需重复点）。
+
+### 权限说明
+
+| 操作 | 谁可以 |
+|------|--------|
+| 公开读图片 URL | 所有人 |
+| 上传（insert） | 已登录用户（贡献者提交、协作者编辑） |
+| 更新 / 删除 Storage 对象 | 协作者（`is_editor()`） |
+
+### 仍用 localStorage 的访客
+
+未登录或未启用云端时，图片仍按原逻辑存 Base64；上云保存时才写入 Storage。

@@ -28,6 +28,7 @@ import {
   upsertCloudArchivesBatch,
   parseMarkersImport,
 } from '../services/cloudData';
+import { migrateCloudImagesToStorage } from '../services/imageStorage';
 
 export default function AdminDashboard() {
   const [status, setStatus] = useState('');
@@ -38,6 +39,8 @@ export default function AdminDashboard() {
   const [quoteBusy, setQuoteBusy] = useState(false);
   const [archiveBusy, setArchiveBusy] = useState(false);
   const [syncAllBusy, setSyncAllBusy] = useState(false);
+  const [imageMigrateBusy, setImageMigrateBusy] = useState(false);
+  const [imageMigrateStatus, setImageMigrateStatus] = useState('');
   const [count, setCount] = useState(null);
   const [quoteCount, setQuoteCount] = useState(null);
   const [archiveCount, setArchiveCount] = useState(null);
@@ -319,6 +322,32 @@ export default function AdminDashboard() {
     );
   };
 
+  const handleMigrateImagesToStorage = async () => {
+    if (
+      !window.confirm(
+        '将云端数据库中仍存 Base64 的图片上传到 Supabase Storage，并把 payload 里的 data 字段替换为公开 URL。' +
+          '需已执行 supabase/migration-storage.sql。耗时取决于图片数量，继续？'
+      )
+    ) {
+      return;
+    }
+
+    setImageMigrateBusy(true);
+    setImageMigrateStatus('准备中…');
+    try {
+      const result = await migrateCloudImagesToStorage({
+        onProgress: (msg) => setImageMigrateStatus(msg),
+      });
+      setImageMigrateStatus(
+        `完成：地点 ${result.markersUpdated} · 影像馆 ${result.galleryUpdated} · 档案 ${result.archivesUpdated} · 待审 ${result.submissionsUpdated} 条已更新。`
+      );
+    } catch (err) {
+      setImageMigrateStatus(`失败：${err.message}`);
+    } finally {
+      setImageMigrateBusy(false);
+    }
+  };
+
   const hasLocalData =
     localMarkerCount > 0 || localQuoteStats.total > 0 || localArchiveStats.total > 0;
 
@@ -522,6 +551,32 @@ export default function AdminDashboard() {
         {archiveStatus && (
           <p className={`text-sm ${archiveStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
             {archiveStatus}
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-gray-800">图片对象存储（P2-05）</h2>
+        <p className="text-sm text-gray-600">
+          新上传的图片会在保存时自动写入 Supabase Storage（bucket <code className="text-xs bg-gray-100 px-1 rounded">images</code>
+          ）。若云端仍有旧 Base64 数据，请先在 SQL Editor 执行{' '}
+          <code className="text-xs bg-gray-100 px-1 rounded">supabase/migration-storage.sql</code>，再点下方按钮一次性迁移。
+        </p>
+        <button
+          type="button"
+          onClick={handleMigrateImagesToStorage}
+          disabled={imageMigrateBusy || syncAllBusy}
+          className="px-4 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {imageMigrateBusy ? '迁移中…' : '迁移云端 Base64 图片 → Storage'}
+        </button>
+        {imageMigrateStatus && (
+          <p
+            className={`text-sm ${
+              imageMigrateStatus.startsWith('失败') ? 'text-red-600' : 'text-indigo-800'
+            }`}
+          >
+            {imageMigrateStatus}
           </p>
         )}
       </div>

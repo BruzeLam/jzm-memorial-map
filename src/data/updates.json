@@ -1,4 +1,12 @@
 {
+  "2026-5-25": [
+    {
+      "type": "feature",
+      "emoji": "🖼️",
+      "title": "图片对象存储（Supabase Storage）",
+      "description": "保存地点/影像/档案时自动上传图片到 Storage，payload 存 URL 而非 Base64；后台可一键迁移历史 Base64。需执行 migration-storage.sql。"
+    }
+  ],
   "2026-6-13": [
     {
       "type": "feature",
