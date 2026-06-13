@@ -3,6 +3,9 @@ import RandomQuoteDisplay from './RandomQuoteDisplay';
 import { useI18n } from '../i18n/LanguageContext';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { getBranding, isPortfolioMode } from '../config/branding';
+import AccountBar from './AccountBar';
+import { isCloudEnabled } from '../lib/cloudConfig';
+import { useAuth } from '../context/AuthContext';
 
 function getMilestoneDate() {
   return new Date(`${getBranding().milestoneDate}T00:00:00`);
@@ -112,7 +115,45 @@ function NavButton({ emoji, label, onClick, className }) {
   );
 }
 
-export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onOpenChangeLog }) {
+function HeaderAccountChip({ onLoginClick }) {
+  const { t } = useI18n();
+  const { user, signOut, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (!user) {
+    return (
+      <button
+        type="button"
+        onClick={onLoginClick}
+        className="hidden md:flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors shrink-0"
+      >
+        <span aria-hidden>👤</span>
+        <span>{t('account.login')}</span>
+      </button>
+    );
+  }
+
+  const email = user.email || '';
+  const short = email.length > 16 ? `${email.slice(0, 14)}…` : email;
+
+  return (
+    <div className="hidden md:flex items-center gap-1.5 shrink-0 max-w-[200px]">
+      <span className="text-xs text-gray-600 truncate" title={email}>
+        👤 {short}
+      </span>
+      <button
+        type="button"
+        onClick={() => signOut()}
+        className="text-[11px] px-2 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 whitespace-nowrap"
+      >
+        {t('account.logout')}
+      </button>
+    </div>
+  );
+}
+
+export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onOpenChangeLog, onLoginClick }) {
   const { t } = useI18n();
   const branding = getBranding();
   const seconds = useCountdown();
@@ -141,25 +182,30 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
           alt=""
           className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
         />
-        <h1 className="flex-1 min-w-0 text-[13px] md:text-lg font-serif font-bold leading-snug">
-          {branding.headerLink ? (
-            <a
-              href={branding.headerLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
-            >
-              {branding.siteTitle}
-            </a>
-          ) : (
-            <span className="text-gray-800 line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          <h1 className="min-w-0 text-[13px] md:text-lg font-serif font-bold leading-snug">
+            {branding.headerLink ? (
+              <a
+                href={branding.headerLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
+              >
+                {branding.siteTitle}
+              </a>
+            ) : (
+              <span className="text-gray-800 line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
+            )}
+            {isPortfolioMode() && (
+              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-slate-100 text-slate-600 align-middle">
+                作品集
+              </span>
+            )}
+          </h1>
+          {!isMobile && isCloudEnabled() && onLoginClick && (
+            <HeaderAccountChip onLoginClick={onLoginClick} />
           )}
-          {isPortfolioMode() && (
-            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-slate-100 text-slate-600 align-middle">
-              作品集
-            </span>
-          )}
-        </h1>
+        </div>
 
         {!isMobile && <RandomQuoteDisplay />}
 
@@ -197,6 +243,9 @@ export default function Header({ onOpenQuotes, onOpenArchive, onOpenGallery, onO
             onClick={closeMenu}
           />
           <div className="absolute left-0 right-0 top-full z-[499] border-b border-gray-200 bg-white shadow-lg px-3 py-3 space-y-2 mobile-header-menu pb-safe">
+            {isCloudEnabled() && onLoginClick && (
+              <AccountBar onLoginClick={onLoginClick} compact />
+            )}
             {navItems.map((item) => (
               <button
                 key={item.label}

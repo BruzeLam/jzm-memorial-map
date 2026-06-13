@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../admin/useAdminAuth';
-import { getAdminEmail, isCloudEnabled } from '../lib/cloudConfig';
+import { isCloudEnabled } from '../lib/cloudConfig';
 import { useI18n } from '../i18n/LanguageContext';
 
 export default function EditorLoginModal({ onClose }) {
   const { t } = useI18n();
   const { signInWithEmail } = useAdminAuth();
-  const [email, setEmail] = useState(getAdminEmail() || '');
+  const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);

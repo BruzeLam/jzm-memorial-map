@@ -435,9 +435,7 @@ export default function App() {
     onToggleOnThisDay: toggleOnThisDay,
     dataReadOnly,
     onAddWhenReadOnly: handleAddWhenReadOnly,
-    isEditorLoggedIn: isEditor,
-    isContributorLoggedIn: isContributor,
-    editorEmail: user?.email || '',
+    onLoginClick: () => setShowEditorLogin(true),
   };
 
   const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);
@@ -452,6 +450,7 @@ export default function App() {
         onOpenArchive={() => setShowArchive(true)}
         onOpenGallery={() => setShowGallery(true)}
         onOpenChangeLog={() => setShowChangeLog(true)}
+        onLoginClick={() => setShowEditorLogin(true)}
       />
       {showOnThisDayModal && todayMarkers.length > 0 && (
         <OnThisDayModal
