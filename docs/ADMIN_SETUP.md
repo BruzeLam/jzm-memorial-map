@@ -97,7 +97,21 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 
 > ⚠️ **务必先执行迁移再部署前端**，否则 RLS 仍认旧策略；迁移后若未写入你的邮箱，将失去写权限。
 
-## 8. 安全说明
+## 8. 用户提交待审（阶段 A）
+
+执行 [`supabase/migration-submissions.sql`](../supabase/migration-submissions.sql)（需已执行 collaborators 迁移）。
+
+| 角色 | 添加地点行为 |
+|------|-------------|
+| 访客 | 只读；点「添加」→ 登录 |
+| 已登录非协作者 | 提交进 `submissions` 表，**待审核** |
+| 协作者 / 超管 | 直接写入正式 `markers` 表 |
+
+测试：用**未加入 collaborators 的邮箱**魔法链接登录 → 添加地点 → 应看到「已提交审核」弹窗；数据在 Supabase `submissions` 表，**不会**立刻出现在公开地图。
+
+下一阶段：后台 `/admin/review` 审核看板（通过/驳回后上架）。
+
+## 9. 安全说明
 
 - 写权限由 Supabase **RLS** 按 JWT 邮箱约束，务必保证 SQL 中 admin 邮箱正确  
 - 勿将 `service_role` key 放入前端环境变量  

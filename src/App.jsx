@@ -21,11 +21,15 @@ import { ArchivesProvider } from './context/ArchivesContext';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useAuth } from './context/AuthContext';
 import EditorLoginModal from './components/EditorLoginModal';
+import SubmissionSuccessModal from './components/SubmissionSuccessModal';
 import { getBranding } from './config/branding';
+import { isCloudEnabled } from './lib/cloudConfig';
+import { submitMarkerForReview } from './services/submissions';
 
 export default function App() {
   const { isEditor, user } = useAuth();
   const branding = getBranding();
+  const isContributor = Boolean(user && isCloudEnabled() && !isEditor);
 
   useEffect(() => {
     document.title = branding.siteTitle;
@@ -99,6 +103,7 @@ export default function App() {
   const [showOnThisDayModal, setShowOnThisDayModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showEditorLogin, setShowEditorLogin] = useState(false);
+  const [showSubmissionSuccess, setShowSubmissionSuccess] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [mapContainerSize, setMapContainerSize] = useState({ width: 800, height: 600 });
 
@@ -214,7 +219,31 @@ export default function App() {
     }
   };
 
-  const handleAddMarker = (data) => {
+  const finishAddFlow = () => {
+    setShowAddForm(false);
+    setPendingCoords(null);
+    setEditingMarker(null);
+    setFormPrefill(null);
+    setIsAddingMode(false);
+    setAddInputMode(null);
+    setShowModePicker(false);
+    setMapFloatingCard(null);
+    setMapPickForForm(false);
+    setMapPickCoords(null);
+  };
+
+  const handleAddMarker = async (data) => {
+    if (isContributor) {
+      try {
+        await submitMarkerForReview(data);
+        finishAddFlow();
+        setShowSubmissionSuccess(true);
+      } catch (err) {
+        window.alert(err.message || '提交失败，请稍后重试');
+      }
+      return;
+    }
+
     const newId = addMarker(data);
     // 地点 → 影像馆（单向同步）
     if (data.images?.length > 0) {
@@ -312,7 +341,18 @@ export default function App() {
   };
 
   // Floating card: quick save
-  const handleFloatingQuickSave = (data) => {
+  const handleFloatingQuickSave = async (data) => {
+    if (isContributor) {
+      try {
+        await submitMarkerForReview(data);
+        handleCloseFloatingCard();
+        setShowSubmissionSuccess(true);
+      } catch (err) {
+        window.alert(err.message || '提交失败，请稍后重试');
+      }
+      return;
+    }
+
     const newId = addMarker(data);
     setMapFloatingCard(null);
     setAddInputMode(null);
@@ -345,7 +385,7 @@ export default function App() {
   };
 
   const handleAddWhenReadOnly = () => {
-    if (isEditor) {
+    if (isEditor || isContributor) {
       handleStartAddMode();
       return;
     }
@@ -396,6 +436,7 @@ export default function App() {
     dataReadOnly,
     onAddWhenReadOnly: handleAddWhenReadOnly,
     isEditorLoggedIn: isEditor,
+    isContributorLoggedIn: isContributor,
     editorEmail: user?.email || '',
   };
 
@@ -425,6 +466,9 @@ export default function App() {
       {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
       {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
       {showEditorLogin && <EditorLoginModal onClose={() => setShowEditorLogin(false)} />}
+      {showSubmissionSuccess && (
+        <SubmissionSuccessModal onClose={() => setShowSubmissionSuccess(false)} />
+      )}
       {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
       {showGallery && (
         <GalleryPanel

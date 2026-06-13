@@ -140,6 +140,51 @@ create policy "archives_editor_write"
   using (public.is_editor())
   with check (public.is_editor());
 
+-- 用户提交待审队列
+create table if not exists public.submissions (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('marker', 'quote', 'archive', 'gallery')),
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  payload jsonb not null,
+  submitter_email text not null,
+  reviewer_email text,
+  review_note text,
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+
+alter table public.submissions enable row level security;
+
+create index if not exists submissions_status_created_idx
+  on public.submissions (status, created_at desc);
+
+create index if not exists submissions_submitter_idx
+  on public.submissions (submitter_email);
+
+create policy "submissions_insert_own"
+  on public.submissions for insert
+  with check (
+    auth.role() = 'authenticated'
+    and status = 'pending'
+    and lower(trim(submitter_email)) = lower(trim(coalesce(auth.jwt() ->> 'email', '')))
+  );
+
+create policy "submissions_select"
+  on public.submissions for select
+  using (
+    lower(trim(submitter_email)) = lower(trim(coalesce(auth.jwt() ->> 'email', '')))
+    or public.is_editor()
+  );
+
+create policy "submissions_editor_update"
+  on public.submissions for update
+  using (public.is_editor())
+  with check (public.is_editor());
+
+create policy "submissions_admin_delete"
+  on public.submissions for delete
+  using (public.is_admin());
+
 create index if not exists markers_updated_at_idx on public.markers (updated_at desc);
 create index if not exists gallery_updated_at_idx on public.gallery (updated_at desc);
 create index if not exists quotes_updated_at_idx on public.quotes (updated_at desc);

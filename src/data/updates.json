@@ -2,6 +2,12 @@
   "2026-6-13": [
     {
       "type": "feature",
+      "emoji": "📝",
+      "title": "用户提交待审（地点）",
+      "description": "登录用户（非协作者）添加地点写入 submissions 待审队列，不直接上架；协作者仍可直接发布。需执行 migration-submissions.sql。"
+    },
+    {
+      "type": "feature",
       "emoji": "👥",
       "title": "协作者账号体系",
       "description": "支持多邮箱协作者：RLS 协作者表 + 角色 admin/editor；后台 /admin/collaborators 邀请与管理；地图页登录后可编辑。"

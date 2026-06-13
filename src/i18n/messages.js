@@ -42,16 +42,17 @@ const zh = {
       cloudReadOnly: '☁️ 数据来自云端，访客仅可浏览',
       openAdmin: '前往管理后台编辑 →',
       editorSignedIn: '管理员已登录（{email}），可直接添加编辑',
+      contributorSignedIn: '已登录（{email}）· 提交的内容将先进入审核，通过后公开展示',
     },
     editorLogin: {
-      title: '登录以添加内容',
-      subtitle: '地图数据由管理员维护，请先登录',
-      emailLabel: '管理员邮箱',
+      title: '登录以贡献内容',
+      subtitle: '登录后可提交地点等信息，审核通过后公开展示',
+      emailLabel: '邮箱',
       sendLink: '发送登录链接',
       sending: '发送中…',
       sendFailed: '发送失败',
       sent: '登录链接已发送至 {email}，请查收邮件并点击链接完成登录。',
-      adminOnly: '仅授权管理员邮箱可编辑内容。',
+      adminOnly: '仅已邀请的协作者可直接编辑；其他用户登录后可提交内容，审核通过后展示。',
       goAdmin: '前往管理后台',
       close: '关闭',
       notConfigured: '云端尚未配置，无法登录。',
@@ -164,6 +165,10 @@ const zh = {
     marker: {
       distanceFromYou: '距您 {distance}',
     },
+    submission: {
+      successTitle: '已提交审核',
+      successBody: '感谢您的贡献。管理员审核通过后，该地点将出现在公开地图上。',
+    },
 };
 
 const en = {
@@ -206,17 +211,18 @@ const en = {
       expandSidebar: 'Expand sidebar',
       cloudReadOnly: '☁️ Cloud data — visitors can browse only',
       openAdmin: 'Open admin to edit →',
-      editorSignedIn: 'Signed in as {email} — you can add and edit',
+      editorSignedIn: 'Signed in as {email} — you can add and edit directly',
+      contributorSignedIn: 'Signed in as {email} — submissions are reviewed before publishing',
     },
     editorLogin: {
-      title: 'Sign in to add content',
-      subtitle: 'Map data is maintained by admins',
-      emailLabel: 'Admin email',
+      title: 'Sign in to contribute',
+      subtitle: 'Submit places and other content for review before publishing',
+      emailLabel: 'Your email',
       sendLink: 'Send magic link',
       sending: 'Sending…',
       sendFailed: 'Failed to send',
       sent: 'Magic link sent to {email}. Check your inbox to finish signing in.',
-      adminOnly: 'Only authorized admin emails can edit.',
+      adminOnly: 'Invited collaborators can edit directly; others can submit for review after signing in.',
       goAdmin: 'Open admin',
       close: 'Close',
       notConfigured: 'Cloud is not configured.',
@@ -328,6 +334,10 @@ const en = {
     },
     marker: {
       distanceFromYou: '{distance} away',
+    },
+    submission: {
+      successTitle: 'Submitted for review',
+      successBody: 'Thank you. This place will appear on the map after an admin approves it.',
     },
 };
 

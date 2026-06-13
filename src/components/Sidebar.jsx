@@ -95,6 +95,7 @@ export default function Sidebar({
   dataReadOnly = false,
   onAddWhenReadOnly,
   isEditorLoggedIn = false,
+  isContributorLoggedIn = false,
   editorEmail = '',
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
@@ -196,8 +197,13 @@ export default function Sidebar({
           </button>
         </>
       )}
-      {dataReadOnly && (
+      {dataReadOnly && !isContributorLoggedIn && !isEditorLoggedIn && (
         <p className="text-xs text-gray-500 px-2 pt-2">{t('sidebar.cloudReadOnly')}</p>
+      )}
+      {isContributorLoggedIn && !isEditorLoggedIn && (
+        <p className="text-xs text-amber-800 px-2 pt-2 bg-amber-50 rounded-md mx-1">
+          {t('sidebar.contributorSignedIn', { email: editorEmail })}
+        </p>
       )}
       {isEditorLoggedIn && (
         <p className="text-xs text-green-700 px-2 pt-2">
