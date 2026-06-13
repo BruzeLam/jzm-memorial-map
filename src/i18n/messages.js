@@ -161,6 +161,9 @@ const zh = {
       search: '搜索',
       optional: '可选',
     },
+    marker: {
+      distanceFromYou: '距您 {distance}',
+    },
 };
 
 const en = {
@@ -322,6 +325,9 @@ const en = {
       upload: 'Upload',
       search: 'Search',
       optional: 'Optional',
+    },
+    marker: {
+      distanceFromYou: '{distance} away',
     },
 };
 

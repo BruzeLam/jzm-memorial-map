@@ -29,18 +29,41 @@ npm run build:portfolio
 
 也可复制 `.env.portfolio.example` 为 `.env.local` 后运行 `npm start`。
 
-## Vercel 部署（推荐：独立项目）
+## 线上地址（已配置）
 
-1. 在 Vercel 新建项目，连接同一 GitHub 仓库 `BruzeLam/jzm-memorial-map`
-2. 设置项目名如 `elder-legacy-map`（域名如 `elder-legacy-map.vercel.app`）
-3. 在 **Environment Variables** 中添加：
+| 站点 | 分支 | 域名 |
+|------|------|------|
+| 主站 | `main` | https://jzm-memorial-map.vercel.app |
+| 作品集 | `portfolio` | **https://elder-legacy-map.vercel.app** |
 
-   ```
-   REACT_APP_PORTFOLIO_MODE=true
-   REACT_APP_PORTFOLIO_DEMO_DATA=true
-   ```
+作品集分支的 Preview 环境变量（仅 `portfolio` 分支）：
 
-4. 部署完成后，主站与作品集站互不影响
+```
+REACT_APP_PORTFOLIO_MODE=true
+REACT_APP_PORTFOLIO_DEMO_DATA=true
+```
+
+推送 `portfolio` 分支会自动更新作品集站；`main` 生产环境不受影响。
+
+备用预览 URL：`https://jzm-memorial-map-git-portfolio-bruzelams-projects.vercel.app`
+
+## Vercel 部署（同一项目 + 分支）
+
+当前采用**同一 Vercel 项目**、**独立 Git 分支** + **分支域名**的方案：
+
+1. 代码在 `portfolio` 分支（与 `main` 同步功能，通过 env 切换品牌）
+2. Vercel 为 `portfolio` 分支配置 Preview 环境变量（见上）
+3. 域名 `elder-legacy-map.vercel.app` 绑定到 `portfolio` 分支
+
+若从零配置，可参考：
+
+1. 创建并推送 `portfolio` 分支
+2. Vercel → Environment Variables → Preview → 选择 Git Branch `portfolio`，添加上述两个变量
+3. Vercel → Domains → 添加 `elder-legacy-map.vercel.app` 并指定 Git Branch 为 `portfolio`
+
+### 旧方案：独立 Vercel 项目
+
+也可新建独立项目连接同一仓库，仅在该项目设置 `REACT_APP_PORTFOLIO_MODE=true`。
 
 ### 可选：作品集站也演示云端能力
 

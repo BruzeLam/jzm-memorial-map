@@ -3,6 +3,7 @@ import { MARKER_TYPES } from '../utils/constants';
 import { getTripSiblings, resolveTripSummary, resolveLocalDescription } from '../utils/markerTrips';
 import { MarkerTagPills } from './MarkerTagInput';
 import TripSiblingsSection from './TripSiblingsSection';
+import MarkerDistance from './MarkerDistance';
 
 export default function MarkerDetails({
   marker,
@@ -60,9 +61,12 @@ export default function MarkerDetails({
           <p className="text-sm text-gray-700 leading-relaxed mb-3">{localDesc}</p>
         )}
         <TripSiblingsSection siblings={siblings} onSelectMarker={onSelectMarker} compact />
-        <p className="text-xs text-gray-400 mb-3">
-          📍 {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
-        </p>
+        <div className="flex items-center justify-between gap-2 text-xs text-gray-400 mb-3">
+          <span className="min-w-0 truncate">
+            📍 {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
+          </span>
+          <MarkerDistance latitude={marker.latitude} longitude={marker.longitude} />
+        </div>
 
         {hasImages && (
           <div className="mb-3">
