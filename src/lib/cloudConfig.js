@@ -13,9 +13,15 @@ export function getAdminEmail() {
   return adminEmail;
 }
 
-export function isAdminUser(user) {
+/** 环境变量中的初始超管（迁移 collaborators 表之前的 fallback） */
+export function isBootstrapAdmin(user) {
   if (!user?.email || !adminEmail) return false;
   return user.email.trim().toLowerCase() === adminEmail;
+}
+
+/** @deprecated 使用 isBootstrapAdmin 或协作者表 */
+export function isAdminUser(user) {
+  return isBootstrapAdmin(user);
 }
 
 export { url as supabaseUrl, anonKey as supabaseAnonKey };

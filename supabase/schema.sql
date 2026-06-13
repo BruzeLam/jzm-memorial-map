@@ -1,4 +1,4 @@
--- 江迹 MVP：云端 markers + gallery，公开只读，仅 admin 邮箱可写
+-- 江迹：云端数据 + 协作者 RLS（公开只读，collaborators 表内邮箱可写）
 -- 在 Supabase SQL Editor 中执行；将 YOUR_ADMIN_EMAIL 换成你的邮箱
 
 create table if not exists public.markers (
@@ -58,31 +58,87 @@ create policy "archives_public_read"
   on public.archives for select
   using (true);
 
--- 仅超级管理员可写（把邮箱改成你的，或通过 Supabase Dashboard 编辑）
-create policy "markers_admin_write"
+-- 协作者账号（admin 可管理列表，editor/admin 可写内容）
+create table if not exists public.collaborators (
+  email text primary key,
+  role text not null default 'editor' check (role in ('admin', 'editor')),
+  invited_at timestamptz not null default now(),
+  invited_by text,
+  notes text
+);
+
+alter table public.collaborators enable row level security;
+
+create or replace function public.is_editor()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.collaborators c
+    where lower(trim(c.email)) = lower(trim(coalesce(auth.jwt() ->> 'email', '')))
+  );
+$$;
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.collaborators c
+    where lower(trim(c.email)) = lower(trim(coalesce(auth.jwt() ->> 'email', '')))
+      and c.role = 'admin'
+  );
+$$;
+
+grant execute on function public.is_editor() to authenticated, anon;
+grant execute on function public.is_admin() to authenticated, anon;
+
+insert into public.collaborators (email, role, notes)
+values ('YOUR_ADMIN_EMAIL', 'admin', '初始超级管理员')
+on conflict (email) do update set role = 'admin';
+
+create policy "collaborators_read"
+  on public.collaborators for select
+  using (public.is_editor());
+
+create policy "collaborators_admin_write"
+  on public.collaborators for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- 协作者可写（YOUR_ADMIN_EMAIL 须已在 collaborators 表中）
+create policy "markers_editor_write"
   on public.markers for all
-  using (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL')
-  with check (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL');
+  using (public.is_editor())
+  with check (public.is_editor());
 
-create policy "gallery_admin_write"
+create policy "gallery_editor_write"
   on public.gallery for all
-  using (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL')
-  with check (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL');
+  using (public.is_editor())
+  with check (public.is_editor());
 
-create policy "site_meta_admin_write"
+create policy "site_meta_editor_write"
   on public.site_meta for all
-  using (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL')
-  with check (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL');
+  using (public.is_editor())
+  with check (public.is_editor());
 
-create policy "quotes_admin_write"
+create policy "quotes_editor_write"
   on public.quotes for all
-  using (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL')
-  with check (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL');
+  using (public.is_editor())
+  with check (public.is_editor());
 
-create policy "archives_admin_write"
+create policy "archives_editor_write"
   on public.archives for all
-  using (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL')
-  with check (auth.jwt() ->> 'email' = 'YOUR_ADMIN_EMAIL');
+  using (public.is_editor())
+  with check (public.is_editor());
 
 create index if not exists markers_updated_at_idx on public.markers (updated_at desc);
 create index if not exists gallery_updated_at_idx on public.gallery (updated_at desc);

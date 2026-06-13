@@ -2,6 +2,12 @@
   "2026-6-13": [
     {
       "type": "feature",
+      "emoji": "👥",
+      "title": "协作者账号体系",
+      "description": "多邮箱协作者 + admin/editor 角色；/admin/collaborators 管理邀请（作品集演示站不含云端）。"
+    },
+    {
+      "type": "feature",
       "emoji": "📏",
       "title": "标点直线距离",
       "description": "点击标点后显示与当前位置的直线距离（浏览器定位授权）；地图弹窗同步。"

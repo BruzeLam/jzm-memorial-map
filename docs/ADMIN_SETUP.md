@@ -75,10 +75,29 @@ Vercel：**Settings → Environment Variables** 同样配置三项（Production 
 | `/` | 公众地图（云端只读） |
 | `/admin` | 后台概览、导入、统计 |
 | `/admin/markers` | 地点列表 / 编辑 / 删除 / 新建 |
+| `/admin/collaborators` | 协作者邀请与管理（仅超级管理员） |
 
 Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次「导入」覆盖同 id 记录，或直接在后台编辑。
 
-## 7. 安全说明
+## 7. 协作者账号（多邮箱编辑）
+
+已有数据库请执行 [`supabase/migration-collaborators.sql`](../supabase/migration-collaborators.sql)：
+
+1. 将 **`YOUR_ADMIN_EMAIL`** 改成与 `REACT_APP_ADMIN_EMAIL` 相同的邮箱  
+2. 在 Supabase SQL Editor 执行整段脚本  
+
+会创建 `collaborators` 表、写入你的超级管理员，并将各表写权限从「单邮箱硬编码」改为「协作者列表」。
+
+| 角色 | 权限 |
+|------|------|
+| **admin** | 编辑全部内容 + `/admin/collaborators` 邀请/移除 |
+| **editor** | 编辑地图与后台内容，不可管理账号 |
+
+日常：登录后打开 **`/admin/collaborators`** → 添加协作者邮箱 → 点「发登录链接」让对方首次登录。
+
+> ⚠️ **务必先执行迁移再部署前端**，否则 RLS 仍认旧策略；迁移后若未写入你的邮箱，将失去写权限。
+
+## 8. 安全说明
 
 - 写权限由 Supabase **RLS** 按 JWT 邮箱约束，务必保证 SQL 中 admin 邮箱正确  
 - 勿将 `service_role` key 放入前端环境变量  
