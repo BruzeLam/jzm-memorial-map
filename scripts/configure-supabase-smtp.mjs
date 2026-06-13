@@ -99,3 +99,9 @@ console.log('   smtp_admin_email:', parsed?.smtp_admin_email || senderEmail);
 console.log('   rate_limit_email_sent:', parsed?.rate_limit_email_sent ?? rateLimitEmail);
 console.log('   rate_limit_otp:', parsed?.rate_limit_otp ?? rateLimitOtp);
 console.log('\n请到首页试一次「发送登录链接」，并在 Resend → Logs 查看是否发信成功。');
+if (senderEmail === 'onboarding@resend.dev') {
+  console.log(
+    '\n⚠️  当前发件人为 onboarding@resend.dev：只能发到 Resend 注册邮箱，朋友无法收信。'
+  );
+  console.log('   验证自有域名后请设置：SMTP_SENDER=no-reply@你的域名.com');
+}

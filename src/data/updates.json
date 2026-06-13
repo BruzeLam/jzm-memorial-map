@@ -1,6 +1,12 @@
 {
   "2026-5-25": [
     {
+      "type": "fix",
+      "emoji": "✉️",
+      "title": "登录发信失败中文提示",
+      "description": "将 Error sending confirmation email 等 SMTP 错误转为中文，并说明 Resend 测试发件域只能发给自己的限制。"
+    },
+    {
       "type": "feature",
       "emoji": "🖼️",
       "title": "图片对象存储（Supabase Storage）",

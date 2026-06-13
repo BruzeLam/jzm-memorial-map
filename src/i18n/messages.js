@@ -73,6 +73,8 @@ const zh = {
         '登录邮件发送过于频繁（Supabase 限制）。请稍等 30～60 分钟再试，或查收邮箱中尚未过期的登录链接；长期可配置自定义 SMTP，见 docs/ADMIN_SETUP.md。',
       emailNotAuthorized:
         '该邮箱暂无法收信。请在 Supabase 配置自定义 SMTP，或将收件人加入 Supabase 组织成员（仅适合测试）。',
+      smtpSendFailed:
+        '登录邮件未能发出。若发件人仍是 Resend 测试地址 onboarding@resend.dev，只能发到 Resend 注册邮箱，朋友无法收信——请在 Resend 验证自有域名并改用 no-reply@你的域名 发信（见 docs/ADMIN_SETUP.md §10）。也可在 Resend Logs 查看被拒原因。',
       sent: '登录链接已发送至 {email}，请查收邮件并点击链接完成登录。',
       adminOnly: '仅已邀请的协作者可直接编辑；其他用户登录后可提交内容，审核通过后展示。',
       goAdmin: '前往管理后台',
@@ -265,6 +267,8 @@ const en = {
         'Too many login emails sent (Supabase limit). Wait 30–60 minutes or use an unused link in your inbox. For production, set up custom SMTP — see docs/ADMIN_SETUP.md.',
       emailNotAuthorized:
         'This address cannot receive auth emails yet. Configure custom SMTP in Supabase, or add the recipient to your org team (testing only).',
+      smtpSendFailed:
+        'Could not send the login email. If the sender is still Resend test address onboarding@resend.dev, only the Resend account email can receive mail—verify your own domain and use no-reply@yourdomain (see docs/ADMIN_SETUP.md §10). Check Resend Logs for rejection details.',
       sent: 'Magic link sent to {email}. Check your inbox to finish signing in.',
       adminOnly: 'Invited collaborators can edit directly; others can submit for review after signing in.',
       goAdmin: 'Open admin',

@@ -162,6 +162,27 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 
 6. 用朋友邮箱再试一次「发送登录链接」，确认不再 429。
 
+### ⚠️ `onboarding@resend.dev` 只能发给自己
+
+脚本默认发件人为 **`onboarding@resend.dev`**（Resend 共享测试域）。此模式下 **只能向 Resend 注册账号本人的邮箱发信**，给朋友或其他域名发信会被 Resend 拒绝，Supabase 返回英文：
+
+`Error sending confirmation email`
+
+前端已将该错误转为中文说明。**要让朋友也能登录**，必须：
+
+1. 在 Resend **Domains** 添加并验证你的域名（DNS 配 SPF / DKIM）  
+2. 把 Supabase SMTP 发件人改为 `no-reply@你的域名`（或 Resend 验证过的地址）  
+3. 重新执行 `node scripts/configure-supabase-smtp.mjs`，并设置环境变量：
+
+```bash
+SMTP_SENDER=no-reply@你的域名.com \
+SUPABASE_ACCESS_TOKEN=sbp_... \
+RESEND_API_KEY=re_... \
+node scripts/configure-supabase-smtp.mjs
+```
+
+4. 在 [Resend → Logs](https://resend.com/emails) 确认发往朋友邮箱的状态为 **Delivered**
+
 ### 其他 SMTP 服务
 
 Brevo、SendGrid、AWS SES、腾讯/阿里企业邮等均可，只要提供标准 SMTP 主机、端口、账号密码。配置路径相同。
