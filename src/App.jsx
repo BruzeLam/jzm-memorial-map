@@ -435,7 +435,6 @@ export default function App() {
     onToggleOnThisDay: toggleOnThisDay,
     dataReadOnly,
     onAddWhenReadOnly: handleAddWhenReadOnly,
-    onLoginClick: () => setShowEditorLogin(true),
   };
 
   const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);

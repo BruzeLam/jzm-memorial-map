@@ -10,7 +10,6 @@ import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
-import AccountBar from './AccountBar';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
 
 function MobileScrollList({ children, scrollHint, listKey }) {
@@ -95,7 +94,6 @@ export default function Sidebar({
   compactMobile = false,
   dataReadOnly = false,
   onAddWhenReadOnly,
-  onLoginClick,
 }) {
   const { t, locale, setLocale, markerTypeLabel, localeOptions } = useI18n();
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
@@ -451,7 +449,6 @@ export default function Sidebar({
         </MobileScrollList>
 
         <div className="flex-shrink-0 border-t border-gray-100 bg-white">
-          <AccountBar onLoginClick={onLoginClick} compact={compactMobile} />
           {settingsPanel}
           <div className="px-2 py-1 flex gap-1.5">
             <button
@@ -569,7 +566,6 @@ export default function Sidebar({
       </div>
 
       <div className="flex-shrink-0 border-t border-gray-100 bg-white">
-        <AccountBar onLoginClick={onLoginClick} />
         {settingsPanel}
         <div className="px-3 py-2 flex gap-1.5">
           <button

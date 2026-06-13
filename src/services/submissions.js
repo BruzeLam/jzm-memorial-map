@@ -125,3 +125,32 @@ export async function rejectSubmission(submissionId, reviewNote = '') {
     .eq('status', 'pending');
   if (error) throw error;
 }
+
+/** 当前用户提交统计（用于账号菜单） */
+export async function fetchMySubmissionStats() {
+  const supabase = getSupabase();
+  if (!supabase) return { total: 0, pending: 0, approved: 0, rejected: 0 };
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  if (!user?.email) return { total: 0, pending: 0, approved: 0, rejected: 0 };
+
+  const email = normalizeEmail(user.email);
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('status')
+    .eq('submitter_email', email);
+
+  if (error) throw error;
+
+  const rows = data || [];
+  return {
+    total: rows.length,
+    pending: rows.filter((r) => r.status === 'pending').length,
+    approved: rows.filter((r) => r.status === 'approved').length,
+    rejected: rows.filter((r) => r.status === 'rejected').length,
+  };
+}
