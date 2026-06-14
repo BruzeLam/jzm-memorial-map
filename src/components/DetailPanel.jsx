@@ -19,6 +19,7 @@ export default function DetailPanel({
   onSelectMarker,
   onTagSearch,
   onLoginClick,
+  onGalleryUpdated,
 }) {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
 
@@ -169,7 +170,11 @@ export default function DetailPanel({
             </div>
           )}
 
-          <PilgrimageSection markerId={marker.id} onLoginClick={onLoginClick} />
+          <PilgrimageSection
+            marker={marker}
+            onLoginClick={onLoginClick}
+            onGalleryUpdated={onGalleryUpdated}
+          />
         </div>
       </div>
 

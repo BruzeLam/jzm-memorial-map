@@ -3,6 +3,7 @@ import {
   dedupeGallery,
   isSameImageData,
   markerImageAlreadyInGallery,
+  normalizeGalleryList,
 } from '../utils/galleryUtils';
 import { filterGalleryBySearch } from '../utils/textSearch';
 import { isCloudEnabled } from '../lib/cloudConfig';
@@ -74,7 +75,9 @@ function saveToStorage(gallery) {
 
 export function useGallery(markers = [], { isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
-  const [gallery, setGallery] = useState(() => (cloudMode ? [] : loadFromStorage(markers)));
+  const [gallery, setGallery] = useState(() =>
+    cloudMode ? [] : normalizeGalleryList(loadFromStorage(markers))
+  );
   const readOnly = cloudMode && !isEditor;
 
   const persistGallery = useCallback(
@@ -94,32 +97,35 @@ export function useGallery(markers = [], { isEditor = false } = {}) {
     }
   }, [gallery, cloudMode]);
 
-  useEffect(() => {
-    if (!cloudMode) return undefined;
-
-    let cancelled = false;
-    fetchCloudGallery()
+  const loadCloudGallery = useCallback(() => {
+    if (!cloudMode) return Promise.resolve();
+    return fetchCloudGallery()
       .then((rows) => {
-        if (cancelled) return;
-        const next = dedupeGallery(rows || []);
+        const next = dedupeGallery(normalizeGalleryList(rows || []));
         setGallery(next);
         try {
           localStorage.setItem(GALLERY_CACHE_KEY, JSON.stringify(next));
         } catch (_) {}
       })
       .catch((err) => {
-        if (cancelled) return;
         console.error('Cloud gallery fetch failed:', err);
         try {
           const cached = localStorage.getItem(GALLERY_CACHE_KEY);
-          if (cached) setGallery(JSON.parse(cached));
+          if (cached) setGallery(normalizeGalleryList(JSON.parse(cached)));
         } catch (_) {}
       });
+  }, [cloudMode]);
 
+  useEffect(() => {
+    if (!cloudMode) return undefined;
+    let cancelled = false;
+    loadCloudGallery().then(() => {
+      if (cancelled) return;
+    });
     return () => {
       cancelled = true;
     };
-  }, [cloudMode]);
+  }, [cloudMode, loadCloudGallery]);
 
   const addImage = useCallback((imageData, metadata = {}) => {
     if (readOnly) return null;
@@ -143,6 +149,7 @@ export function useGallery(markers = [], { isEditor = false } = {}) {
           longitude: '',
         },
         relatedMarker: metadata.relatedMarker || null,
+        source: metadata.source || 'official',
         uploadTime: new Date().toISOString(),
       };
       result = newImage;
@@ -178,6 +185,7 @@ export function useGallery(markers = [], { isEditor = false } = {}) {
             longitude: region.longitude ?? '',
           },
           relatedMarker: markerId,
+          source: 'official',
           uploadTime: new Date().toISOString(),
         };
         added.push(entry);
@@ -244,5 +252,6 @@ export function useGallery(markers = [], { isEditor = false } = {}) {
     searchImages,
     dedupeAll,
     readOnly,
+    reloadGallery: loadCloudGallery,
   };
 }

@@ -124,6 +124,8 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 
 未执行迁移时，详情页「圣地巡礼」区域会加载失败；在 Supabase SQL Editor 执行上述脚本即可。
 
+**图片与影像馆分类**：再执行 [`supabase/migration-pilgrimage-images.sql`](../supabase/migration-pilgrimage-images.sql)，巡礼可附带最多 3 张图，自动写入 `gallery` 且 `source=community`；地点/协作者同步的图片为 `official`。影像馆可按「全部 / 地点官方 / 网友巡礼」筛选。
+
 下一阶段：开放公众注册 UI（阶段 C）。
 
 ## 10. 安全说明

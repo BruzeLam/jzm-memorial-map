@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { compressImage } from '../utils/imageCompression';
 import { filterGalleryBySearch } from '../utils/textSearch';
+import { getGallerySource } from '../utils/galleryUtils';
 import { useI18n } from '../i18n/LanguageContext';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
@@ -22,11 +23,27 @@ export default function GalleryPanel({
   const [uploading, setUploading] = useState(false);
   const [newImageToEdit, setNewImageToEdit] = useState(null);
   const [showUploadArea, setShowUploadArea] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState('all');
 
-  const filteredGallery = useMemo(
+  const searchedGallery = useMemo(
     () => filterGalleryBySearch(gallery, searchQuery, markers),
     [gallery, searchQuery, markers]
   );
+
+  const filteredGallery = useMemo(() => {
+    if (sourceFilter === 'all') return searchedGallery;
+    return searchedGallery.filter((img) => getGallerySource(img) === sourceFilter);
+  }, [searchedGallery, sourceFilter]);
+
+  const sourceCounts = useMemo(() => {
+    let official = 0;
+    let community = 0;
+    searchedGallery.forEach((img) => {
+      if (getGallerySource(img) === 'community') community += 1;
+      else official += 1;
+    });
+    return { all: searchedGallery.length, official, community };
+  }, [searchedGallery]);
 
   useEffect(() => {
     setViewingImageIndex(null);
@@ -137,6 +154,26 @@ export default function GalleryPanel({
               </button>
             )}
           </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { key: 'all', label: t('gallery.filterAll'), count: sourceCounts.all },
+              { key: 'official', label: t('gallery.filterOfficial'), count: sourceCounts.official },
+              { key: 'community', label: t('gallery.filterCommunity'), count: sourceCounts.community },
+            ].map(({ key, label, count }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSourceFilter(key)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  sourceFilter === key
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {label} ({count})
+              </button>
+            ))}
+          </div>
           {!readOnly && showUploadArea && (
             <div className="space-y-2">
               <ImageUploadInput
@@ -176,6 +213,20 @@ export default function GalleryPanel({
                       alt={img.title || img.name}
                       className="w-full h-full object-cover"
                     />
+
+                    <div className="absolute top-2 left-2">
+                      <span
+                        className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full shadow-sm ${
+                          getGallerySource(img) === 'community'
+                            ? 'bg-emerald-500/90 text-white'
+                            : 'bg-slate-700/80 text-white'
+                        }`}
+                      >
+                        {getGallerySource(img) === 'community'
+                          ? t('gallery.badgeCommunity')
+                          : t('gallery.badgeOfficial')}
+                      </span>
+                    </div>
 
                     {/* 悬停覆盖层 */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex flex-col items-center justify-center gap-2">

@@ -49,6 +49,23 @@ export function dedupeGallery(gallery) {
   return result;
 }
 
+/** 影像来源：official 地点/官方 · community 网友巡礼 */
+export function getGallerySource(item) {
+  return item?.source === 'community' ? 'community' : 'official';
+}
+
+export function normalizeGalleryItem(item) {
+  if (!item) return item;
+  return {
+    ...item,
+    source: getGallerySource(item),
+  };
+}
+
+export function normalizeGalleryList(gallery) {
+  return (gallery || []).map(normalizeGalleryItem);
+}
+
 export function markerImageAlreadyInGallery(gallery, imageData, markerId) {
   return gallery.some(
     (g) =>

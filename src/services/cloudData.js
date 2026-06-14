@@ -2,6 +2,7 @@ import { getSupabase } from '../lib/supabase';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 import { REMOVED_MARKER_IDS } from '../utils/constants';
+import { normalizeGalleryList } from '../utils/galleryUtils';
 import {
   ensureMarkerImagesUploaded,
   ensureGalleryImageUploaded,
@@ -98,7 +99,7 @@ export async function fetchCloudGallery() {
     .order('updated_at', { ascending: false });
 
   if (error) throw error;
-  return (data || []).map((row) => row.payload);
+  return normalizeGalleryList((data || []).map((row) => row.payload));
 }
 
 export async function upsertCloudGalleryBatch(items) {
@@ -276,6 +277,7 @@ export function buildGalleryFromMarkers(markers) {
           longitude: marker.longitude ?? '',
         },
         relatedMarker: marker.id,
+        source: 'official',
         uploadTime: new Date().toISOString(),
       });
     });

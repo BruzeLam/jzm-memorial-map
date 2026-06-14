@@ -74,6 +74,7 @@ export default function App() {
     deleteImage,
     removeMarkerRelation,
     readOnly: galleryReadOnly,
+    reloadGallery,
   } = useGallery(markers, { isEditor: isEditor });
 
   const [isAddingMode, setIsAddingMode] = useState(false);
@@ -493,6 +494,7 @@ export default function App() {
           }}
           onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
           onLoginClick={() => setShowEditorLogin(true)}
+          onGalleryUpdated={reloadGallery}
         />
       )}
       {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (

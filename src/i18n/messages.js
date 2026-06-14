@@ -132,6 +132,11 @@ const zh = {
       cancelUpload: '取消上传',
       closeUpload: '关闭',
       uploading: '压缩上传中…',
+      filterAll: '全部',
+      filterOfficial: '地点官方',
+      filterCommunity: '网友巡礼',
+      badgeOfficial: '官方',
+      badgeCommunity: '网友',
     },
     archive: {
       title: '档案馆',
@@ -194,7 +199,7 @@ const zh = {
     },
     pilgrimage: {
       title: '圣地巡礼',
-      hint: '登录后可分享到访感受与见闻，发布后立即展示；请文明留言，勿发布广告或无关内容。',
+      hint: '登录后可分享到访感受与图片，发布后立即展示并同步到影像馆「网友巡礼」；请文明留言。',
       count: '{count} 条',
       loading: '加载中…',
       empty: '还没有巡礼留言，来做第一个吧。',
@@ -208,6 +213,10 @@ const zh = {
       delete: '删除',
       confirmDelete: '确定删除这条巡礼留言吗？',
       deleteFailed: '删除失败',
+      addImages: '添加图片',
+      removeImage: '移除图片',
+      maxImages: '最多 {max} 张图片',
+      imageFailed: '图片处理失败',
     },
     submission: {
       successTitle: '已提交审核',
@@ -346,6 +355,11 @@ const en = {
       cancelUpload: 'Cancel upload',
       closeUpload: 'Close',
       uploading: 'Uploading…',
+      filterAll: 'All',
+      filterOfficial: 'Official',
+      filterCommunity: 'Community',
+      badgeOfficial: 'Official',
+      badgeCommunity: 'Community',
     },
     archive: {
       title: 'Archive',
@@ -408,7 +422,7 @@ const en = {
     },
     pilgrimage: {
       title: 'Pilgrimage notes',
-      hint: 'Sign in to share your visit. Posts appear immediately. Please stay respectful—no spam.',
+      hint: 'Sign in to share your visit with text and photos. Posts appear immediately in Gallery under Community.',
       count: '{count}',
       loading: 'Loading…',
       empty: 'No notes yet. Be the first to share your visit.',
@@ -422,6 +436,10 @@ const en = {
       delete: 'Delete',
       confirmDelete: 'Delete this note?',
       deleteFailed: 'Could not delete',
+      addImages: 'Add photos',
+      removeImage: 'Remove photo',
+      maxImages: 'Up to {max} photos',
+      imageFailed: 'Could not process image',
     },
     submission: {
       successTitle: 'Submitted for review',
