@@ -132,7 +132,7 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 - 勿将 `service_role` key 放入前端环境变量  
 - 后台路径 `/admin` 无 obscurity 保护，依赖 Auth + RLS；后续可加 IP 限制或二次验证
 
-## 10. 登录邮件频率与自定义 SMTP
+## 11. 登录邮件频率与自定义 SMTP
 
 首页 / 后台的魔法链接由 **Supabase Auth 发信**。免费项目默认使用 **内置 SMTP**，全项目大约只有 **每小时 2～4 封**，多人登录或反复点「发送登录链接」会触发：
 
@@ -246,7 +246,7 @@ node scripts/configure-supabase-smtp.mjs
 
 若 `api.supabase.com` 也连不上，只能 VPN 后再跑上述命令。
 
-## 11. 图片对象存储（P2-05）
+## 12. 图片对象存储（P2-05）
 
 地点 / 影像馆 / 档案馆 / 待审提交中的图片，保存时会自动上传到 Supabase **Storage**（bucket `images`），数据库 `payload` 里只存公开 URL，不再把 Base64 塞进 JSONB。
 
