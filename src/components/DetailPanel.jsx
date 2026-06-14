@@ -10,6 +10,7 @@ import { MarkerTagPills } from './MarkerTagInput';
 import TripSiblingsSection from './TripSiblingsSection';
 import ImageViewer from './ImageViewer';
 import MarkerDistance from './MarkerDistance';
+import PilgrimageSection from './PilgrimageSection';
 
 export default function DetailPanel({
   marker,
@@ -17,6 +18,8 @@ export default function DetailPanel({
   onClose,
   onSelectMarker,
   onTagSearch,
+  onLoginClick,
+  onGalleryUpdated,
 }) {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
 
@@ -152,13 +155,13 @@ export default function DetailPanel({
               <h4 className="text-sm font-semibold text-gray-700 mb-2">
                 📸 图片库 ({marker.images.length})
               </h4>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-w-sm">
                 {marker.images.map((img, i) => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setViewingImageIndex(i)}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:opacity-90"
+                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:opacity-95 transition-colors bg-gray-100"
                   >
                     <img src={img.data} alt={img.name || ''} className="w-full h-full object-cover" />
                   </button>
@@ -167,6 +170,11 @@ export default function DetailPanel({
             </div>
           )}
 
+          <PilgrimageSection
+            marker={marker}
+            onLoginClick={onLoginClick}
+            onGalleryUpdated={onGalleryUpdated}
+          />
         </div>
       </div>
 

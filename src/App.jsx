@@ -495,6 +495,8 @@ export default function App() {
             setShowDetailPanel(true);
           }}
           onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
+          onLoginClick={() => setShowEditorLogin(true)}
+          onGalleryUpdated={reloadGallery}
         />
       )}
       {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (
