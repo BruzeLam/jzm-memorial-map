@@ -436,6 +436,8 @@ export default function App() {
     onToggleOnThisDay: toggleOnThisDay,
     dataReadOnly,
     onAddWhenReadOnly: handleAddWhenReadOnly,
+    onLoginClick: () => setShowEditorLogin(true),
+    onGalleryUpdated: reloadGallery,
   };
 
   const mobileSidebarExpanded = isMobile && (showAddForm || showModePicker);
@@ -493,8 +495,6 @@ export default function App() {
             setShowDetailPanel(true);
           }}
           onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
-          onLoginClick={() => setShowEditorLogin(true)}
-          onGalleryUpdated={reloadGallery}
         />
       )}
       {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (

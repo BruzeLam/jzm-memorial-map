@@ -1,6 +1,12 @@
 {
   "2026-5-25": [
     {
+      "type": "feature",
+      "emoji": "☕",
+      "title": "Stripe 赞赏入口",
+      "description": "账号菜单新增「赞赏 · 支持维护」，配置 REACT_APP_STRIPE_TIP_URL（Payment Link）后跳转 Stripe 收银台；测试链接会显示测试提示。"
+    },
+    {
       "type": "fix",
       "emoji": "✉️",
       "title": "登录发信失败中文提示",

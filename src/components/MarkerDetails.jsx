@@ -4,6 +4,8 @@ import { getTripSiblings, resolveTripSummary, resolveLocalDescription } from '..
 import { MarkerTagPills } from './MarkerTagInput';
 import TripSiblingsSection from './TripSiblingsSection';
 import MarkerDistance from './MarkerDistance';
+import PilgrimageSection from './PilgrimageSection';
+import { isCloudEnabled } from '../lib/cloudConfig';
 
 export default function MarkerDetails({
   marker,
@@ -15,6 +17,8 @@ export default function MarkerDetails({
   onViewImage,
   onTagSearch,
   onSelectMarker,
+  onLoginClick,
+  onGalleryUpdated,
 }) {
   if (!marker) return null;
 
@@ -25,7 +29,8 @@ export default function MarkerDetails({
   const siblings = getTripSiblings(markers, marker);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="space-y-2">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="px-3 py-2 flex items-center justify-between" style={{ backgroundColor: marker.color + '18' }}>
         <div className="flex items-center gap-2">
           <span className="text-lg">{marker.icon}</span>
@@ -128,6 +133,18 @@ export default function MarkerDetails({
           )}
         </div>
       </div>
+      </div>
+
+      {isCloudEnabled() && (
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <PilgrimageSection
+            embedded
+            marker={marker}
+            onLoginClick={onLoginClick}
+            onGalleryUpdated={onGalleryUpdated}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -28,7 +28,7 @@ function formatVisitTime(iso, locale) {
   }
 }
 
-export default function PilgrimageSection({ marker, onLoginClick, onGalleryUpdated }) {
+export default function PilgrimageSection({ marker, onLoginClick, onGalleryUpdated, embedded = false }) {
   const { t, locale } = useI18n();
   const { user, isSuperAdmin } = useAuth();
   const cloudOn = isCloudEnabled();
@@ -130,7 +130,7 @@ export default function PilgrimageSection({ marker, onLoginClick, onGalleryUpdat
   };
 
   return (
-    <section className="mt-6 pt-5 border-t border-gray-200">
+    <section className={embedded ? 'px-3 py-3' : 'mt-6 pt-5 border-t border-gray-200'}>
       <div className="flex items-center justify-between gap-2 mb-3">
         <h4 className="text-sm font-semibold text-gray-800">
           🧭 {t('pilgrimage.title')}

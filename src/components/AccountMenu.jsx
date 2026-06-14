@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
+import { getStripeTipUrl, isStripeTipEnabled, isStripeTipTestMode } from '../lib/tipConfig';
 import { fetchMySubmissionStats } from '../services/submissions';
 
 function getDisplayName(email) {
@@ -31,10 +32,25 @@ function StatCard({ value, label, badge }) {
   );
 }
 
-function MenuRow({ icon, label, onClick, to, danger = false }) {
+function MenuRow({ icon, label, onClick, to, href, danger = false }) {
   const className = `flex w-full items-center gap-2.5 px-3 py-2.5 text-sm rounded-lg transition-colors text-left ${
     danger ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-50'
   }`;
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        onClick={onClick}
+      >
+        <span className="w-5 text-center text-base leading-none" aria-hidden>{icon}</span>
+        <span>{label}</span>
+      </a>
+    );
+  }
 
   if (to) {
     return (
@@ -296,6 +312,25 @@ export default function AccountMenu({
           ) : (
             <div className="px-4 pt-4 pb-2 border-b border-gray-100">
               <p className="text-sm font-semibold text-gray-900">{t('account.menuTitle')}</p>
+            </div>
+          )}
+
+          {isStripeTipEnabled() && (
+            <div className="px-1.5 py-1.5 border-b border-gray-100">
+              <MenuRow
+                icon="☕"
+                href={getStripeTipUrl()}
+                label={t('account.supportTip')}
+                onClick={close}
+              />
+              <p className="px-3 pt-0.5 pb-1 text-[10px] text-gray-500 leading-snug">
+                {t('account.supportTipHint')}
+              </p>
+              {isStripeTipTestMode() && (
+                <p className="px-3 pb-1 text-[10px] text-amber-700 font-medium">
+                  {t('account.supportTipTest')}
+                </p>
+              )}
             </div>
           )}
 

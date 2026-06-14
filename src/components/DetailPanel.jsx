@@ -10,7 +10,6 @@ import { MarkerTagPills } from './MarkerTagInput';
 import TripSiblingsSection from './TripSiblingsSection';
 import ImageViewer from './ImageViewer';
 import MarkerDistance from './MarkerDistance';
-import PilgrimageSection from './PilgrimageSection';
 
 export default function DetailPanel({
   marker,
@@ -18,8 +17,6 @@ export default function DetailPanel({
   onClose,
   onSelectMarker,
   onTagSearch,
-  onLoginClick,
-  onGalleryUpdated,
 }) {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
 
@@ -170,11 +167,6 @@ export default function DetailPanel({
             </div>
           )}
 
-          <PilgrimageSection
-            marker={marker}
-            onLoginClick={onLoginClick}
-            onGalleryUpdated={onGalleryUpdated}
-          />
         </div>
       </div>
 

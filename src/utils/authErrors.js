@@ -6,7 +6,7 @@ const ZH = {
   'editorLogin.emailNotAuthorized':
     '该邮箱暂无法收信。请在 Supabase 配置自定义 SMTP，或将收件人加入 Supabase 组织成员（仅适合测试）。',
   'editorLogin.smtpSendFailed':
-    '登录邮件未能发出。若发件人仍是 Resend 测试地址 onboarding@resend.dev，只能发到 Resend 注册邮箱，朋友无法收信——请在 Resend 验证自有域名并改用 no-reply@你的域名 发信（见 docs/ADMIN_SETUP.md §10）。也可在 Resend Logs 查看被拒原因。',
+    '登录邮件未能发出（SMTP 发信失败）。请稍后再试，或查收垃圾箱；也可在 Resend → Logs 查看该邮箱是否被拒。学校/企业邮箱常会拦截外部登录邮件。',
   'editorLogin.sendFailed': '发送失败',
 };
 

@@ -93,6 +93,8 @@ export default function Sidebar({
   compactMobile = false,
   dataReadOnly = false,
   onAddWhenReadOnly,
+  onLoginClick,
+  onGalleryUpdated,
 }) {
   const { t, locale, markerTypeLabel } = useI18n();
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
@@ -208,6 +210,8 @@ export default function Sidebar({
         onViewImage={onViewImage}
         onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
         onSelectMarker={onMarkerSelect}
+        onLoginClick={onLoginClick}
+        onGalleryUpdated={onGalleryUpdated}
       />
     </div>
   ) : (
