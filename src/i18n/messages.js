@@ -61,6 +61,9 @@ const zh = {
       myUploads: '我上传的',
       pendingReview: '待审核',
       myComments: '我评论过的',
+      supportTip: '赞赏 · 支持维护',
+      supportTipHint: '自愿支持服务器与地图维护，将跳转 Stripe 安全支付页',
+      supportTipTest: '当前为 Stripe 测试模式，不会真实扣款',
     },
     editorLogin: {
       title: '登录以贡献内容',
@@ -74,7 +77,7 @@ const zh = {
       emailNotAuthorized:
         '该邮箱暂无法收信。请在 Supabase 配置自定义 SMTP，或将收件人加入 Supabase 组织成员（仅适合测试）。',
       smtpSendFailed:
-        '登录邮件未能发出。若发件人仍是 Resend 测试地址 onboarding@resend.dev，只能发到 Resend 注册邮箱，朋友无法收信——请在 Resend 验证自有域名并改用 no-reply@你的域名 发信（见 docs/ADMIN_SETUP.md §10）。也可在 Resend Logs 查看被拒原因。',
+        '登录邮件未能发出（SMTP 发信失败）。请稍后再试，或查收垃圾箱；也可在 Resend → Logs 查看该邮箱是否被拒。学校/企业邮箱常会拦截外部登录邮件。',
       sent: '登录链接已发送至 {email}，请查收邮件并点击链接完成登录。',
       adminOnly: '仅已邀请的协作者可直接编辑；其他用户登录后可提交内容，审核通过后展示。',
       goAdmin: '前往管理后台',
@@ -189,6 +192,23 @@ const zh = {
     marker: {
       distanceFromYou: '距您 {distance}',
     },
+    pilgrimage: {
+      title: '圣地巡礼',
+      hint: '登录后可分享到访感受与见闻，发布后立即展示；请文明留言，勿发布广告或无关内容。',
+      count: '{count} 条',
+      loading: '加载中…',
+      empty: '还没有巡礼留言，来做第一个吧。',
+      loadFailed: '加载失败，请稍后重试',
+      composeLabel: '写下你的巡礼见闻',
+      placeholder: '例如：今日到访，缅怀与学习…',
+      submit: '发布',
+      submitting: '发布中…',
+      submitFailed: '发布失败',
+      loginToPost: '登录后分享巡礼见闻',
+      delete: '删除',
+      confirmDelete: '确定删除这条巡礼留言吗？',
+      deleteFailed: '删除失败',
+    },
     submission: {
       successTitle: '已提交审核',
       successBody: '感谢您的贡献。管理员审核通过后，该地点将出现在公开地图上。',
@@ -255,6 +275,9 @@ const en = {
       myUploads: 'My uploads',
       pendingReview: 'Pending',
       myComments: 'My comments',
+      supportTip: 'Tip · Support the project',
+      supportTipHint: 'Optional support for hosting and maintenance — opens Stripe Checkout',
+      supportTipTest: 'Stripe test mode — no real charges',
     },
     editorLogin: {
       title: 'Sign in to contribute',
@@ -268,7 +291,7 @@ const en = {
       emailNotAuthorized:
         'This address cannot receive auth emails yet. Configure custom SMTP in Supabase, or add the recipient to your org team (testing only).',
       smtpSendFailed:
-        'Could not send the login email. If the sender is still Resend test address onboarding@resend.dev, only the Resend account email can receive mail—verify your own domain and use no-reply@yourdomain (see docs/ADMIN_SETUP.md §10). Check Resend Logs for rejection details.',
+        'Could not send the login email (SMTP failure). Try again later and check spam. See Resend → Logs for that address. School/corporate inboxes often block external auth mail.',
       sent: 'Magic link sent to {email}. Check your inbox to finish signing in.',
       adminOnly: 'Invited collaborators can edit directly; others can submit for review after signing in.',
       goAdmin: 'Open admin',
@@ -382,6 +405,23 @@ const en = {
     },
     marker: {
       distanceFromYou: '{distance} away',
+    },
+    pilgrimage: {
+      title: 'Pilgrimage notes',
+      hint: 'Sign in to share your visit. Posts appear immediately. Please stay respectful—no spam.',
+      count: '{count}',
+      loading: 'Loading…',
+      empty: 'No notes yet. Be the first to share your visit.',
+      loadFailed: 'Could not load notes. Try again later.',
+      composeLabel: 'Share your visit',
+      placeholder: 'e.g. Visited today to learn and reflect…',
+      submit: 'Post',
+      submitting: 'Posting…',
+      submitFailed: 'Could not post',
+      loginToPost: 'Sign in to share your visit',
+      delete: 'Delete',
+      confirmDelete: 'Delete this note?',
+      deleteFailed: 'Could not delete',
     },
     submission: {
       successTitle: 'Submitted for review',

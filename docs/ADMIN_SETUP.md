@@ -112,9 +112,21 @@ Git 仍可用于维护官方样本；改完 `constants.js` 后可在后台再次
 
 **审核**：登录协作者账号 → **`/admin/review`** → 预览待审内容 → **通过并发布**（写入正式 markers + 影像）或 **驳回**。
 
+## 9. 圣地巡礼（地点留言）
+
+执行 [`supabase/migration-pilgrimage.sql`](../supabase/migration-pilgrimage.sql)（需已执行 collaborators 迁移，且存在 `is_admin()` 函数）。
+
+| 角色 | 行为 |
+|------|------|
+| 访客 | 在地点详情底部**只读**浏览巡礼留言 |
+| 已登录用户 | 发布留言，**即时公开展示**（无需审核） |
+| 超级管理员 | 可删除任意留言 |
+
+未执行迁移时，详情页「圣地巡礼」区域会加载失败；在 Supabase SQL Editor 执行上述脚本即可。
+
 下一阶段：开放公众注册 UI（阶段 C）。
 
-## 9. 安全说明
+## 10. 安全说明
 
 - 写权限由 Supabase **RLS** 按 JWT 邮箱约束，务必保证 SQL 中 admin 邮箱正确  
 - 勿将 `service_role` key 放入前端环境变量  
