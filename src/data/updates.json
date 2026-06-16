@@ -1,6 +1,60 @@
 {
   "2026-5-25": [
     {
+      "type": "fix",
+      "emoji": "🗺️",
+      "title": "地图横向无缝循环",
+      "description": "开启 worldCopyJump、取消经度边界，侧栏展开时左右拖动可卷轴式循环，不再撞墙留白；点击标点 flyTo 走最近路径。最小缩放保持 zoom=3。"
+    },
+    {
+      "type": "feature",
+      "emoji": "✈️",
+      "title": "外事行程 2001–2002",
+      "description": "新增 45 个足迹点（拉美六国、俄东欧、朝鲜、缅甸、越南、德非中东、阿拉木图 CICA、圣彼得堡上合、美国工作访问、洛斯卡沃斯 APEC 等），9 组系列标签，可按 # 筛选。"
+    },
+    {
+      "type": "feature",
+      "emoji": "⭐",
+      "title": "在华主办多边会议",
+      "description": "历史事件录入：1996「上海五国」首次元首会晤、2000 中非合作论坛成立、2001 上海合作组织成立、2001 APEC 上海峰会；简介据外交部等公开史料摘取。"
+    },
+    {
+      "type": "feature",
+      "emoji": "✈️",
+      "title": "外事行程 1997–2000",
+      "description": "新增 65 个足迹点：1997 访美/温哥华 APEC/加墨/东盟 10+1、1998 俄日、1999 欧洲三国与亚非六国、2000 中东欧非与文莱 APEC 等，14 组系列标签。"
+    },
+    {
+      "type": "feature",
+      "emoji": "✈️",
+      "title": "外事行程 1990–1996",
+      "description": "新增 46 个足迹点与 14 组系列标签（如 1993巴西国事访问、1994东南亚与 APEC）；日期支持 YYYY / YYYY-MM 模糊输入，排序按当年或当月 1 日。"
+    },
+    {
+      "type": "fix",
+      "emoji": "☁️",
+      "title": "上云后内置行程标点可见",
+      "description": "云端拉取后与内置 SAMPLE_MARKERS 按 id 合并，避免旧云端数据覆盖新批量录入的外事足迹。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "⚡",
+      "title": "首屏加载优化",
+      "description": "localStorage 缓存优先展示；影像馆、档案馆、语录改为打开面板或空闲后再拉云端；重型弹窗按需分包（React.lazy）。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🛕",
+      "title": "圣地巡礼",
+      "description": "登录用户可在地点下留言；侧栏卡片滚动即可查看，详情页保留入口；支持发图并同步影像馆，区分官方与网友图片。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🔍",
+      "title": "高德 POI 搜索",
+      "description": "添加/编辑地点时，国内机构名可走高德 POI 检索定位，配合 OSM 底图使用。"
+    },
+    {
       "type": "feature",
       "emoji": "☕",
       "title": "Stripe 赞赏入口",
@@ -17,6 +71,30 @@
       "emoji": "🖼️",
       "title": "图片对象存储（Supabase Storage）",
       "description": "保存地点/影像/档案时自动上传图片到 Storage，payload 存 URL 而非 Base64；后台可一键迁移历史 Base64。需执行 migration-storage.sql。"
+    },
+    {
+      "type": "fix",
+      "emoji": "🔍",
+      "title": "影像馆搜索修正",
+      "description": "搜索现仅按标题搜索，移除地点、描述等多字段搜索。无结果直接返回空"
+    },
+    {
+      "type": "feature",
+      "emoji": "✏️",
+      "title": "长者语录全面可编辑",
+      "description": "所有语录（含内置30条）均可编辑和删除，数据统一迁移至本地存储"
+    },
+    {
+      "type": "fix",
+      "emoji": "🔄",
+      "title": "随机语录同步修复",
+      "description": "Header 随机语录现包含用户新添加的内容，数据实时同步"
+    },
+    {
+      "type": "fix",
+      "emoji": "🚀",
+      "title": "Vercel 部署缓存修复",
+      "description": "添加 vercel.json 禁用 HTML 缓存，确保每次部署后用户立即看到最新版本"
     }
   ],
   "2026-6-13": [
@@ -155,38 +233,6 @@
       "emoji": "📁",
       "title": "档案馆上线",
       "description": "支持较长文献、出处、相关链接与配图；可添加、编辑、删除与搜索。内置「三个代表」相关两条示例"
-    }
-  ],
-  "2026-5-25": [
-    {
-      "type": "fix",
-      "emoji": "🔍",
-      "title": "影像馆搜索修正",
-      "description": "搜索现仅按标题搜索，移除地点、描述等多字段搜索。无结果直接返回空"
-    },
-    {
-      "type": "optimize",
-      "emoji": "🌍",
-      "title": "地图最小缩放限制",
-      "description": "设定最小缩放级别（zoom=3），地图不再能缩到整个世界视角，保持聚焦亚洲区域"
-    },
-    {
-      "type": "feature",
-      "emoji": "✏️",
-      "title": "长者语录全面可编辑",
-      "description": "所有语录（含内置30条）均可编辑和删除，数据统一迁移至本地存储"
-    },
-    {
-      "type": "fix",
-      "emoji": "🔄",
-      "title": "随机语录同步修复",
-      "description": "Header 随机语录现包含用户新添加的内容，数据实时同步"
-    },
-    {
-      "type": "fix",
-      "emoji": "🚀",
-      "title": "Vercel 部署缓存修复",
-      "description": "添加 vercel.json 禁用 HTML 缓存，确保每次部署后用户立即看到最新版本"
     }
   ],
   "2026-5-24": [
