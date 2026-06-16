@@ -1,7 +1,8 @@
-/** 导览 Agent：服务端加载地点并检索（Supabase 优先，否则内置样本） */
+/** 导览 Agent：服务端加载地点并检索（Supabase + 内置样本，与前端一致） */
 
 import { createClient } from '@supabase/supabase-js';
 import { REMOVED_MARKER_IDS } from '../../src/utils/constants.js';
+import { mergeMarkerCatalog } from '../../src/utils/markerCatalog.js';
 import {
   buildMarkerIndex,
   buildRetrievalIntent,
@@ -13,32 +14,42 @@ import { planRetrievalWithLLM } from './agentQueryPlanner.js';
 import { normalizeQuestionPronouns } from './agentContext.js';
 import {
   isAggregateQuestion,
-  computeMapStatistics,
   sampleMarkersForAggregateQuestion,
 } from './agentStats.js';
 
 const removed = new Set(REMOVED_MARKER_IDS);
 
+async function loadBuiltInMarkers() {
+  const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
+  return SAMPLE_MARKERS.filter((m) => !removed.has(m.id));
+}
+
 export async function loadMarkersForAgent() {
+  const builtIn = await loadBuiltInMarkers();
+
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
   const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
 
   if (url && key) {
     try {
       const supabase = createClient(url, key);
-      const { data, error } = await supabase.from('markers').select('id, payload');
+      const { data, error } = await supabase
+        .from('markers')
+        .select('id, payload')
+        .order('updated_at', { ascending: false });
+
       if (!error && data?.length) {
-        return data
+        const remote = data
           .map((row) => row.payload)
           .filter((m) => m?.id && !removed.has(m.id));
+        return mergeMarkerCatalog(remote, builtIn, REMOVED_MARKER_IDS);
       }
-    } catch (_) {
-      /* fallback below */
+    } catch (err) {
+      console.warn('[agent/markers] Supabase load failed:', err?.message || err);
     }
   }
 
-  const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
-  return SAMPLE_MARKERS.filter((m) => !removed.has(m.id));
+  return builtIn;
 }
 
 /** 两阶段检索：语料索引 + 必要时 LLM 规划 */
@@ -73,7 +84,7 @@ export async function searchMarkersForAgent(markers, question, { apiKey } = {}) 
   }
 }
 
-export { buildMarkerIndex, buildRetrievalIntent, retrieveMarkers };
+export { buildMarkerIndex, buildRetrievalIntent, retrieveMarkers, sampleMarkersForAggregateQuestion };
 
 export function summarizeMarkerForPrompt(m) {
   const typeLabels = { spot: '足迹', event: '历史事件', inscription: '题字' };

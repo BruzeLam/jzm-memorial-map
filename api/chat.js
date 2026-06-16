@@ -7,6 +7,7 @@ import {
   searchMarkersForAgent,
   summarizeMarkerForPrompt,
   toMapHits,
+  sampleMarkersForAggregateQuestion,
 } from './lib/agentMarkers.js';
 import { getAgentSystemPrompt, buildAgentUserPrompt, shouldSkipBackgroundSupplement } from './lib/agentPrompt.js';
 import { getAgentSubject } from './lib/agentContext.js';
@@ -59,23 +60,28 @@ export default async function handler(req, res) {
   try {
     const subject = getAgentSubject();
     const allMarkers = await loadMarkersForAgent();
+    const aggregate = isAggregateQuestion(message);
     const { hits, usedLlmPlanner } = await searchMarkersForAgent(allMarkers, message, { apiKey });
-    const statistics =
-      isAggregateQuestion(message) || hits.length === 0
-        ? computeMapStatistics(allMarkers, message)
-        : null;
-    const summaries = hits.map(summarizeMarkerForPrompt);
-    const mapHits = toMapHits(hits);
-    const skipBackground = shouldSkipBackgroundSupplement(message, hits.length) || Boolean(statistics);
+    const statistics = aggregate ? computeMapStatistics(allMarkers, message) : null;
+
+    const summaries = aggregate ? [] : hits.map(summarizeMarkerForPrompt);
+    const mapHits = aggregate
+      ? toMapHits(sampleMarkersForAggregateQuestion(allMarkers, message))
+      : toMapHits(hits);
+
+    const skipBackground =
+      shouldSkipBackgroundSupplement(message, hits.length) || Boolean(statistics);
 
     const deepseek = createDeepSeek({ apiKey });
     const { text } = await generateText({
       model: deepseek('deepseek-chat'),
-      system: getAgentSystemPrompt({ skipBackground, subject }),
+      system: getAgentSystemPrompt({ skipBackground, subject, aggregate }),
       prompt: buildAgentUserPrompt(message, summaries, history, {
         matchCount: hits.length,
+        catalogSize: allMarkers.length,
         statistics,
         subject,
+        aggregate,
       }),
       maxTokens: skipBackground ? 1000 : 1200,
       temperature: 0.3,
@@ -85,6 +91,7 @@ export default async function handler(req, res) {
       reply: text.trim(),
       mapHits,
       matchCount: hits.length,
+      catalogSize: allMarkers.length,
       usedLlmPlanner,
     });
   } catch (err) {

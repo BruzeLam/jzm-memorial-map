@@ -6,6 +6,7 @@ import { isCloudEnabled } from '../lib/cloudConfig';
 import { getStorageKeys } from '../config/branding';
 import { fetchCloudMarkers, upsertCloudMarker, deleteCloudMarker } from '../services/cloudData';
 import { readJsonCache } from '../utils/storageCache';
+import { mergeMarkerCatalog } from '../utils/markerCatalog';
 
 const CACHE_KEY = getStorageKeys().markersCache;
 
@@ -71,13 +72,7 @@ function saveToStorage(markers) {
 }
 
 function mergeBuiltInMarkers(remoteMarkers) {
-  const base = remoteMarkers?.length ? applyMarkerMigrations(remoteMarkers) : [];
-  const ids = new Set(base.map((m) => m.id));
-  const missing = SAMPLE_MARKERS.filter((m) => !ids.has(m.id));
-  if (!missing.length) {
-    return base.length ? base : applyMarkerMigrations(SAMPLE_MARKERS);
-  }
-  return applyMarkerMigrations([...base, ...missing]);
+  return applyMarkerMigrations(mergeMarkerCatalog(remoteMarkers, SAMPLE_MARKERS, REMOVED_MARKER_IDS));
 }
 
 export function useMarkers({ isEditor = false } = {}) {
