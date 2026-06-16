@@ -14,11 +14,20 @@ import {
   BUILTIN_ARCHIVES,
 } from '../utils/archivesStorage';
 import { collectAllTags, registerTags } from '../utils/archiveTags';
+import { readJsonCache } from '../utils/storageCache';
 
-export function useArchives({ isEditor = false } = {}) {
+function loadArchivesCache() {
+  const cached = readJsonCache(ARCHIVES_CACHE_KEY);
+  return Array.isArray(cached) && cached.length > 0 ? cached : null;
+}
+
+export function useArchives({ isEditor = false, cloudFetchEnabled = false } = {}) {
   const cloudMode = isCloudEnabled();
-  const [archives, setArchives] = useState(() => (cloudMode ? [] : loadLocalArchives()));
-  const [loading, setLoading] = useState(cloudMode);
+  const [archives, setArchives] = useState(() => {
+    if (!cloudMode) return loadLocalArchives();
+    return loadArchivesCache() || loadLocalArchives();
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const readOnly = cloudMode && !isEditor;
 
@@ -34,15 +43,12 @@ export function useArchives({ isEditor = false } = {}) {
     }
   }, [archives, cloudMode]);
 
-  useEffect(() => {
-    if (!cloudMode) return undefined;
+  const loadCloudArchives = useCallback(() => {
+    if (!cloudMode) return Promise.resolve();
 
-    let cancelled = false;
     setLoading(true);
-
-    fetchCloudArchives()
+    return fetchCloudArchives()
       .then((rows) => {
-        if (cancelled) return;
         if (rows?.length) {
           setArchives(rows);
           try {
@@ -54,25 +60,27 @@ export function useArchives({ isEditor = false } = {}) {
         setError(null);
       })
       .catch((err) => {
-        if (cancelled) return;
         console.error('Cloud archives fetch failed:', err);
         setError(err.message);
-        try {
-          const cached = localStorage.getItem(ARCHIVES_CACHE_KEY);
-          if (cached) setArchives(JSON.parse(cached));
-          else setArchives(loadLocalArchives());
-        } catch (_) {
-          setArchives(loadLocalArchives());
-        }
+        const cached = loadArchivesCache();
+        if (cached) setArchives(cached);
+        else setArchives(loadLocalArchives());
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       });
+  }, [cloudMode]);
 
+  useEffect(() => {
+    if (!cloudMode || !cloudFetchEnabled) return undefined;
+    let cancelled = false;
+    loadCloudArchives().then(() => {
+      if (cancelled) return;
+    });
     return () => {
       cancelled = true;
     };
-  }, [cloudMode]);
+  }, [cloudMode, cloudFetchEnabled, loadCloudArchives]);
 
   const addArchive = useCallback(
     async (item) => {
@@ -120,5 +128,6 @@ export function useArchives({ isEditor = false } = {}) {
     addArchive,
     updateArchive,
     deleteArchive,
+    ensureCloudLoaded: loadCloudArchives,
   };
 }

@@ -9,6 +9,7 @@ import { filterGalleryBySearch } from '../utils/textSearch';
 import { isCloudEnabled } from '../lib/cloudConfig';
 import { getStorageKeys } from '../config/branding';
 import { fetchCloudGallery, upsertCloudGalleryBatch } from '../services/cloudData';
+import { readJsonCache } from '../utils/storageCache';
 
 const _sk = getStorageKeys();
 const GALLERY_KEY = _sk.gallery;
@@ -65,6 +66,14 @@ function loadFromStorage(markers = []) {
   }
 }
 
+function loadCloudGalleryCache() {
+  const cached = readJsonCache(GALLERY_CACHE_KEY);
+  if (Array.isArray(cached) && cached.length > 0) {
+    return dedupeGallery(normalizeGalleryList(cached));
+  }
+  return null;
+}
+
 function saveToStorage(gallery) {
   try {
     localStorage.setItem(GALLERY_KEY, JSON.stringify(gallery));
@@ -73,11 +82,12 @@ function saveToStorage(gallery) {
   }
 }
 
-export function useGallery(markers = [], { isEditor = false } = {}) {
+export function useGallery(markers = [], { isEditor = false, cloudFetchEnabled = true } = {}) {
   const cloudMode = isCloudEnabled();
-  const [gallery, setGallery] = useState(() =>
-    cloudMode ? [] : normalizeGalleryList(loadFromStorage(markers))
-  );
+  const [gallery, setGallery] = useState(() => {
+    if (!cloudMode) return normalizeGalleryList(loadFromStorage(markers));
+    return loadCloudGalleryCache() || [];
+  });
   const readOnly = cloudMode && !isEditor;
 
   const persistGallery = useCallback(
@@ -117,7 +127,7 @@ export function useGallery(markers = [], { isEditor = false } = {}) {
   }, [cloudMode]);
 
   useEffect(() => {
-    if (!cloudMode) return undefined;
+    if (!cloudMode || !cloudFetchEnabled) return undefined;
     let cancelled = false;
     loadCloudGallery().then(() => {
       if (cancelled) return;
@@ -125,7 +135,7 @@ export function useGallery(markers = [], { isEditor = false } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [cloudMode, loadCloudGallery]);
+  }, [cloudMode, cloudFetchEnabled, loadCloudGallery]);
 
   const addImage = useCallback((imageData, metadata = {}) => {
     if (readOnly) return null;

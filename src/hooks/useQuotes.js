@@ -9,11 +9,20 @@ import {
   QUOTES_CACHE_KEY,
   BUILTIN_QUOTES,
 } from '../utils/quotesStorage';
+import { readJsonCache, runWhenIdle } from '../utils/storageCache';
+
+function loadQuotesCache() {
+  const cached = readJsonCache(QUOTES_CACHE_KEY);
+  return Array.isArray(cached) && cached.length > 0 ? cached : null;
+}
 
 export function useQuotes({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
-  const [quotes, setQuotes] = useState(() => (cloudMode ? [] : loadLocalQuotes()));
-  const [loading, setLoading] = useState(cloudMode);
+  const [quotes, setQuotes] = useState(() => {
+    if (!cloudMode) return loadLocalQuotes();
+    return loadQuotesCache() || loadLocalQuotes();
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const readOnly = cloudMode && !isEditor;
 
@@ -29,39 +38,40 @@ export function useQuotes({ isEditor = false } = {}) {
     if (!cloudMode) return undefined;
 
     let cancelled = false;
-    setLoading(true);
 
-    fetchCloudQuotes()
-      .then((rows) => {
-        if (cancelled) return;
-        if (rows?.length) {
-          setQuotes(rows);
-          try {
-            localStorage.setItem(QUOTES_CACHE_KEY, JSON.stringify(rows));
-          } catch (_) {}
-        } else {
-          setQuotes(loadLocalQuotes());
-        }
-        setError(null);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error('Cloud quotes fetch failed:', err);
-        setError(err.message);
-        try {
-          const cached = localStorage.getItem(QUOTES_CACHE_KEY);
-          if (cached) setQuotes(JSON.parse(cached));
+    const fetchQuotes = () => {
+      setLoading(true);
+      fetchCloudQuotes()
+        .then((rows) => {
+          if (cancelled) return;
+          if (rows?.length) {
+            setQuotes(rows);
+            try {
+              localStorage.setItem(QUOTES_CACHE_KEY, JSON.stringify(rows));
+            } catch (_) {}
+          } else {
+            setQuotes(loadLocalQuotes());
+          }
+          setError(null);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          console.error('Cloud quotes fetch failed:', err);
+          setError(err.message);
+          const cached = loadQuotesCache();
+          if (cached) setQuotes(cached);
           else setQuotes(loadLocalQuotes());
-        } catch (_) {
-          setQuotes(loadLocalQuotes());
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+
+    const cancelIdle = runWhenIdle(fetchQuotes, 800);
 
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, [cloudMode]);
 

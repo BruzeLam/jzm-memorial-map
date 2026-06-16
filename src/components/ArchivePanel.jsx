@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { compressImage } from '../utils/imageCompression';
 import { filterBySearch, getArchiveSearchFields } from '../utils/textSearch';
 import {
@@ -295,12 +295,17 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
 
 export default function ArchivePanel({ onClose }) {
   const { t } = useI18n();
-  const { archives, readOnly, addArchive, updateArchive, deleteArchive } = useArchivesContext();
+  const { archives, readOnly, addArchive, updateArchive, deleteArchive, ensureCloudLoaded } =
+    useArchivesContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+
+  useEffect(() => {
+    ensureCloudLoaded?.();
+  }, [ensureCloudLoaded]);
 
   const allTags = useMemo(() => collectAllTags(archives), [archives]);
 

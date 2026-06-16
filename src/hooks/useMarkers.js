@@ -5,8 +5,17 @@ import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from
 import { isCloudEnabled } from '../lib/cloudConfig';
 import { getStorageKeys } from '../config/branding';
 import { fetchCloudMarkers, upsertCloudMarker, deleteCloudMarker } from '../services/cloudData';
+import { readJsonCache } from '../utils/storageCache';
 
 const CACHE_KEY = getStorageKeys().markersCache;
+
+function loadCloudCacheMarkers() {
+  const cached = readJsonCache(CACHE_KEY);
+  if (Array.isArray(cached) && cached.length > 0) {
+    return applyMarkerMigrations(cached);
+  }
+  return null;
+}
 
 const removedIdSet = new Set(REMOVED_MARKER_IDS);
 
@@ -63,7 +72,10 @@ function saveToStorage(markers) {
 
 export function useMarkers({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
-  const [markers, setMarkers] = useState(() => (cloudMode ? [] : loadFromStorage()));
+  const [markers, setMarkers] = useState(() => {
+    if (!cloudMode) return loadFromStorage();
+    return loadCloudCacheMarkers() || applyMarkerMigrations(SAMPLE_MARKERS);
+  });
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
   const [cloudLoading, setCloudLoading] = useState(cloudMode);
   const [cloudError, setCloudError] = useState(null);

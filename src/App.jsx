@@ -1,5 +1,5 @@
 // Cache fix: 2026-05-25 - Force Vercel rebuild
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, Suspense, lazy } from 'react';
 import { useMarkers } from './hooks/useMarkers';
 import { useSearch } from './hooks/useSearch';
 import { useGallery } from './hooks/useGallery';
@@ -7,12 +7,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MapView from './components/Map';
 import MapFloatingCard from './components/MapFloatingCard';
-import QuotesPanel from './components/QuotesPanel';
-import ArchivePanel from './components/ArchivePanel';
-import DetailPanel from './components/DetailPanel';
 import ImageViewer from './components/ImageViewer';
-import GalleryPanel from './components/GalleryPanel';
-import ChangeLog from './components/ChangeLog';
 import OnThisDayModal from './components/OnThisDayModal';
 import { getOnThisDayMarkers } from './utils/onThisDay';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -20,11 +15,21 @@ import { QuotesProvider } from './context/QuotesContext';
 import { ArchivesProvider } from './context/ArchivesContext';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useAuth } from './context/AuthContext';
-import EditorLoginModal from './components/EditorLoginModal';
-import SubmissionSuccessModal from './components/SubmissionSuccessModal';
 import { getBranding } from './config/branding';
 import { isCloudEnabled } from './lib/cloudConfig';
 import { submitMarkerForReview } from './services/submissions';
+
+const QuotesPanel = lazy(() => import('./components/QuotesPanel'));
+const ArchivePanel = lazy(() => import('./components/ArchivePanel'));
+const DetailPanel = lazy(() => import('./components/DetailPanel'));
+const GalleryPanel = lazy(() => import('./components/GalleryPanel'));
+const ChangeLog = lazy(() => import('./components/ChangeLog'));
+const EditorLoginModal = lazy(() => import('./components/EditorLoginModal'));
+const SubmissionSuccessModal = lazy(() => import('./components/SubmissionSuccessModal'));
+
+function ModalFallback() {
+  return null;
+}
 
 export default function App() {
   const { isEditor, user } = useAuth();
@@ -66,6 +71,13 @@ export default function App() {
     toggleOnThisDay,
   } = useSearch(markers);
 
+  const [showQuotes, setShowQuotes] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
+  const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const [viewingImageIndex, setViewingImageIndex] = useState(null);
+  const [showGallery, setShowGallery] = useState(false);
+  const [showChangeLog, setShowChangeLog] = useState(false);
+
   const {
     gallery,
     addImage,
@@ -75,7 +87,10 @@ export default function App() {
     removeMarkerRelation,
     readOnly: galleryReadOnly,
     reloadGallery,
-  } = useGallery(markers, { isEditor: isEditor });
+  } = useGallery(markers, {
+    isEditor: isEditor,
+    cloudFetchEnabled: showGallery || isEditor,
+  });
 
   const [isAddingMode, setIsAddingMode] = useState(false);
   // 'map' | 'manual' | null
@@ -95,12 +110,6 @@ export default function App() {
   const [mapPickForForm, setMapPickForForm] = useState(false);
   const [mapPickCoords, setMapPickCoords] = useState(null);
 
-  const [showQuotes, setShowQuotes] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
-  const [showDetailPanel, setShowDetailPanel] = useState(false);
-  const [viewingImageIndex, setViewingImageIndex] = useState(null);
-  const [showGallery, setShowGallery] = useState(false);
-  const [showChangeLog, setShowChangeLog] = useState(false);
   const [showOnThisDayModal, setShowOnThisDayModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showEditorLogin, setShowEditorLogin] = useState(false);
@@ -467,38 +476,40 @@ export default function App() {
           onSelectMarker={handleMarkerSelect}
         />
       )}
-      {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
-      {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
-      {showEditorLogin && <EditorLoginModal onClose={() => setShowEditorLogin(false)} />}
-      {showSubmissionSuccess && (
-        <SubmissionSuccessModal onClose={() => setShowSubmissionSuccess(false)} />
-      )}
-      {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
-      {showGallery && (
-        <GalleryPanel
-          gallery={gallery}
-          markers={markers}
-          onAddImage={addImage}
-          onUpdateImage={updateImage}
-          onDeleteImage={deleteImage}
-          onClose={() => setShowGallery(false)}
-          readOnly={galleryReadOnly}
-        />
-      )}
-      {showDetailPanel && (
-        <DetailPanel
-          marker={selectedMarker}
-          markers={markers}
-          onClose={() => setShowDetailPanel(false)}
-          onSelectMarker={(id) => {
-            selectMarker(id);
-            setShowDetailPanel(true);
-          }}
-          onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
-          onLoginClick={() => setShowEditorLogin(true)}
-          onGalleryUpdated={reloadGallery}
-        />
-      )}
+      <Suspense fallback={<ModalFallback />}>
+        {showQuotes && <QuotesPanel onClose={() => setShowQuotes(false)} />}
+        {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
+        {showEditorLogin && <EditorLoginModal onClose={() => setShowEditorLogin(false)} />}
+        {showSubmissionSuccess && (
+          <SubmissionSuccessModal onClose={() => setShowSubmissionSuccess(false)} />
+        )}
+        {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
+        {showGallery && (
+          <GalleryPanel
+            gallery={gallery}
+            markers={markers}
+            onAddImage={addImage}
+            onUpdateImage={updateImage}
+            onDeleteImage={deleteImage}
+            onClose={() => setShowGallery(false)}
+            readOnly={galleryReadOnly}
+          />
+        )}
+        {showDetailPanel && (
+          <DetailPanel
+            marker={selectedMarker}
+            markers={markers}
+            onClose={() => setShowDetailPanel(false)}
+            onSelectMarker={(id) => {
+              selectMarker(id);
+              setShowDetailPanel(true);
+            }}
+            onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
+            onLoginClick={() => setShowEditorLogin(true)}
+            onGalleryUpdated={reloadGallery}
+          />
+        )}
+      </Suspense>
       {viewingImageIndex !== null && selectedMarker?.images?.length > 0 && (
         <ImageViewer
           images={selectedMarker.images}
