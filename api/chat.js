@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
   try {
     const allMarkers = await loadMarkersForAgent();
-    const hits = searchMarkersForAgent(allMarkers, message);
+    const { hits, usedLlmPlanner } = await searchMarkersForAgent(allMarkers, message, { apiKey });
     const summaries = hits.map(summarizeMarkerForPrompt);
     const mapHits = toMapHits(hits);
 
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
       model: deepseek('deepseek-chat'),
       system: AGENT_SYSTEM_PROMPT,
       prompt: buildAgentUserPrompt(message, summaries, history),
-      maxTokens: 1200,
+      maxTokens: 1400,
       temperature: 0.4,
     });
 
@@ -73,6 +73,7 @@ export default async function handler(req, res) {
       reply: text.trim(),
       mapHits,
       matchCount: hits.length,
+      usedLlmPlanner,
     });
   } catch (err) {
     console.error('[agent/chat]', err);

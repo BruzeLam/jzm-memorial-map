@@ -33,5 +33,5 @@ export function buildAgentUserPrompt(message, markerSummaries, history = []) {
 本次检索到的地图记录（JSON，仅此为准归入「地图已有」）：
 ${JSON.stringify(markerSummaries, null, 2)}${historyBlock}
 
-请按系统要求的两段式结构回答。`;
+请按系统要求的两段式结构回答。若检索结果较多，可分组归纳，但不得遗漏 JSON 中的条目。`;
 }
