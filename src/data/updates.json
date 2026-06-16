@@ -1,6 +1,18 @@
 {
   "2026-6-16": [
     {
+      "type": "feature",
+      "emoji": "🤖",
+      "title": "智能问（侧栏集成）",
+      "description": "搜索框切换「搜索 / 智能问」；自然语言提问，基于全库标点检索 + DeepSeek 归纳；支持汇总统计（如到访国家数）、一键跳转地图。需在 Vercel 配置 DEEPSEEK_API_KEY。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🌏",
+      "title": "外交行程数据批量录入",
+      "description": "1990–2002 外事足迹、在华多边会议（上合/APEC/中非论坛等）等写入内置数据；智能问与地图侧栏读取同一全量 catalog（云端 + 内置合并）。"
+    },
+    {
       "type": "fix",
       "emoji": "🗺️",
       "title": "地图横向无缝循环",
