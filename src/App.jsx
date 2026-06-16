@@ -27,6 +27,7 @@ const GalleryPanel = lazy(() => import('./components/GalleryPanel'));
 const ChangeLog = lazy(() => import('./components/ChangeLog'));
 const EditorLoginModal = lazy(() => import('./components/EditorLoginModal'));
 const SubmissionSuccessModal = lazy(() => import('./components/SubmissionSuccessModal'));
+const AgentPanel = lazy(() => import('./components/AgentPanel'));
 
 function ModalFallback() {
   return null;
@@ -78,6 +79,7 @@ export default function App() {
   const [viewingImageIndex, setViewingImageIndex] = useState(null);
   const [showGallery, setShowGallery] = useState(false);
   const [showChangeLog, setShowChangeLog] = useState(false);
+  const [showAgent, setShowAgent] = useState(false);
 
   const {
     gallery,
@@ -464,6 +466,7 @@ export default function App() {
         onOpenArchive={() => setShowArchive(true)}
         onOpenGallery={() => setShowGallery(true)}
         onOpenChangeLog={() => setShowChangeLog(true)}
+        onOpenAgent={() => setShowAgent(true)}
         onLoginClick={() => setShowEditorLogin(true)}
         dataReadOnly={dataReadOnly}
         onResetToSample={resetToSample}
@@ -487,6 +490,12 @@ export default function App() {
           <SubmissionSuccessModal onClose={() => setShowSubmissionSuccess(false)} />
         )}
         {showChangeLog && <ChangeLog onClose={() => setShowChangeLog(false)} />}
+        {showAgent && (
+          <AgentPanel
+            onClose={() => setShowAgent(false)}
+            onNavigateMarker={handleMarkerSelect}
+          />
+        )}
         {showGallery && (
           <GalleryPanel
             gallery={gallery}

@@ -12,6 +12,7 @@ const zh = {
       shortTitle: '生平纪念地图',
       openMenu: '打开菜单',
       closeMenu: '关闭菜单',
+      agent: '智能导览',
     },
     sidebar: {
       searchPlaceholder: '搜索地点、事件、标签（如 #1993巴西国事访问）…',
@@ -222,6 +223,17 @@ const zh = {
       successTitle: '已提交审核',
       successBody: '感谢您的贡献。管理员审核通过后，该地点将出现在公开地图上。',
     },
+    agent: {
+      title: '智能导览',
+      subtitle: '先查地图已有记录，再补充公开背景；未录入内容会单独标注',
+      emptyHint: '用自然语言提问，例如某年访问、某类事件、某地区足迹',
+      inputPlaceholder: '问一问地图与相关背景…',
+      send: '发送',
+      close: '关闭',
+      clear: '清空对话',
+      thinking: '正在检索并整理回答…',
+      mapHits: '在地图上查看',
+    },
 };
 
 const en = {
@@ -235,6 +247,7 @@ const en = {
       shortTitle: 'Memorial Map',
       openMenu: 'Open menu',
       closeMenu: 'Close menu',
+      agent: 'Guide',
     },
     sidebar: {
       searchPlaceholder: 'Search places, events, tags (e.g. #tag)…',
@@ -444,6 +457,17 @@ const en = {
     submission: {
       successTitle: 'Submitted for review',
       successBody: 'Thank you. This place will appear on the map after an admin approves it.',
+    },
+    agent: {
+      title: 'Guide',
+      subtitle: 'Map records first, then public background — extras are clearly labeled',
+      emptyHint: 'Ask in plain language about visits, events, or regions',
+      inputPlaceholder: 'Ask about the map or historical context…',
+      send: 'Send',
+      close: 'Close',
+      clear: 'Clear chat',
+      thinking: 'Searching and composing…',
+      mapHits: 'View on map',
     },
 };
 

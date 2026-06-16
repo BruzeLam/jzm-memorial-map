@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@ai-sdk/deepseek": "^2.0.38",
     "@supabase/supabase-js": "^2.107.0",
+    "ai": "^6.0.206",
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-calendar": "^4.8.0",
