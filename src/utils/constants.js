@@ -1,6 +1,7 @@
 import { isPortfolioDemoData, getStorageKeys } from '../config/branding';
 import { PORTFOLIO_SAMPLE_MARKERS } from '../data/portfolio/markers';
-import { ITINERARY_MARKERS } from '../data/itineraryMarkers';
+import { ITINERARY_MARKERS_1990_1996 } from '../data/itineraryMarkers';
+import { ITINERARY_MARKERS_1997_2000 } from '../data/itineraryMarkers1997_2000';
 
 export const MARKER_TYPES = {
   spot: {
@@ -584,8 +585,11 @@ const SAMPLE_MARKERS_RAW = [
     province: '',
     city: '华盛顿',
     date: '1997-10-26',
-    title: '首次国事访美',
-    description: '12年来中国国家元首首次正式访美，开启中美关系新篇章。',
+    endDate: '1997-11-03',
+    tags: ['1997美国国事访问'],
+    tripSummary: '1997年10月26日至11月3日对美国国事访问，与克林顿会谈；系12年来中国国家元首首次访美。',
+    title: '1997年美国国事访问',
+    description: '在华盛顿与克林顿总统举行会谈，推动中美关系稳定发展。',
     color: '#1E88E5',
     icon: '📍',
     images: [],
@@ -634,9 +638,11 @@ const SAMPLE_MARKERS_RAW = [
     country: '法国',
     province: '',
     city: '巴黎',
-    date: '1999-10-25',
-    title: '中法全面伙伴关系',
-    description: '访问法国，推进中法全面战略伙伴关系。',
+    date: '1999-10-22',
+    endDate: '1999-10-26',
+    tags: ['1999欧非亚六国国事访问'],
+    title: '1999年法国国事访问',
+    description: '与希拉克总统会谈，推进面向21世纪的中法全面伙伴关系。',
     color: '#1E88E5',
     icon: '📍',
     images: [],
@@ -1151,13 +1157,14 @@ const SAMPLE_MARKERS_RAW = [
     ],
     sources: [{ title: '公开报道', note: '1990年6月1日·北京' }],
   },
-  ...ITINERARY_MARKERS,
+  ...ITINERARY_MARKERS_1990_1996,
+  ...ITINERARY_MARKERS_1997_2000,
 ];
 
 /** 已从示例库撤下的标点 ID（版本迁移时从 localStorage 同步删除） */
 export const REMOVED_MARKER_IDS = ['spot_trip_001', 'event_trip_001'];
 
 // 数据版本：条数变更或结构迁移时递增（32 = 1990–1996 外事行程批量添加）
-export const DATA_VERSION = 32;
+export const DATA_VERSION = 33;
 
 export const SAMPLE_MARKERS = isPortfolioDemoData() ? PORTFOLIO_SAMPLE_MARKERS : SAMPLE_MARKERS_RAW;

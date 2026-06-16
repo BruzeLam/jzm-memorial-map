@@ -3,31 +3,9 @@
  * 资料来源：维基百科「江泽民外事访问列表」及公开报道
  */
 
-const SRC = '维基百科：江泽民外事访问列表';
+import { city } from './itineraryHelpers';
 
-function visit(id, fields) {
-  return {
-    id,
-    type: 'spot',
-    color: '#1E88E5',
-    icon: '📍',
-    images: [],
-    sources: [{ title: SRC, note: fields.sourceNote || '' }],
-    province: '',
-    ...fields,
-  };
-}
-
-function city(id, tag, tripSummary, shared, cityFields) {
-  return visit(id, {
-    tags: [tag],
-    tripSummary: cityFields.tripSummary ?? (shared.first ? tripSummary : undefined),
-    ...shared,
-    ...cityFields,
-  });
-}
-
-export const ITINERARY_MARKERS = [
+export const ITINERARY_MARKERS_1990_1996 = [
   // ── 1990 朝鲜 ─────────────────────────────────────────
   city('spot_1990_kp_pyongyang', '1990朝鲜友好访问', '1990年3月14日至16日对朝鲜进行友好访问，会见金日成。系江泽民任中共中央总书记后首次出访。', { date: '1990-03-14', endDate: '1990-03-16', first: true }, {
     name: '平壤',
