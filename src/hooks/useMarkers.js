@@ -12,7 +12,7 @@ const CACHE_KEY = getStorageKeys().markersCache;
 function loadCloudCacheMarkers() {
   const cached = readJsonCache(CACHE_KEY);
   if (Array.isArray(cached) && cached.length > 0) {
-    return applyMarkerMigrations(cached);
+    return mergeBuiltInMarkers(cached);
   }
   return null;
 }
@@ -70,6 +70,16 @@ function saveToStorage(markers) {
   }
 }
 
+function mergeBuiltInMarkers(remoteMarkers) {
+  const base = remoteMarkers?.length ? applyMarkerMigrations(remoteMarkers) : [];
+  const ids = new Set(base.map((m) => m.id));
+  const missing = SAMPLE_MARKERS.filter((m) => !ids.has(m.id));
+  if (!missing.length) {
+    return base.length ? base : applyMarkerMigrations(SAMPLE_MARKERS);
+  }
+  return applyMarkerMigrations([...base, ...missing]);
+}
+
 export function useMarkers({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
   const [markers, setMarkers] = useState(() => {
@@ -94,15 +104,11 @@ export function useMarkers({ isEditor = false } = {}) {
     fetchCloudMarkers()
       .then((rows) => {
         if (cancelled) return;
-        if (rows?.length) {
-          setMarkers(rows);
-          try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-          } catch (_) {}
-        } else {
-          const fallback = applyMarkerMigrations(SAMPLE_MARKERS);
-          setMarkers(fallback);
-        }
+        const merged = mergeBuiltInMarkers(rows);
+        setMarkers(merged);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(merged));
+        } catch (_) {}
         setCloudError(null);
       })
       .catch((err) => {
@@ -111,7 +117,7 @@ export function useMarkers({ isEditor = false } = {}) {
         setCloudError(err.message);
         try {
           const cached = localStorage.getItem(CACHE_KEY);
-          if (cached) setMarkers(JSON.parse(cached));
+          if (cached) setMarkers(mergeBuiltInMarkers(JSON.parse(cached)));
           else setMarkers(applyMarkerMigrations(SAMPLE_MARKERS));
         } catch (_) {
           setMarkers(applyMarkerMigrations(SAMPLE_MARKERS));
