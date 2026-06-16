@@ -18,6 +18,7 @@ import { useAuth } from './context/AuthContext';
 import { getBranding } from './config/branding';
 import { isCloudEnabled } from './lib/cloudConfig';
 import { submitMarkerForReview } from './services/submissions';
+import { flyToLatLng, normalizeLng } from './utils/mapWrap';
 
 const QuotesPanel = lazy(() => import('./components/QuotesPanel'));
 const ArchivePanel = lazy(() => import('./components/ArchivePanel'));
@@ -168,8 +169,10 @@ export default function App() {
       const firstResult = filteredMarkers[0];
       selectMarker(firstResult.id);
       if (mapRef.current) {
-        mapRef.current.flyTo(
-          [firstResult.latitude, firstResult.longitude],
+        flyToLatLng(
+          mapRef.current,
+          firstResult.latitude,
+          firstResult.longitude,
           8,
           { duration: 1 }
         );
@@ -194,7 +197,7 @@ export default function App() {
       // 计算目标缩放级别：如果已经足够近，保持不变；否则缩放到 10-12 范围
       const targetZoom = Math.max(currentZoom, 10);
       const constrainedZoom = Math.min(targetZoom, 12);
-      map.flyTo([marker.latitude, marker.longitude], constrainedZoom, {
+      flyToLatLng(map, marker.latitude, marker.longitude, constrainedZoom, {
         duration: 0.8,
         easeLinearity: 0.5, // 使动画更流畅
       });
@@ -203,7 +206,7 @@ export default function App() {
 
   const handleMapClick = (latlng) => {
     if (mapPickForForm) {
-      setMapPickCoords({ lat: latlng.lat, lng: latlng.lng });
+      setMapPickCoords({ lat: latlng.lat, lng: normalizeLng(latlng.lng) });
       setMapPickForForm(false);
       return;
     }
@@ -219,11 +222,11 @@ export default function App() {
           pixelPos = { x: point.x, y: point.y };
         } catch (_) {}
       }
-      setMapFloatingCard({ coords: latlng, pixelPos });
+      setMapFloatingCard({ coords: { lat: latlng.lat, lng: normalizeLng(latlng.lng) }, pixelPos });
       setIsAddingMode(false);
     } else {
       // Legacy single-mode (shouldn't be reached in new flow, but kept for safety)
-      setPendingCoords(latlng);
+      setPendingCoords({ lat: latlng.lat, lng: normalizeLng(latlng.lng) });
       setShowAddForm(true);
       setIsAddingMode(false);
     }

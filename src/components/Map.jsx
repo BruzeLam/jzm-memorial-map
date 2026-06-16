@@ -5,11 +5,12 @@ import { DEFAULT_CENTER, DEFAULT_ZOOM, MARKER_TYPES } from '../utils/constants';
 import { getTripMateIds } from '../utils/markerTrips';
 import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistance } from '../utils/geo';
+import { normalizeLng } from '../utils/mapWrap';
 
 // 放大时保持原始标点大小；仅在缩小到较大尺度（世界/区域视图）时适度缩小
 function getMarkerDimensions(zoom, isSelected) {
   const fullSizeZoom = 8;
-  const minZoom = 3;
+  const minZoom = 2;
   const minScale = 0.55;
 
   const size = isSelected ? 44 : 36;
@@ -85,7 +86,7 @@ function MapClickHandler({ isMapInteractive, onMapClick }) {
   useMapEvents({
     click(e) {
       if (isMapInteractive) {
-        onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
+        onMapClick({ lat: e.latlng.lat, lng: normalizeLng(e.latlng.lng) });
       }
     },
   });
@@ -203,16 +204,12 @@ export default function MapView({
   onMapClick,
   isMapInteractive,
 }) {
-  // 限制地图拖动范围在全球范围内
-  const globalBounds = [[-85, -180], [85, 180]];
-
+  // 经度不设边界，瓦片横向循环；仅保留较低 minZoom 便于纵览全球足迹
   return (
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
-      minZoom={3}
-      maxBounds={globalBounds}
-      maxBoundsViscosity={1.0}
+      minZoom={2}
       style={{ width: '100%', height: '100%' }}
       className={isMapInteractive ? 'cursor-crosshair' : ''}
       zoomControl={false}
@@ -220,6 +217,7 @@ export default function MapView({
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        noWrap={false}
       />
       <MapRefSetter mapRef={mapRef} />
       <MapClickHandler isMapInteractive={isMapInteractive} onMapClick={onMapClick} />

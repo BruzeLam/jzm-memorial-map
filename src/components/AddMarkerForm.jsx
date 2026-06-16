@@ -10,6 +10,7 @@ import ImageUploadInput from './ImageUploadInput';
 import MarkerTagInput from './MarkerTagInput';
 import { normalizeMarkerTagList } from '../utils/markerTags';
 import { findTripTemplateFromTag, applyTripTemplateToForm } from '../utils/markerTrips';
+import { flyToLatLng } from '../utils/mapWrap';
 
 const emptyForm = {
   type: 'spot',
@@ -108,7 +109,7 @@ export default function AddMarkerForm({
     if (mapRef?.current) {
       const map = mapRef.current;
       const zoom = Math.max(map.getZoom(), 10);
-      map.flyTo([lat, lng], Math.min(zoom, 14), { duration: 0.6 });
+      flyToLatLng(map, lat, lng, Math.min(zoom, 14), { duration: 0.6 });
     }
     onMapPickConsumed?.();
   }, [mapPickCoords, mapRef, onMapPickConsumed]);
@@ -292,7 +293,7 @@ export default function AddMarkerForm({
                 city: city || prev.city,
               }));
               if (mapRef?.current) {
-                mapRef.current.flyTo([lat, lng], 11, { duration: 1 });
+                flyToLatLng(mapRef.current, lat, lng, 11, { duration: 1 });
               }
             }}
             placeholder="如：中国联合工程、滨安路1060、北京"
@@ -389,7 +390,7 @@ export default function AddMarkerForm({
                     const lat = parseFloat(form.latitude);
                     const lng = parseFloat(form.longitude);
                     if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-                      mapRef.current.flyTo([lat, lng], Math.max(mapRef.current.getZoom(), 10), {
+                      flyToLatLng(mapRef.current, lat, lng, Math.max(mapRef.current.getZoom(), 10), {
                         duration: 0.6,
                       });
                     }
