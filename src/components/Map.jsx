@@ -93,6 +93,15 @@ function MapClickHandler({ isMapInteractive, onMapClick }) {
   return null;
 }
 
+function MapWorldScroll({ mapRef }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setMaxBounds(null);
+    if (mapRef) mapRef.current = map;
+  }, [map, mapRef]);
+  return null;
+}
+
 function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect }) {
   const map = useMap();
   const { location } = useUserLocation();
@@ -204,12 +213,13 @@ export default function MapView({
   onMapClick,
   isMapInteractive,
 }) {
-  // 经度不设边界，瓦片横向循环；仅保留较低 minZoom 便于纵览全球足迹
+  // worldCopyJump：Leaflet 横向循环拖动的关键；无 maxBounds 经度限制
   return (
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
       minZoom={2}
+      worldCopyJump
       style={{ width: '100%', height: '100%' }}
       className={isMapInteractive ? 'cursor-crosshair' : ''}
       zoomControl={false}
@@ -219,6 +229,7 @@ export default function MapView({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         noWrap={false}
       />
+      <MapWorldScroll mapRef={mapRef} />
       <MapRefSetter mapRef={mapRef} />
       <MapClickHandler isMapInteractive={isMapInteractive} onMapClick={onMapClick} />
       <MarkersLayer
