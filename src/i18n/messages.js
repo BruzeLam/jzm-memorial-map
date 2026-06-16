@@ -4,7 +4,7 @@ import { intlMessages } from './messagesIntl';
 const zh = {
     nav: {
       gallery: '影像馆',
-      quotes: '长者语录',
+      quotes: '语录文献',
       archive: '档案馆',
       changelog: '更新日志',
       countdown: '距百岁诞辰',
@@ -159,7 +159,7 @@ const zh = {
       formAdd: '添加文献',
     },
     quotes: {
-      title: '长者语录',
+      title: '语录文献',
       upload: '上传语录',
       searchPlaceholder: '搜索语录、出处、背景…',
       noResults: '未找到相关语录',

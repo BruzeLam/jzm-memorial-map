@@ -123,7 +123,7 @@ export function getMarkerSearchFields(marker, regionPath = '') {
   ];
 }
 
-/** 长者语录 */
+/** 语录文献 */
 export function getQuoteSearchFields(quote) {
   return [quote.text, quote.source, quote.context];
 }

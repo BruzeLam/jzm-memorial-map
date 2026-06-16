@@ -6,13 +6,13 @@ export function getAgentSubject() {
     return {
       name: '该历史人物',
       siteLabel: '伟人足迹互动地图',
-      pronouns: ['他', '她', '这位', '其人', '长者'],
+      pronouns: ['他', '她', '这位', '其人'],
     };
   }
   return {
     name: '江泽民同志',
     siteLabel: '江泽民同志生平纪念地图',
-    pronouns: ['他', '她', '这位', '其人', '长者', '江泽民', '泽民'],
+    pronouns: ['他', '她', '这位', '其人', '江泽民', '泽民'],
   };
 }
 

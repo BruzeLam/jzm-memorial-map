@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="./public/logo.png" alt="" width="72" height="72" style="border-radius: 12px; border: 2px solid #c9a86c;" />
+<img src="./docs/github-hero.svg" alt="历史人物纪念地图 · 交互式足迹 · 开源可复用" width="720" />
 
 # 历史人物纪念地图
 
@@ -10,13 +10,7 @@
 
 <br/>
 
-<a href="https://jzm-memorial-map.vercel.app">
-  <img src="./public/promo/memorial-map-poster.png" alt="江泽民同志生平纪念地图 · 交互式历史足迹地图" width="720" style="border-radius: 8px; border: 1px solid #c9a86c;" />
-</a>
-
-<br/>
-
-[![在线演示](https://img.shields.io/badge/在线演示-打开地图-1e3a5f?style=for-the-badge&logo=vercel&logoColor=ffd700)](https://jzm-memorial-map.vercel.app)
+[![在线演示](https://img.shields.io/badge/在线演示-查看部署实例-1e3a5f?style=for-the-badge&logo=vercel&logoColor=ffd700)](https://jzm-memorial-map.vercel.app)
 [![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
 [![Leaflet](https://img.shields.io/badge/Leaflet-地图-199900?style=flat-square&logo=leaflet&logoColor=white)](https://leafletjs.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-可选-3ecf8e?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
@@ -24,7 +18,7 @@
 
 <br/>
 
-*可复用的纪念 / 教育向 Web 架构 · React + Leaflet · 部署于 Vercel*
+*可复用的纪念 / 教育向 Web 架构 · Fork 后替换数据即可用于任意历史人物*
 
 </div>
 
@@ -58,7 +52,7 @@
 
 **🏛️ 一个具体实例**
 
-本仓库含该人物的内置内容与线上部署（见顶图）。目录名、环境变量前缀等保留实例标识；**通用产品设计**见 [PRD](./docs/PRD.md)。
+本仓库含一套**可运行的部署实例**（内置数据 + 线上演示）。目录名、环境变量前缀等保留实例标识；**通用产品设计**见 [PRD](./docs/PRD.md)。
 
 </td>
 <td width="50%" valign="top" bgcolor="#eef3f8">
@@ -109,7 +103,7 @@
 </td>
 <td width="33%" valign="top" bgcolor="#faf6ef">
 
-### 💬 语录 · 📜 档案
+### 💬 语录文献 · 📜 档案
 
 顶栏轮播 + 面板浏览；长文献、外链与配图，可检索。
 
@@ -243,11 +237,11 @@ npx vercel dev               # 本地测智能问
 
 &nbsp;
 
-**[ 🌐 打开在线实例 → jzm-memorial-map.vercel.app ](https://jzm-memorial-map.vercel.app)**
+**[ 🌐 查看在线演示（当前部署实例）→ ](https://jzm-memorial-map.vercel.app)**
 
 <br/>
 
-<sub><font color="#c9a86c">React · Leaflet · OpenStreetMap · 高德 · Tailwind · Supabase · Vercel · DeepSeek</font></sub>
+<sub><font color="#c9a86c">Fork 本仓库 · 替换 <code>src/data/*</code> 与品牌配置 · 即可用于其他历史人物</font></sub>
 
 &nbsp;
 

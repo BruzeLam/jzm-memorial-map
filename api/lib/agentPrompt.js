@@ -14,7 +14,7 @@ function subjectContextBlock(subject) {
   return `【站点语境】
 - 本站：${subject.siteLabel}
 - 主题人物：${subject.name}
-- 访客说的「他/她/长者/这位/其/其人」一律指 ${subject.name}，**禁止**要求访客补充或确认姓名。`;
+- 访客说的「他/她/这位/其人」及口语代称一律指 ${subject.name}，**禁止**要求访客补充或确认姓名。`;
 }
 
 export function getAgentSystemPrompt({ skipBackground, subject, aggregate = false }) {
