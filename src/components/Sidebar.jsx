@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { collectAllMarkerTags } from '../utils/markerTags';
 import { MarkerTagPills } from './MarkerTagInput';
-import SearchBar from './SearchBar';
+import SidebarSearch from './SidebarSearch';
+import AgentChatInline from './AgentChatInline';
+import { useAgentChat } from '../hooks/useAgentChat';
 import FilterPanel from './FilterPanel';
 import MarkerDetails from './MarkerDetails';
 import AddMarkerForm from './AddMarkerForm';
@@ -98,6 +100,9 @@ export default function Sidebar({
   onGalleryUpdated,
 }) {
   const { t, locale, markerTypeLabel } = useI18n();
+  const { messages: agentMessages, loading: agentLoading, error: agentError, sendMessage, clearChat, setError: setAgentError } = useAgentChat();
+  const [inputMode, setInputMode] = useState('search');
+  const [agentDraft, setAgentDraft] = useState('');
   const onThisDayLabel = formatOnThisDayLabel(new Date(), locale);
   const allMarkerTags = useMemo(() => collectAllMarkerTags(markers), [markers]);
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -127,6 +132,50 @@ export default function Sidebar({
     }
     onStartAddMode();
   };
+
+  const handleAgentSubmit = async () => {
+    const ok = await sendMessage(agentDraft);
+    if (ok) setAgentDraft('');
+  };
+
+  const handleAgentSuggestion = async (q) => {
+    setAgentError(null);
+    setAgentDraft('');
+    await sendMessage(q);
+  };
+
+  const handleNavigateFromAgent = (id) => {
+    onMarkerSelect(id);
+    setInputMode('search');
+  };
+
+  const searchBlockProps = {
+    mode: inputMode,
+    onModeChange: setInputMode,
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    agentDraft,
+    setAgentDraft,
+    onAgentSubmit: handleAgentSubmit,
+    agentLoading,
+    onClearAgentChat: clearChat,
+    hasAgentMessages: agentMessages.length > 0,
+  };
+
+  const showAgentChat =
+    inputMode === 'agent' && !showModePicker && !showAddForm && !selectedMarker;
+
+  const agentChatPanel = (
+    <AgentChatInline
+      messages={agentMessages}
+      loading={agentLoading}
+      error={agentError}
+      onSuggestion={handleAgentSuggestion}
+      onNavigateMarker={handleNavigateFromAgent}
+      compact={compactMobile}
+    />
+  );
 
   const markerListContent = showModePicker ? (
     /* ── Mode Picker ─────────────────────────────────────── */
@@ -298,12 +347,7 @@ export default function Sidebar({
     return (
       <div className="sidebar-panel flex flex-col bg-white h-full min-h-0">
         <div className="px-2 pt-2 pb-1.5 border-b border-gray-100 flex-shrink-0">
-          <SearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            clearSearch={clearSearch}
-            compact
-          />
+          <SidebarSearch {...searchBlockProps} compact />
         </div>
 
         <div className="px-2 py-1 border-b border-gray-100 flex-shrink-0">
@@ -376,9 +420,9 @@ export default function Sidebar({
 
         <MobileScrollList
           scrollHint={t('sidebar.scrollHint')}
-          listKey={`${sortedMarkers.length}-${selectedMarkerId}-${searchQuery}`}
+          listKey={`${sortedMarkers.length}-${selectedMarkerId}-${searchQuery}-${inputMode}-${agentMessages.length}`}
         >
-          {markerListContent}
+          {showAgentChat ? agentChatPanel : markerListContent}
         </MobileScrollList>
 
         <div className="flex-shrink-0 border-t border-gray-100 bg-white">
@@ -430,11 +474,7 @@ export default function Sidebar({
       className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0 h-full"
     >
       <div className="px-3 pt-3 pb-2 border-b border-gray-100">
-        <SearchBar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          clearSearch={clearSearch}
-        />
+        <SidebarSearch {...searchBlockProps} />
       </div>
 
       <div className="px-3 py-2 border-b border-gray-100">
@@ -478,7 +518,7 @@ export default function Sidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto sidebar-scrollable">
-        {markerListContent}
+        {showAgentChat ? agentChatPanel : markerListContent}
       </div>
 
       <div className="flex-shrink-0 border-t border-gray-100 bg-white">

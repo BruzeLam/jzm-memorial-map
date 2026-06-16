@@ -118,7 +118,6 @@ export default function Header({
   onOpenArchive,
   onOpenGallery,
   onOpenChangeLog,
-  onOpenAgent,
   onLoginClick,
   dataReadOnly,
   onResetToSample,
@@ -129,7 +128,6 @@ export default function Header({
   const seconds = useCountdown();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [menuOpen, setMenuOpen] = useState(false);
-  const showAgent = onOpenAgent && !isPortfolioMode();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -139,9 +137,6 @@ export default function Header({
   };
 
   const navItems = [
-    ...(showAgent
-      ? [{ emoji: '🤖', label: t('nav.agent'), onClick: onOpenAgent, className: 'bg-slate-700 hover:bg-slate-800 text-white' }]
-      : []),
     { emoji: '🖼️', label: t('nav.gallery'), onClick: onOpenGallery, className: 'bg-purple-600 hover:bg-purple-700 text-white' },
     { emoji: '📚', label: t('nav.quotes'), onClick: onOpenQuotes, className: 'bg-red-700 hover:bg-red-800 text-white' },
     { emoji: '📁', label: t('nav.archive'), onClick: onOpenArchive, className: 'bg-amber-800 hover:bg-amber-900 text-white' },
