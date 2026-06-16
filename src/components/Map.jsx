@@ -10,7 +10,7 @@ import { normalizeLng } from '../utils/mapWrap';
 // 放大时保持原始标点大小；仅在缩小到较大尺度（世界/区域视图）时适度缩小
 function getMarkerDimensions(zoom, isSelected) {
   const fullSizeZoom = 8;
-  const minZoom = 2;
+  const minZoom = 3;
   const minScale = 0.55;
 
   const size = isSelected ? 44 : 36;
