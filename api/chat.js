@@ -9,6 +9,8 @@ import {
   toMapHits,
 } from './lib/agentMarkers.js';
 import { getAgentSystemPrompt, buildAgentUserPrompt, shouldSkipBackgroundSupplement } from './lib/agentPrompt.js';
+import { getAgentSubject } from './lib/agentContext.js';
+import { isAggregateQuestion, computeMapStatistics } from './lib/agentStats.js';
 
 const MAX_MESSAGE_LEN = 800;
 const MAX_HISTORY = 8;
@@ -55,17 +57,26 @@ export default async function handler(req, res) {
     : [];
 
   try {
+    const subject = getAgentSubject();
     const allMarkers = await loadMarkersForAgent();
     const { hits, usedLlmPlanner } = await searchMarkersForAgent(allMarkers, message, { apiKey });
+    const statistics =
+      isAggregateQuestion(message) || hits.length === 0
+        ? computeMapStatistics(allMarkers, message)
+        : null;
     const summaries = hits.map(summarizeMarkerForPrompt);
     const mapHits = toMapHits(hits);
-    const skipBackground = shouldSkipBackgroundSupplement(message, hits.length);
+    const skipBackground = shouldSkipBackgroundSupplement(message, hits.length) || Boolean(statistics);
 
     const deepseek = createDeepSeek({ apiKey });
     const { text } = await generateText({
       model: deepseek('deepseek-chat'),
-      system: getAgentSystemPrompt({ skipBackground }),
-      prompt: buildAgentUserPrompt(message, summaries, history, { matchCount: hits.length }),
+      system: getAgentSystemPrompt({ skipBackground, subject }),
+      prompt: buildAgentUserPrompt(message, summaries, history, {
+        matchCount: hits.length,
+        statistics,
+        subject,
+      }),
       maxTokens: skipBackground ? 1000 : 1200,
       temperature: 0.3,
     });

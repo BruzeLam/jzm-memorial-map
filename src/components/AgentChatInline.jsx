@@ -40,9 +40,9 @@ function MessageBody({ content }) {
 }
 
 export const AGENT_SUGGESTIONS = [
+  '他去过多少个国家？',
   '1997 年访美去了哪些城市？',
   '地图上有哪些在上海的历史事件？',
-  '90 年代有哪些东南亚行程？',
 ];
 
 export default function AgentChatInline({

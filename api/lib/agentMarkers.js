@@ -10,6 +10,12 @@ import {
   retrieveMarkersWithIntent,
 } from './agentRetrieval.js';
 import { planRetrievalWithLLM } from './agentQueryPlanner.js';
+import { normalizeQuestionPronouns } from './agentContext.js';
+import {
+  isAggregateQuestion,
+  computeMapStatistics,
+  sampleMarkersForAggregateQuestion,
+} from './agentStats.js';
 
 const removed = new Set(REMOVED_MARKER_IDS);
 
@@ -37,32 +43,33 @@ export async function loadMarkersForAgent() {
 
 /** 两阶段检索：语料索引 + 必要时 LLM 规划 */
 export async function searchMarkersForAgent(markers, question, { apiKey } = {}) {
-  const { hits: firstHits, intent } = retrieveMarkers(markers, question);
+  const normalizedQuestion = normalizeQuestionPronouns(question);
+  let { hits: firstHits, intent } = retrieveMarkers(markers, normalizedQuestion);
 
-  const complexQuestion =
-    question.length > 45 ||
-    (intent.years.length > 0 && intent.places.length > 0) ||
-    (intent.keywords.length >= 4);
+  if (firstHits.length === 0 && isAggregateQuestion(question)) {
+    firstHits = sampleMarkersForAggregateQuestion(markers, question);
+  }
 
   const needsPlanner =
     apiKey &&
-    (firstHits.length < 3 || (complexQuestion && firstHits.length < 8));
+    firstHits.length < 3 &&
+    !isAggregateQuestion(question);
 
   if (!needsPlanner) {
-    return { hits: firstHits, intent, usedLlmPlanner: false };
+    return { hits: firstHits, intent, usedLlmPlanner: false, normalizedQuestion };
   }
 
   try {
-    const planned = await planRetrievalWithLLM(question, apiKey);
-    if (!planned) return { hits: firstHits, intent, usedLlmPlanner: false };
+    const planned = await planRetrievalWithLLM(normalizedQuestion, apiKey);
+    if (!planned) return { hits: firstHits, intent, usedLlmPlanner: false, normalizedQuestion };
 
     const merged = mergeRetrievalIntents(intent, planned);
     const secondHits = retrieveMarkersWithIntent(markers, merged);
     const hits = secondHits.length > firstHits.length ? secondHits : firstHits;
-    return { hits, intent: merged, usedLlmPlanner: true };
+    return { hits, intent: merged, usedLlmPlanner: true, normalizedQuestion };
   } catch (err) {
     console.warn('[agent/search] LLM planner failed:', err?.message || err);
-    return { hits: firstHits, intent, usedLlmPlanner: false };
+    return { hits: firstHits, intent, usedLlmPlanner: false, normalizedQuestion };
   }
 }
 
