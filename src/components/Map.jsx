@@ -218,7 +218,7 @@ export default function MapView({
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
-      minZoom={2}
+      minZoom={3}
       worldCopyJump
       style={{ width: '100%', height: '100%' }}
       className={isMapInteractive ? 'cursor-crosshair' : ''}

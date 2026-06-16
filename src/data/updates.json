@@ -1,5 +1,5 @@
 {
-  "2026-5-25": [
+  "2026-6-16": [
     {
       "type": "fix",
       "emoji": "🗺️",
@@ -41,19 +41,17 @@
       "emoji": "⚡",
       "title": "首屏加载优化",
       "description": "localStorage 缓存优先展示；影像馆、档案馆、语录改为打开面板或空闲后再拉云端；重型弹窗按需分包（React.lazy）。"
-    },
+    }
+  ],
+  "2026-6-14": [
     {
       "type": "feature",
       "emoji": "🛕",
       "title": "圣地巡礼",
       "description": "登录用户可在地点下留言；侧栏卡片滚动即可查看，详情页保留入口；支持发图并同步影像馆，区分官方与网友图片。"
-    },
-    {
-      "type": "feature",
-      "emoji": "🔍",
-      "title": "高德 POI 搜索",
-      "description": "添加/编辑地点时，国内机构名可走高德 POI 检索定位，配合 OSM 底图使用。"
-    },
+    }
+  ],
+  "2026-5-25": [
     {
       "type": "feature",
       "emoji": "☕",
@@ -71,30 +69,6 @@
       "emoji": "🖼️",
       "title": "图片对象存储（Supabase Storage）",
       "description": "保存地点/影像/档案时自动上传图片到 Storage，payload 存 URL 而非 Base64；后台可一键迁移历史 Base64。需执行 migration-storage.sql。"
-    },
-    {
-      "type": "fix",
-      "emoji": "🔍",
-      "title": "影像馆搜索修正",
-      "description": "搜索现仅按标题搜索，移除地点、描述等多字段搜索。无结果直接返回空"
-    },
-    {
-      "type": "feature",
-      "emoji": "✏️",
-      "title": "长者语录全面可编辑",
-      "description": "所有语录（含内置30条）均可编辑和删除，数据统一迁移至本地存储"
-    },
-    {
-      "type": "fix",
-      "emoji": "🔄",
-      "title": "随机语录同步修复",
-      "description": "Header 随机语录现包含用户新添加的内容，数据实时同步"
-    },
-    {
-      "type": "fix",
-      "emoji": "🚀",
-      "title": "Vercel 部署缓存修复",
-      "description": "添加 vercel.json 禁用 HTML 缓存，确保每次部署后用户立即看到最新版本"
     }
   ],
   "2026-6-13": [
@@ -121,6 +95,12 @@
       "emoji": "📏",
       "title": "标点直线距离",
       "description": "点击标点后，在坐标旁显示与您当前位置的直线距离（需浏览器授权定位）；地图 Leaflet 弹窗同步显示。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🔍",
+      "title": "高德 POI 搜索",
+      "description": "添加/编辑地点时，国内机构名可走高德 POI 检索定位，配合 OSM 底图使用。"
     }
   ],
   "2026-6-7": [
