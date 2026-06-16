@@ -1,4 +1,6 @@
-/** 解析 YYYY-MM-DD 或 YYYY-MM 为月、日 */
+import { compareMarkerDates } from './markerDates';
+
+/** 解析 YYYY-MM-DD、YYYY-MM 或 YYYY 为月、日（模糊日期按当月/当年 1 日） */
 export function parseMarkerMonthDay(dateStr) {
   if (!dateStr || typeof dateStr !== 'string') return null;
   const full = dateStr.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
@@ -8,6 +10,10 @@ export function parseMarkerMonthDay(dateStr) {
   const monthOnly = dateStr.match(/^(\d{4})-(\d{1,2})$/);
   if (monthOnly) {
     return { month: parseInt(monthOnly[2], 10), day: 1 };
+  }
+  const yearOnly = dateStr.match(/^(\d{4})$/);
+  if (yearOnly) {
+    return { month: 1, day: 1 };
   }
   return null;
 }
@@ -58,12 +64,5 @@ export function getOnThisDayMarkers(markers, refDate = new Date()) {
   if (!Array.isArray(markers)) return [];
   return markers
     .filter((m) => markerMatchesOnThisDay(m, refDate))
-    .sort((a, b) => {
-      const dateA = a.date || '';
-      const dateB = b.date || '';
-      if (!dateA && !dateB) return 0;
-      if (!dateA) return 1;
-      if (!dateB) return -1;
-      return dateA.localeCompare(dateB);
-    });
+    .sort((a, b) => compareMarkerDates(a.date, b.date));
 }

@@ -1,55 +1,13 @@
 import React, { useState } from 'react';
-
-// 模糊匹配多种日期格式
-function parseDateString(dateStr) {
-  if (!dateStr) return null;
-
-  dateStr = dateStr.trim();
-
-  // 已经是标准格式 YYYY-MM-DD
-  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStr)) {
-    const parts = dateStr.split('-');
-    const year = parts[0];
-    const month = String(parseInt(parts[1])).padStart(2, '0');
-    const day = String(parseInt(parts[2])).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  // 8 位纯数字：YYYYMMDD
-  if (/^\d{8}$/.test(dateStr)) {
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    const day = dateStr.slice(6, 8);
-    return `${year}-${month}-${day}`;
-  }
-
-  // 7 位纯数字：YYYYMDD（月份单数字）
-  if (/^\d{7}$/.test(dateStr)) {
-    const year = dateStr.slice(0, 4);
-    const month = String(parseInt(dateStr.slice(4, 5))).padStart(2, '0');
-    const day = dateStr.slice(5, 7);
-    return `${year}-${month}-${day}`;
-  }
-
-  // 6 位纯数字：YYYYMM（只有年月，默认为月初）
-  if (/^\d{6}$/.test(dateStr)) {
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    return `${year}-${month}-01`;
-  }
-
-  return null;
-}
+import { parseFlexibleDateInput } from '../utils/dateInput';
+import { getSortableDateKey } from '../utils/markerDates';
 
 export default function DatePicker({ onSelect, initialDate, initialEndDate, onClose }) {
   const [startDate, setStartDate] = useState(initialDate || '');
   const [endDate, setEndDate] = useState(initialEndDate || '');
   const [error, setError] = useState('');
 
-  const validateAndParse = (dateStr) => {
-    const parsed = parseDateString(dateStr);
-    return parsed !== null ? parsed : null;
-  };
+  const validateAndParse = (dateStr) => parseFlexibleDateInput(dateStr);
 
   const handleConfirm = () => {
     // 如果没有填写起始日期，直接返回空值（日期可选）
@@ -70,7 +28,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
 
     const parsedStart = validateAndParse(startDate);
     if (!parsedStart) {
-      setError('起始日期格式错误，请用 YYYY-MM-DD、YYYYMMDD、YYYYMDD 或 YYYYMM');
+      setError('起始日期格式错误，请用 YYYY、YYYY-MM 或 YYYY-MM-DD');
       return;
     }
 
@@ -78,7 +36,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
     if (endDate) {
       parsedEnd = validateAndParse(endDate);
       if (!parsedEnd) {
-        setError('结束日期格式错误，请用 YYYY-MM-DD、YYYYMMDD、YYYYMDD 或 YYYYMM');
+        setError('结束日期格式错误，请用 YYYY、YYYY-MM 或 YYYY-MM-DD');
         return;
       }
     }
@@ -91,7 +49,10 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
       });
     } else if (parsedEnd) {
       // Different dates - treat as range, ensure chronological order
-      const [minDate, maxDate] = parsedStart < parsedEnd ? [parsedStart, parsedEnd] : [parsedEnd, parsedStart];
+      const [minDate, maxDate] =
+        getSortableDateKey(parsedStart) <= getSortableDateKey(parsedEnd)
+          ? [parsedStart, parsedEnd]
+          : [parsedEnd, parsedStart];
       onSelect({
         date: minDate,
         endDate: maxDate,
@@ -116,7 +77,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
   return (
     <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3 max-w-sm">
       <p className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded">
-        可留空；结束日期留空表示单日。格式 YYYY-MM-DD
+        可留空；结束日期留空表示单日。支持 YYYY、YYYY-MM、YYYY-MM-DD
       </p>
 
       {/* Input fields */}
@@ -130,7 +91,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
               setStartDate(e.target.value);
               setError('');
             }}
-            placeholder="YYYY-MM-DD（可留空）"
+            placeholder="YYYY / YYYY-MM / YYYY-MM-DD"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
           />
         </div>
@@ -144,7 +105,7 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
               setEndDate(e.target.value);
               setError('');
             }}
-            placeholder="YYYY-MM-DD（留空为时间点）"
+            placeholder="同上（留空为时间点）"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
           />
         </div>

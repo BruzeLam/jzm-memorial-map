@@ -1,5 +1,6 @@
 import { isPortfolioDemoData, getStorageKeys } from '../config/branding';
 import { PORTFOLIO_SAMPLE_MARKERS } from '../data/portfolio/markers';
+import { ITINERARY_MARKERS } from '../data/itineraryMarkers';
 
 export const MARKER_TYPES = {
   spot: {
@@ -1150,12 +1151,13 @@ const SAMPLE_MARKERS_RAW = [
     ],
     sources: [{ title: '公开报道', note: '1990年6月1日·北京' }],
   },
+  ...ITINERARY_MARKERS,
 ];
 
 /** 已从示例库撤下的标点 ID（版本迁移时从 localStorage 同步删除） */
 export const REMOVED_MARKER_IDS = ['spot_trip_001', 'event_trip_001'];
 
-// 数据版本：条数变更或结构迁移时递增（31 = 1986/1987/1990 六一儿童节）
-export const DATA_VERSION = 31;
+// 数据版本：条数变更或结构迁移时递增（32 = 1990–1996 外事行程批量添加）
+export const DATA_VERSION = 32;
 
 export const SAMPLE_MARKERS = isPortfolioDemoData() ? PORTFOLIO_SAMPLE_MARKERS : SAMPLE_MARKERS_RAW;

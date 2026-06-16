@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { MARKER_TYPES } from '../utils/constants';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
+import { compareMarkerDates } from '../utils/markerDates';
 import { formatRegionPath } from '../utils/regionFormat';
 import { useI18n } from '../i18n/LanguageContext';
 import ImageViewer from './ImageViewer';
@@ -96,12 +97,7 @@ export default function OnThisDayModal({ markers, onClose, onViewOnMap, onSelect
   const [imageView, setImageView] = useState(null);
 
   const sorted = useMemo(
-    () =>
-      [...markers].sort((a, b) => {
-        const dateA = a.date || '';
-        const dateB = b.date || '';
-        return dateA.localeCompare(dateB);
-      }),
+    () => [...markers].sort((a, b) => compareMarkerDates(a.date, b.date)),
     [markers]
   );
 

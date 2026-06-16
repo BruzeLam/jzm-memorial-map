@@ -10,6 +10,7 @@ import { exportMarkers } from '../utils/dataExport';
 import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
+import { compareMarkerDates } from '../utils/markerDates';
 
 function MobileScrollList({ children, scrollHint, listKey }) {
   const scrollRef = useRef(null);
@@ -108,19 +109,8 @@ export default function Sidebar({
   };
 
   const sortedMarkers = [...filteredMarkers].sort((a, b) => {
-    const dateA = a.date || '';
-    const dateB = b.date || '';
-
-    // 时间为空的排最后
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
-
-    if (sortOrder === 'date-asc') {
-      return dateA.localeCompare(dateB);
-    } else {
-      return dateB.localeCompare(dateA);
-    }
+    const cmp = compareMarkerDates(a.date, b.date);
+    return sortOrder === 'date-asc' ? cmp : -cmp;
   });
 
   // Determine what the add button shows
