@@ -76,6 +76,21 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('[agent/chat]', err);
+    const errMsg = String(err?.message || err?.data?.error?.message || '');
+    if (err?.statusCode === 402 || /insufficient balance/i.test(errMsg)) {
+      res.status(402).json({
+        error: 'insufficient_balance',
+        message: 'DeepSeek 账户余额不足，请在 platform.deepseek.com 充值后重试',
+      });
+      return;
+    }
+    if (/invalid.*api.*key|authentication/i.test(errMsg)) {
+      res.status(401).json({
+        error: 'invalid_api_key',
+        message: 'DeepSeek API Key 无效，请在 Vercel 环境变量中检查 DEEPSEEK_API_KEY',
+      });
+      return;
+    }
     res.status(500).json({
       error: 'agent_failed',
       message: '导览助手暂时不可用，请稍后重试',
