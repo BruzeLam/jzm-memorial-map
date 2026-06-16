@@ -225,9 +225,9 @@ const zh = {
     },
     agent: {
       title: '智能导览',
-      subtitle: '先查地图已有记录，再补充公开背景；未录入内容会单独标注',
+      subtitle: '基于地图已录入的足迹与事件作答',
       emptyHint: '用自然语言提问，例如某年访问、某类事件、某地区足迹',
-      inputPlaceholder: '问一问地图与相关背景…',
+      inputPlaceholder: '问一问地图上的地点与事件…',
       send: '发送',
       close: '关闭',
       clear: '清空对话',
@@ -460,9 +460,9 @@ const en = {
     },
     agent: {
       title: 'Guide',
-      subtitle: 'Map records first, then public background — extras are clearly labeled',
+      subtitle: 'Answers from markers and events already on the map',
       emptyHint: 'Ask in plain language about visits, events, or regions',
-      inputPlaceholder: 'Ask about the map or historical context…',
+      inputPlaceholder: 'Ask about places and events on the map…',
       send: 'Send',
       close: 'Close',
       clear: 'Clear chat',

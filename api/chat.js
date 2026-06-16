@@ -8,7 +8,7 @@ import {
   summarizeMarkerForPrompt,
   toMapHits,
 } from './lib/agentMarkers.js';
-import { AGENT_SYSTEM_PROMPT, buildAgentUserPrompt } from './lib/agentPrompt.js';
+import { getAgentSystemPrompt, buildAgentUserPrompt, shouldSkipBackgroundSupplement } from './lib/agentPrompt.js';
 
 const MAX_MESSAGE_LEN = 800;
 const MAX_HISTORY = 8;
@@ -59,14 +59,15 @@ export default async function handler(req, res) {
     const { hits, usedLlmPlanner } = await searchMarkersForAgent(allMarkers, message, { apiKey });
     const summaries = hits.map(summarizeMarkerForPrompt);
     const mapHits = toMapHits(hits);
+    const skipBackground = shouldSkipBackgroundSupplement(message, hits.length);
 
     const deepseek = createDeepSeek({ apiKey });
     const { text } = await generateText({
       model: deepseek('deepseek-chat'),
-      system: AGENT_SYSTEM_PROMPT,
-      prompt: buildAgentUserPrompt(message, summaries, history),
-      maxTokens: 1400,
-      temperature: 0.4,
+      system: getAgentSystemPrompt({ skipBackground }),
+      prompt: buildAgentUserPrompt(message, summaries, history, { matchCount: hits.length }),
+      maxTokens: skipBackground ? 1000 : 1200,
+      temperature: 0.3,
     });
 
     res.status(200).json({
