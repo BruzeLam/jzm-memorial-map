@@ -134,6 +134,13 @@ export async function fetchCloudGallery() {
   return normalizeGalleryList((data || []).map((row) => row.payload));
 }
 
+export async function deleteCloudGalleryItem(id) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+  const { error } = await supabase.from('gallery').delete().eq('id', id);
+  if (error) throw error;
+}
+
 export async function upsertCloudGalleryBatch(items) {
   const supabase = getSupabase();
   if (!supabase) throw new Error('Cloud not configured');

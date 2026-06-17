@@ -25,7 +25,7 @@ export function useArchives({ isEditor = false, cloudFetchEnabled = false } = {}
   const cloudMode = isCloudEnabled();
   const [archives, setArchives] = useState(() => {
     if (!cloudMode) return loadLocalArchives();
-    return loadArchivesCache() || loadLocalArchives();
+    return loadArchivesCache() || [];
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -49,14 +49,11 @@ export function useArchives({ isEditor = false, cloudFetchEnabled = false } = {}
     setLoading(true);
     return fetchCloudArchives()
       .then((rows) => {
-        if (rows?.length) {
-          setArchives(rows);
-          try {
-            localStorage.setItem(ARCHIVES_CACHE_KEY, JSON.stringify(rows));
-          } catch (_) {}
-        } else {
-          setArchives(loadLocalArchives());
-        }
+        const list = Array.isArray(rows) ? rows : [];
+        setArchives(list);
+        try {
+          localStorage.setItem(ARCHIVES_CACHE_KEY, JSON.stringify(list));
+        } catch (_) {}
         setError(null);
       })
       .catch((err) => {
@@ -64,7 +61,6 @@ export function useArchives({ isEditor = false, cloudFetchEnabled = false } = {}
         setError(err.message);
         const cached = loadArchivesCache();
         if (cached) setArchives(cached);
-        else setArchives(loadLocalArchives());
       })
       .finally(() => {
         setLoading(false);

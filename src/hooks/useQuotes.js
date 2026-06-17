@@ -20,7 +20,7 @@ export function useQuotes({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
   const [quotes, setQuotes] = useState(() => {
     if (!cloudMode) return loadLocalQuotes();
-    return loadQuotesCache() || loadLocalQuotes();
+    return loadQuotesCache() || [];
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -44,14 +44,10 @@ export function useQuotes({ isEditor = false } = {}) {
       fetchCloudQuotes()
         .then((rows) => {
           if (cancelled) return;
-          if (rows?.length) {
-            setQuotes(rows);
-            try {
-              localStorage.setItem(QUOTES_CACHE_KEY, JSON.stringify(rows));
-            } catch (_) {}
-          } else {
-            setQuotes(loadLocalQuotes());
-          }
+          setQuotes(Array.isArray(rows) ? rows : []);
+          try {
+            localStorage.setItem(QUOTES_CACHE_KEY, JSON.stringify(rows || []));
+          } catch (_) {}
           setError(null);
         })
         .catch((err) => {
@@ -60,7 +56,6 @@ export function useQuotes({ isEditor = false } = {}) {
           setError(err.message);
           const cached = loadQuotesCache();
           if (cached) setQuotes(cached);
-          else setQuotes(loadLocalQuotes());
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -117,7 +112,7 @@ export function useQuotes({ isEditor = false } = {}) {
       return;
     }
     const rows = await fetchCloudQuotes();
-    setQuotes(rows?.length ? rows : loadLocalQuotes());
+    setQuotes(Array.isArray(rows) ? rows : []);
   }, [cloudMode]);
 
   return {

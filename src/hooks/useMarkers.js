@@ -13,7 +13,6 @@ import {
   addCloudRemovedMarkerId,
 } from '../services/cloudData';
 import { readJsonCache } from '../utils/storageCache';
-import { mergeMarkerCatalog } from '../utils/markerCatalog';
 
 const { markersCache: CACHE_KEY, removedMarkerIdsCache: REMOVED_CACHE_KEY } = getStorageKeys();
 
@@ -27,25 +26,19 @@ function normalizeMarkerFields(marker) {
   };
 }
 
-function applyMarkerMigrations(markers, removedIds) {
+/** 云端为准：仅做迁移与已删过滤，不再合并 Git 内置样本 */
+function applyCloudMarkers(markers, removedIds) {
   const removed = new Set(removedIds);
-  const withoutRemoved = markers.filter((m) => !removed.has(m.id));
+  const withoutRemoved = (markers || []).filter((m) => m?.id && !removed.has(m.id));
   const migrated = migrateAllMarkerRegions(withoutRemoved).map(normalizeMarkerFields);
   registerMarkerTags(collectAllMarkerTags(migrated));
   return migrated;
 }
 
-function mergeBuiltInMarkers(remoteMarkers, removedIds) {
-  return applyMarkerMigrations(
-    mergeMarkerCatalog(remoteMarkers, SAMPLE_MARKERS, removedIds),
-    removedIds
-  );
-}
-
 function loadCloudCacheMarkers(removedIds) {
   const cached = readJsonCache(CACHE_KEY);
-  if (Array.isArray(cached) && cached.length > 0) {
-    return mergeBuiltInMarkers(cached, removedIds);
+  if (Array.isArray(cached)) {
+    return applyCloudMarkers(cached, removedIds);
   }
   return null;
 }
@@ -62,19 +55,22 @@ function loadFromStorage() {
       if (storedVersion < DATA_VERSION) {
         const storedIds = new Set(stored.map((m) => m.id));
         const newItems = SAMPLE_MARKERS.filter((m) => !storedIds.has(m.id) && !removedIds.includes(m.id));
-        const merged = applyMarkerMigrations([...stored, ...newItems], removedIds);
+        const merged = applyCloudMarkers([...stored, ...newItems], removedIds);
         localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
         return merged;
       }
-      return applyMarkerMigrations(stored, removedIds);
+      return applyCloudMarkers(stored, removedIds);
     }
   } catch (e) {
     console.error('Failed to load markers from localStorage:', e);
   }
 
   localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
-  return mergeBuiltInMarkers([], combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY)));
+  return applyCloudMarkers(
+    SAMPLE_MARKERS,
+    combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY))
+  );
 }
 
 function saveToStorage(markers) {
@@ -99,10 +95,9 @@ function persistMarkersCache(markers) {
 
 export function useMarkers({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
-  const [removedMarkerIds, setRemovedMarkerIds] = useState(() => {
-    if (!cloudMode) return readJsonCache(REMOVED_CACHE_KEY) || [];
-    return readJsonCache(REMOVED_CACHE_KEY) || [];
-  });
+  const [removedMarkerIds, setRemovedMarkerIds] = useState(
+    () => readJsonCache(REMOVED_CACHE_KEY) || []
+  );
 
   const effectiveRemovedIds = useMemo(
     () => combineRemovedMarkerIds(removedMarkerIds),
@@ -111,7 +106,7 @@ export function useMarkers({ isEditor = false } = {}) {
 
   const [markers, setMarkers] = useState(() => {
     if (!cloudMode) return loadFromStorage();
-    return loadCloudCacheMarkers(effectiveRemovedIds) || mergeBuiltInMarkers([], effectiveRemovedIds);
+    return loadCloudCacheMarkers(effectiveRemovedIds) ?? [];
   });
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
   const [cloudLoading, setCloudLoading] = useState(cloudMode);
@@ -135,28 +130,20 @@ export function useMarkers({ isEditor = false } = {}) {
         const combinedRemoved = combineRemovedMarkerIds(removed);
         setRemovedMarkerIds(removed);
         persistRemovedCache(removed);
-        const merged = mergeBuiltInMarkers(rows, combinedRemoved);
-        setMarkers(merged);
-        persistMarkersCache(merged);
+        const next = applyCloudMarkers(rows || [], combinedRemoved);
+        setMarkers(next);
+        persistMarkersCache(next);
         setCloudError(null);
       })
       .catch((err) => {
         if (cancelled) return;
         console.error('Cloud markers fetch failed:', err);
         setCloudError(err.message);
-        try {
-          const cached = localStorage.getItem(CACHE_KEY);
-          const cachedRemoved = readJsonCache(REMOVED_CACHE_KEY) || [];
-          const combinedRemoved = combineRemovedMarkerIds(cachedRemoved);
-          if (cached) {
-            setMarkers(mergeBuiltInMarkers(JSON.parse(cached), combinedRemoved));
-          } else {
-            setMarkers(mergeBuiltInMarkers([], combinedRemoved));
-          }
-        } catch (_) {
-          setMarkers(
-            mergeBuiltInMarkers([], combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY) || []))
-          );
+        const cachedRemoved = readJsonCache(REMOVED_CACHE_KEY) || [];
+        const combinedRemoved = combineRemovedMarkerIds(cachedRemoved);
+        const cached = readJsonCache(CACHE_KEY);
+        if (Array.isArray(cached)) {
+          setMarkers(applyCloudMarkers(cached, combinedRemoved));
         }
       })
       .finally(() => {
@@ -223,24 +210,23 @@ export function useMarkers({ isEditor = false } = {}) {
     setSelectedMarkerId((prev) => (prev === id ? null : prev));
 
     if (cloudMode && isEditor) {
-      Promise.all([
-        deleteCloudMarker(id),
-        addCloudRemovedMarkerId(id),
-      ]).catch((err) => console.error('Cloud marker delete failed:', err));
+      Promise.all([deleteCloudMarker(id), addCloudRemovedMarkerId(id)]).catch((err) =>
+        console.error('Cloud marker delete failed:', err)
+      );
     }
   }, [readOnly, cloudMode, isEditor]);
 
   const resetToSample = useCallback(() => {
-    if (readOnly) return;
+    if (readOnly || cloudMode) return;
     setMarkers(SAMPLE_MARKERS);
     setSelectedMarkerId(null);
-  }, [readOnly]);
+  }, [readOnly, cloudMode]);
 
   const clearAll = useCallback(() => {
-    if (readOnly) return;
+    if (readOnly || cloudMode) return;
     setMarkers([]);
     setSelectedMarkerId(null);
-  }, [readOnly]);
+  }, [readOnly, cloudMode]);
 
   const selectedMarker = markers.find((m) => m.id === selectedMarkerId) || null;
 

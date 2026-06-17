@@ -8,7 +8,7 @@ import {
 import { filterGalleryBySearch } from '../utils/textSearch';
 import { isCloudEnabled } from '../lib/cloudConfig';
 import { getStorageKeys } from '../config/branding';
-import { fetchCloudGallery, upsertCloudGalleryBatch } from '../services/cloudData';
+import { fetchCloudGallery, upsertCloudGalleryBatch, deleteCloudGalleryItem } from '../services/cloudData';
 import { readJsonCache } from '../utils/storageCache';
 
 const _sk = getStorageKeys();
@@ -230,9 +230,21 @@ export function useGallery(markers = [], { isEditor = false, cloudFetchEnabled =
 
   const deleteImage = useCallback((id) => {
     if (readOnly) return;
-    setGallery((prev) => prev.filter((img) => img.id !== id));
-    // 云端删除暂不在首页暴露；后台可补全
-  }, [readOnly]);
+    setGallery((prev) => {
+      const next = prev.filter((img) => img.id !== id);
+      if (cloudMode) {
+        try {
+          localStorage.setItem(GALLERY_CACHE_KEY, JSON.stringify(next));
+        } catch (_) {}
+      }
+      return next;
+    });
+    if (cloudMode && isEditor) {
+      deleteCloudGalleryItem(id).catch((err) =>
+        console.error('Cloud gallery delete failed:', err)
+      );
+    }
+  }, [readOnly, cloudMode, isEditor]);
 
   const removeMarkerRelation = useCallback((markerId) => {
     if (readOnly) return;

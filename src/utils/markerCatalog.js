@@ -1,6 +1,4 @@
-/**
- * 云端 markers 与内置 SAMPLE 合并（前端 useMarkers 与智能导览共用）
- */
+/** 离线 / 本地模式：localStorage 与内置 SAMPLE 合并（云端模式不使用） */
 
 export function mergeMarkerCatalog(remoteMarkers, builtInMarkers, removedIds = []) {
   const removed = new Set(removedIds);

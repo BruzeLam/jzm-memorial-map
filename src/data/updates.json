@@ -35,6 +35,12 @@
   ],
   "2026-6-17": [
     {
+      "type": "fix",
+      "emoji": "☁️",
+      "title": "云端为唯一数据源",
+      "description": "启用 Supabase 后地点/语录/档案/影像馆均以云端为准，不再与 Git 内置或 localStorage 合并；超管删改即时写云。"
+    },
+    {
       "type": "refactor",
       "emoji": "☕",
       "title": "赞赏仅 Stripe USD 三档",

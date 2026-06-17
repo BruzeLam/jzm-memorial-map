@@ -1,4 +1,4 @@
-/** 导览 Agent：服务端加载地点并检索（Supabase + 内置样本，与前端一致） */
+/** 导览 Agent：服务端加载地点（Supabase 为准，与前端一致） */
 
 import { createClient } from '@supabase/supabase-js';
 import { REMOVED_MARKER_IDS } from '../../src/utils/constants.js';
@@ -6,7 +6,6 @@ import {
   SITE_META_REMOVED_MARKER_IDS_KEY,
   combineRemovedMarkerIds,
 } from '../../src/utils/removedMarkers.js';
-import { mergeMarkerCatalog } from '../../src/utils/markerCatalog.js';
 import {
   buildMarkerIndex,
   buildRetrievalIntent,
@@ -37,9 +36,9 @@ async function fetchDynamicRemovedIds(supabase) {
   }
 }
 
-async function loadBuiltInMarkers(removedIds) {
+async function loadFallbackSampleMarkers() {
   const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
-  const removed = new Set(removedIds);
+  const removed = new Set(REMOVED_MARKER_IDS);
   return SAMPLE_MARKERS.filter((m) => !removed.has(m.id));
 }
 
@@ -47,37 +46,29 @@ export async function loadMarkersForAgent() {
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
   const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
 
-  let dynamicRemoved = [];
-  let supabase = null;
-
-  if (url && key) {
-    supabase = createClient(url, key);
-    dynamicRemoved = await fetchDynamicRemovedIds(supabase);
+  if (!url || !key) {
+    return loadFallbackSampleMarkers();
   }
 
-  const removedIds = combineRemovedMarkerIds(dynamicRemoved);
-  const builtIn = await loadBuiltInMarkers(removedIds);
+  try {
+    const supabase = createClient(url, key);
+    const dynamicRemoved = await fetchDynamicRemovedIds(supabase);
+    const removed = new Set(combineRemovedMarkerIds(dynamicRemoved));
 
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('markers')
-        .select('id, payload')
-        .order('updated_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('markers')
+      .select('id, payload')
+      .order('updated_at', { ascending: false });
 
-      if (!error && data?.length) {
-        const removed = new Set(removedIds);
-        const remote = data
-          .map((row) => row.payload)
-          .filter((m) => m?.id && !removed.has(m.id));
-        return mergeMarkerCatalog(remote, builtIn, removedIds);
-      }
-    } catch (err) {
-      console.warn('[agent/markers] Supabase load failed:', err?.message || err);
-    }
+    if (error) throw error;
+
+    return (data || [])
+      .map((row) => row.payload)
+      .filter((m) => m?.id && !removed.has(m.id));
+  } catch (err) {
+    console.warn('[agent/markers] Supabase load failed:', err?.message || err);
+    return loadFallbackSampleMarkers();
   }
-
-  return builtIn;
 }
 
 /** 两阶段检索：语料索引 + 必要时 LLM 规划 */
