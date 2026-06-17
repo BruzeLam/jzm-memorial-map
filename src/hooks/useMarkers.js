@@ -154,7 +154,9 @@ export function useMarkers({ isEditor = false } = {}) {
             setMarkers(mergeBuiltInMarkers([], combinedRemoved));
           }
         } catch (_) {
-          setMarkers(mergeBuiltInMarkers([], effectiveRemovedIds));
+          setMarkers(
+            mergeBuiltInMarkers([], combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY) || []))
+          );
         }
       })
       .finally(() => {
