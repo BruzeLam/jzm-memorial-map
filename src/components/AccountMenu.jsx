@@ -155,7 +155,7 @@ export default function AccountMenu({
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
-  const { enabled: tipEnabled, methods: tipMethods, stripeTestMode } = useTipAvailable();
+  const { enabled: tipEnabled, tiers: tipTiers, stripeTestMode } = useTipAvailable();
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const rootRef = useRef(null);
@@ -345,7 +345,7 @@ export default function AccountMenu({
       )}
       <TipModal
         open={tipOpen}
-        methods={tipMethods}
+        tiers={tipTiers}
         stripeTestMode={stripeTestMode}
         onClose={() => setTipOpen(false)}
       />

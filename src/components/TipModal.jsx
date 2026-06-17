@@ -1,33 +1,36 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../i18n/LanguageContext';
-import { TIP_TIERS, formatTipCny } from '../lib/tipConfig';
+import { formatTipUsd } from '../lib/tipConfig';
 
-export default function TipModal({ open, methods, stripeTestMode = false, onClose }) {
+function TierIcon({ tierId }) {
+  if (tierId === 'toosimple') return '🍵';
+  if (tierId === 'plus1s') return '⏱️';
+  return '🎙️';
+}
+
+export default function TipModal({ open, tiers = [], stripeTestMode = false, onClose }) {
   const { t } = useI18n();
-  const [activeId, setActiveId] = useState(methods[0]?.id);
+  const [checkoutUrl, setCheckoutUrl] = useState('');
 
-  const active = useMemo(
-    () => methods.find((m) => m.id === activeId) || methods[0],
-    [methods, activeId]
-  );
+  const resetCheckout = useCallback(() => setCheckoutUrl(''), []);
 
   useEffect(() => {
-    if (open && methods[0]) setActiveId(methods[0].id);
-  }, [open, methods]);
+    if (open) setCheckoutUrl('');
+  }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (checkoutUrl) resetCheckout();
+        else onClose();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open, onClose, checkoutUrl, resetCheckout]);
 
-  if (!open || !active) return null;
-
-  const isStripe = active.type === 'stripe';
-  const showTabs = methods.length > 1;
+  if (!open || !tiers.length) return null;
 
   return (
     <div
@@ -39,7 +42,7 @@ export default function TipModal({ open, methods, stripeTestMode = false, onClos
     >
       <div
         className={`relative w-full flex flex-col rounded-t-2xl sm:rounded-2xl bg-[#faf6ef] border border-[#d4bc8a] shadow-xl overflow-hidden ${
-          isStripe ? 'sm:max-w-lg max-h-[92vh]' : 'sm:max-w-md max-h-[92vh]'
+          checkoutUrl ? 'sm:max-w-lg max-h-[92vh]' : 'sm:max-w-md max-h-[92vh]'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -48,10 +51,8 @@ export default function TipModal({ open, methods, stripeTestMode = false, onClos
             <h2 id="tip-modal-title" className="text-base font-semibold text-[#1e3a5f]">
               {t('tip.title')}
             </h2>
-            <p className="text-xs text-[#6b5b45] mt-1 leading-relaxed">
-              {isStripe ? t('tip.stripeSubtitle') : t('tip.domesticSubtitle')}
-            </p>
-            {isStripe && stripeTestMode && (
+            <p className="text-xs text-[#6b5b45] mt-1 leading-relaxed">{t('tip.subtitle')}</p>
+            {stripeTestMode && (
               <p className="text-[10px] text-amber-800 font-medium mt-1.5">{t('tip.stripeTest')}</p>
             )}
           </div>
@@ -65,35 +66,18 @@ export default function TipModal({ open, methods, stripeTestMode = false, onClos
           </button>
         </div>
 
-        {showTabs && (
-          <div className="px-4 pt-3 pb-0">
-            <div className="flex rounded-xl bg-[#efe6d4]/60 p-1 gap-1 overflow-x-auto">
-              {methods.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setActiveId(m.id)}
-                  className={`flex-1 min-w-0 py-2 px-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
-                    active.id === m.id
-                      ? 'bg-white text-[#1e3a5f] shadow-sm'
-                      : 'text-[#6b5b45] hover:text-[#1e3a5f]'
-                  }`}
-                >
-                  {m.type === 'wechat' && '💚 '}
-                  {m.type === 'alipay' && '💙 '}
-                  {m.type === 'stripe' && '💳 '}
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {isStripe ? (
+        {checkoutUrl ? (
           <div className="flex flex-col flex-1 min-h-0">
-            <div className="flex items-center justify-end px-4 py-2 border-b border-[#e8dcc8] bg-white/60">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[#e8dcc8] bg-white/60">
+              <button
+                type="button"
+                onClick={resetCheckout}
+                className="text-xs text-[#1e3a5f] hover:underline"
+              >
+                ← {t('tip.backToTiers')}
+              </button>
               <a
-                href={active.paymentUrl}
+                href={checkoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-[#8b6914] hover:underline"
@@ -104,50 +88,39 @@ export default function TipModal({ open, methods, stripeTestMode = false, onClos
             <div className="relative flex-1 min-h-[420px] sm:min-h-[480px] bg-white">
               <iframe
                 title={t('tip.stripeFrameTitle')}
-                src={active.paymentUrl}
+                src={checkoutUrl}
                 className="absolute inset-0 w-full h-full border-0"
                 allow="payment *"
               />
             </div>
           </div>
         ) : (
-          <div className="overflow-y-auto px-4 py-4 space-y-4">
-            <div className="rounded-xl border border-[#d4bc8a] bg-white p-4 text-center">
-              <p className="text-sm font-medium text-[#1e3a5f] mb-3">
-                {t('tip.scanToPay', { channel: active.label })}
-              </p>
-              <div className="inline-block p-2 rounded-xl bg-white border border-gray-100 shadow-inner">
-                <img
-                  src={active.qrUrl}
-                  alt={active.label}
-                  className="w-52 h-52 sm:w-56 sm:h-56 object-contain mx-auto"
-                />
-              </div>
-              <p className="text-[11px] text-[#6b5b45] mt-3 leading-relaxed">{t('tip.domesticScanHint')}</p>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-[#1e3a5f]">{t('tip.suggestAmounts')}</p>
-              {TIP_TIERS.map((tier) => (
-                <div
-                  key={tier.id}
-                  className="flex items-center gap-3 rounded-xl border border-[#e8dcc8] bg-white/70 px-3 py-2.5"
-                >
-                  <span className="text-xl leading-none" aria-hidden>
-                    {tier.id === 'toosimple' ? '🍵' : tier.id === 'plus1s' ? '⏱️' : '🎙️'}
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-sm font-medium text-[#1e3a5f]">{tier.label}</span>
-                    <span className="block text-[10px] text-[#6b5b45] truncate">{tier.subtitle}</span>
-                  </span>
-                  <span className="shrink-0 text-sm font-bold text-[#8b6914] tabular-nums">
-                    {formatTipCny(tier.suggestCny)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-[10px] text-center text-[#6b5b45]/90 leading-relaxed">{t('tip.domesticFooter')}</p>
+          <div className="overflow-y-auto px-4 py-4 space-y-2">
+            {tiers.map((tier) => (
+              <button
+                key={tier.id}
+                type="button"
+                onClick={() => setCheckoutUrl(tier.paymentUrl)}
+                className="w-full flex items-center gap-3 rounded-xl border border-[#d4bc8a] bg-white/80 hover:bg-white hover:border-[#c9a86c] px-3 py-3 text-left transition-colors"
+              >
+                <span className="text-2xl leading-none" aria-hidden>
+                  <TierIcon tierId={tier.id} />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-semibold text-[#1e3a5f]">{tier.label}</span>
+                  <span className="block text-[11px] text-[#6b5b45] mt-0.5 truncate">{tier.subtitle}</span>
+                </span>
+                <span className="shrink-0 text-sm font-bold text-[#8b6914] tabular-nums">
+                  {formatTipUsd(tier.priceUsd)}
+                </span>
+              </button>
+            ))}
+            <p className="text-[10px] text-center text-[#6b5b45]/90 leading-relaxed pt-2">
+              {t('tip.tierHint')}
+            </p>
+            <p className="text-[10px] text-center text-[#6b5b45]/90 leading-relaxed">
+              {t('tip.footer')}
+            </p>
           </div>
         )}
       </div>
