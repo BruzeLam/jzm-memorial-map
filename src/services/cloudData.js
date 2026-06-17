@@ -2,6 +2,7 @@ import { getSupabase } from '../lib/supabase';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 import { REMOVED_MARKER_IDS } from '../utils/constants';
+import { SITE_META_REMOVED_MARKER_IDS_KEY } from '../utils/removedMarkers';
 import { normalizeGalleryList } from '../utils/galleryUtils';
 import {
   ensureMarkerImagesUploaded,
@@ -80,6 +81,37 @@ export async function upsertCloudMarkersBatch(markers) {
   }
   registerMarkerTags(collectAllMarkerTags(rows.map((r) => r.payload)));
   return rows.length;
+}
+
+export async function fetchCloudRemovedMarkerIds() {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('site_meta')
+    .select('value')
+    .eq('key', SITE_META_REMOVED_MARKER_IDS_KEY)
+    .maybeSingle();
+
+  if (error) throw error;
+  const ids = data?.value?.ids;
+  return Array.isArray(ids) ? ids.filter(Boolean) : [];
+}
+
+export async function addCloudRemovedMarkerId(id) {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Cloud not configured');
+  if (!id) return;
+
+  const existing = await fetchCloudRemovedMarkerIds();
+  if (existing.includes(id)) return;
+
+  const { error } = await supabase.from('site_meta').upsert({
+    key: SITE_META_REMOVED_MARKER_IDS_KEY,
+    value: { ids: [...existing, id] },
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
 }
 
 export async function deleteCloudMarker(id) {

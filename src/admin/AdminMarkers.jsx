@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchCloudMarkers, deleteCloudMarker } from '../services/cloudData';
+import { fetchCloudMarkers, deleteCloudMarker, addCloudRemovedMarkerId } from '../services/cloudData';
 import { MARKER_TYPES } from '../utils/constants';
 import { useI18n } from '../i18n/LanguageContext';
 
@@ -35,7 +35,7 @@ export default function AdminMarkers() {
   const handleDelete = async (id, name) => {
     if (!window.confirm(`确定删除「${name}」？此操作不可撤销。`)) return;
     try {
-      await deleteCloudMarker(id);
+      await Promise.all([deleteCloudMarker(id), addCloudRemovedMarkerId(id)]);
       setMarkers((prev) => prev.filter((m) => m.id !== id));
     } catch (e) {
       window.alert(e.message);

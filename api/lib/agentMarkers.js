@@ -2,6 +2,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { REMOVED_MARKER_IDS } from '../../src/utils/constants.js';
+import {
+  SITE_META_REMOVED_MARKER_IDS_KEY,
+  combineRemovedMarkerIds,
+} from '../../src/utils/removedMarkers.js';
 import { mergeMarkerCatalog } from '../../src/utils/markerCatalog.js';
 import {
   buildMarkerIndex,
@@ -17,32 +21,56 @@ import {
   sampleMarkersForAggregateQuestion,
 } from './agentStats.js';
 
-const removed = new Set(REMOVED_MARKER_IDS);
+async function fetchDynamicRemovedIds(supabase) {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('site_meta')
+      .select('value')
+      .eq('key', SITE_META_REMOVED_MARKER_IDS_KEY)
+      .maybeSingle();
+    if (error) return [];
+    const ids = data?.value?.ids;
+    return Array.isArray(ids) ? ids.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
 
-async function loadBuiltInMarkers() {
+async function loadBuiltInMarkers(removedIds) {
   const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
+  const removed = new Set(removedIds);
   return SAMPLE_MARKERS.filter((m) => !removed.has(m.id));
 }
 
 export async function loadMarkersForAgent() {
-  const builtIn = await loadBuiltInMarkers();
-
   const url = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
   const key = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
 
+  let dynamicRemoved = [];
+  let supabase = null;
+
   if (url && key) {
+    supabase = createClient(url, key);
+    dynamicRemoved = await fetchDynamicRemovedIds(supabase);
+  }
+
+  const removedIds = combineRemovedMarkerIds(dynamicRemoved);
+  const builtIn = await loadBuiltInMarkers(removedIds);
+
+  if (supabase) {
     try {
-      const supabase = createClient(url, key);
       const { data, error } = await supabase
         .from('markers')
         .select('id, payload')
         .order('updated_at', { ascending: false });
 
       if (!error && data?.length) {
+        const removed = new Set(removedIds);
         const remote = data
           .map((row) => row.payload)
           .filter((m) => m?.id && !removed.has(m.id));
-        return mergeMarkerCatalog(remote, builtIn, REMOVED_MARKER_IDS);
+        return mergeMarkerCatalog(remote, builtIn, removedIds);
       }
     } catch (err) {
       console.warn('[agent/markers] Supabase load failed:', err?.message || err);
