@@ -26,7 +26,6 @@
     "build": "react-scripts build",
     "build:portfolio": "REACT_APP_PORTFOLIO_MODE=true REACT_APP_PORTFOLIO_DEMO_DATA=true react-scripts build",
     "test": "react-scripts test",
-    "setup:tip": "node scripts/setup-bagelpay-tip.mjs",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

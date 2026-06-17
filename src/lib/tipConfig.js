@@ -1,12 +1,6 @@
-/** 随缘打赏 · 前端配置 */
+/** 随缘打赏 · 微信 / 支付宝收款码 */
 
-export {
-  TIP_TIERS,
-  TIP_CUSTOM_UNIT_USD,
-  formatTipCny,
-  formatTipUsd,
-  getTierById,
-} from './tipTiers';
+export { TIP_TIERS, formatTipCny, getTierById } from './tipTiers';
 
 function publicAssetUrl(path) {
   const trimmed = (path || '').trim();
@@ -17,7 +11,6 @@ function publicAssetUrl(path) {
   return `${base}${rel}`;
 }
 
-/** 国内扫码赞赏（微信 / 支付宝收款码） */
 export function getDomesticTipConfig() {
   const wechatQr = publicAssetUrl(process.env.REACT_APP_TIP_WECHAT_QR);
   const alipayQr = publicAssetUrl(process.env.REACT_APP_TIP_ALIPAY_QR);
@@ -30,6 +23,6 @@ export function getDomesticTipConfig() {
   };
 }
 
-export function isDomesticTipEnabled() {
+export function isTipEnabled() {
   return getDomesticTipConfig().enabled;
 }
