@@ -246,13 +246,7 @@ body {
   .marker-list-item.active {
     transform: none;
   }
-
-  .sidebar-filters-advanced {
-    transition: none;
-  }
 }
-
-/* 弹窗统一动效 P3 */
 .memorial-modal-overlay {
   position: fixed;
   inset: 0;
@@ -308,29 +302,6 @@ body {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
-
-/* P2：筛选折叠 */
-.sidebar-filters-advanced {
-  overflow: hidden;
-  transition: max-height 0.26s ease, opacity 0.2s ease;
-}
-
-.sidebar-filters-advanced--closed {
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.sidebar-filters-advanced--open {
-  max-height: 88px;
-  opacity: 1;
-}
-
-@media (max-width: 768px) {
-  .sidebar-filters-advanced--open {
-    max-height: 96px;
   }
 }
 
