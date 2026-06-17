@@ -67,7 +67,7 @@ const zh = {
       pendingReview: '待审核',
       myComments: '我评论过的',
       supportTip: '赞赏 · 支持维护',
-      supportTipHint: '自愿支持服务器与地图维护，扫码赞赏',
+      supportTipHint: '自愿支持维护 · 国内扫码或 Stripe',
     },
     tip: {
       title: '赞赏 · 支持维护',
@@ -76,6 +76,10 @@ const zh = {
       domesticScanHint: '保存二维码到相册，或长按识别（手机访问时）',
       suggestAmounts: '推荐金额（扫码后自行输入）',
       domesticFooter: '自愿支持，感谢每一份心意。收款码为个人赞赏，非商业交易。',
+      stripeSubtitle: '银行卡 / Apple Pay 等，金额以 Stripe 收银台为准（HKD）。',
+      stripeTest: 'Stripe 测试模式 · 不会真实扣款',
+      stripeFrameTitle: 'Stripe 安全收银台',
+      openInNewTab: '新窗口支付',
     },
     editorLogin: {
       title: '登录以贡献内容',
@@ -313,7 +317,7 @@ const en = {
       pendingReview: 'Pending',
       myComments: 'My comments',
       supportTip: 'Tip · Support the project',
-      supportTipHint: 'Optional support — scan WeChat or Alipay QR',
+      supportTipHint: 'Optional support — QR or Stripe',
     },
     tip: {
       title: 'Tip · Support the project',
@@ -322,6 +326,10 @@ const en = {
       domesticScanHint: 'Save the QR or long-press to scan on mobile',
       suggestAmounts: 'Suggested amounts (enter when paying)',
       domesticFooter: 'Voluntary support — personal tip QR, not a commercial checkout.',
+      stripeSubtitle: 'Card / Apple Pay etc. Amount shown at Stripe checkout (HKD).',
+      stripeTest: 'Stripe test mode — no real charges',
+      stripeFrameTitle: 'Stripe secure checkout',
+      openInNewTab: 'Open in new tab',
     },
     editorLogin: {
       title: 'Sign in to contribute',

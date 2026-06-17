@@ -1,11 +1,12 @@
-import { getDomesticTipConfig } from '../lib/tipConfig';
+import { getTipConfig } from '../lib/tipConfig';
 
-/** 赞赏是否已配置（微信 / 支付宝收款码） */
+/** 赞赏渠道：国内收款码 + Stripe Payment Link（可选） */
 export function useTipAvailable() {
-  const { enabled, channels } = getDomesticTipConfig();
+  const { enabled, methods, stripeTestMode } = getTipConfig();
   return {
     loading: false,
     enabled,
-    channels,
+    methods,
+    stripeTestMode,
   };
 }

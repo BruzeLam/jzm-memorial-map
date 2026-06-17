@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
 import { useTipAvailable } from '../hooks/useTipAvailable';
-import TipModalDomestic from './TipModalDomestic';
+import TipModal from './TipModal';
 import { fetchMySubmissionStats } from '../services/submissions';
 
 function getDisplayName(email) {
@@ -155,7 +155,7 @@ export default function AccountMenu({
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
-  const { enabled: tipEnabled, channels: tipChannels } = useTipAvailable();
+  const { enabled: tipEnabled, methods: tipMethods, stripeTestMode } = useTipAvailable();
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const rootRef = useRef(null);
@@ -343,7 +343,12 @@ export default function AccountMenu({
           />
         </div>
       )}
-      <TipModalDomestic open={tipOpen} channels={tipChannels} onClose={() => setTipOpen(false)} />
+      <TipModal
+        open={tipOpen}
+        methods={tipMethods}
+        stripeTestMode={stripeTestMode}
+        onClose={() => setTipOpen(false)}
+      />
     </div>
   );
 }
