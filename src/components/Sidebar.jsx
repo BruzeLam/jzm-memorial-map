@@ -4,12 +4,11 @@ import { MarkerTagPills } from './MarkerTagInput';
 import SidebarSearch from './SidebarSearch';
 import AgentChatInline from './AgentChatInline';
 import { useAgentChat } from '../hooks/useAgentChat';
-import FilterPanel from './FilterPanel';
+import SidebarFilterBar from './SidebarFilterBar';
 import MarkerDetails from './MarkerDetails';
 import AddMarkerForm from './AddMarkerForm';
 import { MARKER_TYPES } from '../utils/constants';
 import { exportMarkers } from '../utils/dataExport';
-import RegionFilter from './RegionFilter';
 import { useI18n } from '../i18n/LanguageContext';
 import { formatOnThisDayLabel } from '../utils/onThisDay';
 import { compareMarkerDates } from '../utils/markerDates';
@@ -164,7 +163,137 @@ export default function Sidebar({
   };
 
   const showAgentChat =
-    inputMode === 'agent' && !showModePicker && !showAddForm && !selectedMarker;
+    inputMode === 'agent' && !showModePicker && !showAddForm && !selectedMarkerId;
+
+  const filterBarProps = {
+    activeFilters,
+    toggleFilter,
+    stats,
+    filteredCount: filteredMarkers.length,
+    selectedRegionKeys,
+    regionTree,
+    onToggleRegion,
+    onClearRegions,
+    onThisDayActive,
+    onToggleOnThisDay,
+    onThisDayLabel,
+    sortOrder,
+    onToggleSortOrder: () => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc'),
+  };
+
+  const markerDetailsProps = selectedMarker
+    ? {
+        marker: selectedMarker,
+        markers,
+        onEdit: dataReadOnly ? undefined : onEditMarker,
+        onDelete: dataReadOnly ? undefined : onDeleteMarker,
+        onClose: () => onMarkerSelect(selectedMarkerId),
+        onOpenDetail,
+        onViewImage,
+        onTagSearch: (tag) => setSearchQuery(`#${tag}`),
+        onSelectMarker: onMarkerSelect,
+        onLoginClick,
+        onGalleryUpdated,
+      }
+    : null;
+
+  const renderMarkerList = () => (
+    <ul className="py-0.5">
+      {sortedMarkers.length === 0 ? (
+        <li className="px-3 py-4 text-center">
+          <div className="text-sm text-memorial-muted mb-2">
+            {onThisDayActive
+              ? t('sidebar.noMarkersOnThisDay', { date: onThisDayLabel })
+              : t('sidebar.noMarkers')}
+          </div>
+          <button
+            type="button"
+            onClick={onStartAddMode}
+            className="text-sm text-memorial-navy hover:text-memorial-gold-dark underline transition-colors py-2"
+          >
+            {onThisDayActive
+              ? t('sidebar.addMarkerOnThisDay')
+              : t('sidebar.addMarker')}
+          </button>
+        </li>
+      ) : (
+        sortedMarkers.map((m) => {
+          const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
+          const isActive = m.id === selectedMarkerId;
+          const showInlineDetail = isActive && selectedMarker && !compactMobile;
+          return (
+            <li key={m.id} className={isActive ? 'marker-accordion-item marker-accordion-item--open' : 'marker-accordion-item'}>
+              <button
+                type="button"
+                className={`marker-list-item w-full text-left px-2.5 md:px-3 border-l-2 ${
+                  compactMobile ? 'py-2 min-h-[42px]' : 'py-3 md:py-2.5 min-h-[48px]'
+                } ${isActive ? 'active' : 'border-transparent'}`}
+                onClick={() => onMarkerSelect(m.id)}
+              >
+                {compactMobile ? (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                      style={{ backgroundColor: typeInfo.color }}
+                    >
+                      {typeInfo.icon}
+                    </span>
+                    <span className="flex-1 min-w-0 text-sm font-medium font-memorial text-memorial-ink truncate">{m.name}</span>
+                    {m.date && (
+                      <span className="text-[10px] text-memorial-muted flex-shrink-0 tabular-nums">
+                        {m.date}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2">
+                    <span
+                      className="w-7 h-7 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5"
+                      style={{ backgroundColor: typeInfo.color }}
+                    >
+                      {typeInfo.icon}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-medium font-memorial text-memorial-ink truncate">{m.name}</span>
+                      </div>
+                      <div className="text-xs text-memorial-muted mt-0.5 flex items-center gap-2 flex-wrap">
+                        <span
+                          className="px-1.5 py-0.5 rounded-full text-white"
+                          style={{ backgroundColor: typeInfo.color, fontSize: 10 }}
+                        >
+                          {markerTypeLabel(m.type)}
+                        </span>
+                        {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
+                      </div>
+                      {m.title && (
+                        <p className="text-xs text-memorial-muted mt-0.5 truncate">{m.title}</p>
+                      )}
+                      {m.tags?.length > 0 && (
+                        <MarkerTagPills
+                          tags={m.tags}
+                          onTagClick={(tag) => setSearchQuery(`#${tag}`)}
+                          className="mt-1"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
+              </button>
+              {showInlineDetail && (
+                <div className="marker-accordion-panel px-2 pb-2">
+                  <MarkerDetails {...markerDetailsProps} />
+                </div>
+              )}
+            </li>
+          );
+        })
+      )}
+    </ul>
+  );
+
+  const showMobileDetailSheet =
+    compactMobile && selectedMarker && !showModePicker && !showAddForm;
 
   const agentChatPanel = (
     <AgentChatInline
@@ -177,13 +306,7 @@ export default function Sidebar({
     />
   );
 
-  const sidebarViewKey = showModePicker
-    ? 'picker'
-    : showAddForm
-      ? 'form'
-      : selectedMarker
-        ? `detail-${selectedMarkerId}`
-        : 'list';
+  const sidebarViewKey = showModePicker ? 'picker' : showAddForm ? 'form' : 'list';
 
   const markerListContent = (
     <div key={sidebarViewKey} className="sidebar-panel-view">
@@ -246,112 +369,9 @@ export default function Sidebar({
         onMapPickConsumed={onMapPickConsumed}
       />
     </div>
-  ) : selectedMarker ? (
-    /* ── Marker Details ──────────────────────────────────── */
-    <div className="p-2">
-            <MarkerDetails
-              marker={selectedMarker}
-              markers={markers}
-              onEdit={dataReadOnly ? undefined : onEditMarker}
-              onDelete={dataReadOnly ? undefined : onDeleteMarker}
-        onClose={() => onMarkerSelect(selectedMarkerId)}
-        onOpenDetail={onOpenDetail}
-        onViewImage={onViewImage}
-        onTagSearch={(tag) => setSearchQuery(`#${tag}`)}
-        onSelectMarker={onMarkerSelect}
-        onLoginClick={onLoginClick}
-        onGalleryUpdated={onGalleryUpdated}
-      />
-    </div>
   ) : (
-    /* ── Marker List ─────────────────────────────────────── */
-    <ul className="py-0.5">
-      {sortedMarkers.length === 0 ? (
-        <li className="px-3 py-4 text-center">
-          <div className="text-sm text-memorial-muted mb-2">
-            {onThisDayActive
-              ? t('sidebar.noMarkersOnThisDay', { date: onThisDayLabel })
-              : t('sidebar.noMarkers')}
-          </div>
-          <button
-            type="button"
-            onClick={onStartAddMode}
-            className="text-sm text-memorial-navy hover:text-memorial-gold-dark underline transition-colors py-2"
-          >
-            {onThisDayActive
-              ? t('sidebar.addMarkerOnThisDay')
-              : t('sidebar.addMarker')}
-          </button>
-        </li>
-      ) : (
-        sortedMarkers.map((m) => {
-          const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
-          const isActive = m.id === selectedMarkerId;
-          return (
-            <li key={m.id}>
-              <button
-                type="button"
-                className={`marker-list-item w-full text-left px-2.5 md:px-3 border-l-2 ${
-                  compactMobile ? 'py-2 min-h-[42px]' : 'py-3 md:py-2.5 min-h-[48px]'
-                } ${isActive ? 'active' : 'border-transparent'}`}
-                onClick={() => onMarkerSelect(m.id)}
-              >
-                {compactMobile ? (
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                      style={{ backgroundColor: typeInfo.color }}
-                    >
-                      {typeInfo.icon}
-                    </span>
-                    <span className="flex-1 min-w-0 text-sm font-medium font-memorial text-memorial-ink truncate">{m.name}</span>
-                    {m.date && (
-                      <span className="text-[10px] text-memorial-muted flex-shrink-0 tabular-nums">
-                        {m.date}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-start gap-2">
-                    <span
-                      className="w-7 h-7 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5"
-                      style={{ backgroundColor: typeInfo.color }}
-                    >
-                      {typeInfo.icon}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium font-memorial text-memorial-ink truncate">{m.name}</span>
-                      </div>
-                      <div className="text-xs text-memorial-muted mt-0.5 flex items-center gap-2 flex-wrap">
-                        <span
-                          className="px-1.5 py-0.5 rounded-full text-white"
-                          style={{ backgroundColor: typeInfo.color, fontSize: 10 }}
-                        >
-                          {markerTypeLabel(m.type)}
-                        </span>
-                        {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
-                      </div>
-                      {m.title && (
-                        <p className="text-xs text-memorial-muted mt-0.5 truncate">{m.title}</p>
-                      )}
-                      {m.tags?.length > 0 && (
-                        <MarkerTagPills
-                          tags={m.tags}
-                          onTagClick={(tag) => setSearchQuery(`#${tag}`)}
-                          className="mt-1"
-                        />
-                      )}
-                    </div>
-                  </div>
-                )}
-              </button>
-            </li>
-          );
-        })
-      )}
-    </ul>
-      )}
+    renderMarkerList()
+  )}
     </div>
   );
 
@@ -363,71 +383,7 @@ export default function Sidebar({
         </div>
 
         <div className="px-2 py-1 border-b border-memorial-border flex-shrink-0">
-          <div className="flex items-center gap-1">
-            <div className="flex gap-1 flex-shrink-0">
-              {Object.entries(MARKER_TYPES).map(([key, typeInfo]) => {
-                const count = stats[key] || 0;
-                const active = activeFilters[key];
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => toggleFilter(key)}
-                    title={markerTypeLabel(key)}
-                    aria-label={`${markerTypeLabel(key)} ${count}`}
-                    aria-pressed={active}
-                    className={`relative flex items-center justify-center w-9 h-9 rounded-lg text-sm border transition-colors ${
-                      active
-                        ? 'text-white border-transparent'
-                        : 'bg-memorial-surface border-memorial-border text-memorial-ink'
-                    }`}
-                    style={active ? { backgroundColor: typeInfo.color, borderColor: typeInfo.color } : {}}
-                  >
-                    <span>{typeInfo.icon}</span>
-                    <span
-                      className={`absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 rounded-full text-[9px] font-bold leading-[14px] text-center ${
-                        active ? 'bg-memorial-surface text-memorial-ink' : 'bg-memorial-navy text-white'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <RegionFilter
-                selectedRegionKeys={selectedRegionKeys}
-                regionTree={regionTree}
-                onToggleRegion={onToggleRegion}
-                onClearRegions={onClearRegions}
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={onToggleOnThisDay}
-              title={t('sidebar.onThisDay', { date: onThisDayLabel })}
-              aria-label={t('sidebar.onThisDay', { date: onThisDayLabel })}
-              className={`flex-shrink-0 w-9 h-9 text-sm rounded-lg border transition-colors flex items-center justify-center ${
-                onThisDayActive
-                  ? 'bg-amber-50 border-amber-400 text-amber-900'
-                  : 'bg-memorial-surface border-memorial-border text-memorial-muted'
-              }`}
-            >
-              📜
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-              className="flex-shrink-0 w-9 h-9 text-xs rounded-lg bg-memorial-surface text-memorial-muted border border-memorial-border font-medium flex items-center justify-center hover:bg-memorial-cream-dark hover:text-memorial-navy transition-colors"
-              title={t('sidebar.sortTime')}
-              aria-label={t('sidebar.sortTime')}
-            >
-              {sortOrder === 'date-asc' ? '↑' : '↓'}
-            </button>
-          </div>
+          <SidebarFilterBar {...filterBarProps} compact />
         </div>
 
         <MobileScrollList
@@ -477,6 +433,23 @@ export default function Sidebar({
             </div>
           </div>
         </div>
+
+        {showMobileDetailSheet && markerDetailsProps && (
+          <>
+            <button
+              type="button"
+              className="mobile-detail-backdrop"
+              onClick={() => onMarkerSelect(selectedMarkerId)}
+              aria-label={t('sidebar.cancel')}
+            />
+            <div className="mobile-detail-sheet pb-safe">
+              <div className="mobile-detail-sheet-handle" aria-hidden />
+              <div className="px-2 pt-1 pb-2 overflow-y-auto max-h-[inherit]">
+                <MarkerDetails {...markerDetailsProps} />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -490,43 +463,7 @@ export default function Sidebar({
       </div>
 
       <div className="px-3 py-2 border-b border-memorial-border">
-        <FilterPanel activeFilters={activeFilters} toggleFilter={toggleFilter} stats={stats} />
-      </div>
-
-      <div className="px-3 py-2 border-b border-memorial-border flex items-center justify-between text-xs text-memorial-muted">
-        <span>{t('sidebar.totalMarkers', { total: stats.total })}</span>
-        {filteredMarkers.length !== stats.total && (
-          <span>{t('sidebar.showingMarkers', { count: filteredMarkers.length })}</span>
-        )}
-      </div>
-
-      <div className="px-3 py-2 border-b border-memorial-border grid grid-cols-3 gap-2">
-        <RegionFilter
-          selectedRegionKeys={selectedRegionKeys}
-          regionTree={regionTree}
-          onToggleRegion={onToggleRegion}
-          onClearRegions={onClearRegions}
-        />
-        <button
-          type="button"
-          onClick={onToggleOnThisDay}
-          title={t('sidebar.onThisDay', { date: onThisDayLabel })}
-          className={`min-w-0 text-xs py-1.5 px-1.5 rounded border transition-colors font-medium flex items-center justify-center gap-0.5 ${
-            onThisDayActive
-              ? 'bg-amber-50 border-amber-400 text-amber-900'
-              : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:bg-amber-50 hover:text-amber-800'
-          }`}
-        >
-          <span className="flex-shrink-0">📜</span>
-          <span className="truncate">{t('sidebar.onThisDay', { date: onThisDayLabel })}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-          className="min-w-0 text-xs py-1.5 px-2 rounded bg-memorial-surface text-memorial-muted hover:bg-memorial-cream-dark hover:text-memorial-navy transition-colors font-medium flex items-center justify-center gap-1 border border-memorial-border"
-        >
-          📅 {t('sidebar.sortTime')} {sortOrder === 'date-asc' ? '↑' : '↓'}
-        </button>
+        <SidebarFilterBar {...filterBarProps} />
       </div>
 
       <div className="flex-1 overflow-y-auto sidebar-scrollable">

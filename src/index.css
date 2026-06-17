@@ -235,13 +235,168 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .marker-pin-inner--selected,
   .marker-pin-inner--fade-in,
-  .sidebar-panel-view {
+  .sidebar-panel-view,
+  .memorial-modal-overlay,
+  .memorial-modal-panel,
+  .mobile-detail-sheet,
+  .marker-accordion-panel {
     animation: none;
   }
 
   .marker-list-item.active {
     transform: none;
   }
+
+  .sidebar-filters-advanced {
+    transition: none;
+  }
+}
+
+/* 弹窗统一动效 P3 */
+.memorial-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  background: rgba(30, 58, 95, 0.42);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: memorialOverlayIn 0.22s ease-out;
+}
+
+.memorial-modal-panel {
+  background: var(--memorial-cream);
+  border: 1px solid var(--memorial-gold);
+  box-shadow: 0 12px 48px rgba(30, 58, 95, 0.18);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: min(92dvh, 900px);
+  overflow: hidden;
+  animation: memorialPanelIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 1rem 1rem 0 0;
+}
+
+@media (min-width: 769px) {
+  .memorial-modal-panel {
+    border-radius: 1rem;
+    max-height: 85vh;
+    animation: memorialPanelInDesktop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes memorialOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes memorialPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes memorialPanelInDesktop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* P2：筛选折叠 */
+.sidebar-filters-advanced {
+  overflow: hidden;
+  transition: max-height 0.26s ease, opacity 0.2s ease;
+}
+
+.sidebar-filters-advanced--closed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-filters-advanced--open {
+  max-height: 88px;
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .sidebar-filters-advanced--open {
+    max-height: 96px;
+  }
+}
+
+/* P2：列表 accordion */
+.marker-accordion-panel {
+  animation: sidebarPanelViewIn 0.22s ease-out both;
+}
+
+.marker-accordion-item--open .marker-list-item.active {
+  border-bottom-left-radius: 0;
+}
+
+/* P2：移动端详情抽屉 */
+.mobile-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 480;
+  border: none;
+  padding: 0;
+  background: rgba(30, 58, 95, 0.28);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  cursor: pointer;
+  animation: memorialOverlayIn 0.2s ease-out;
+}
+
+.mobile-detail-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 485;
+  max-height: min(58vh, 520px);
+  background: var(--memorial-cream);
+  border-top: 1.5px solid var(--memorial-gold);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -10px 40px rgba(30, 58, 95, 0.16);
+  animation: slideUpSheet 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobile-detail-sheet-handle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 4px;
+  margin: 8px auto 4px;
+  border-radius: 999px;
+  background: var(--memorial-gold);
+  opacity: 0.65;
+}
+
+/* Header 语录过渡 */
+.header-quote-fade {
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.header-quote-fade--out {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.header-quote-fade--in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* 地图全屏铺底，侧边栏独立浮层（收起不改变地图尺寸） */

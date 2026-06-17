@@ -11,6 +11,7 @@ import ArchiveTagInput from './ArchiveTagInput';
 import { useI18n } from '../i18n/LanguageContext';
 import { getBranding } from '../config/branding';
 import { useArchivesContext } from '../context/ArchivesContext';
+import MemorialModal from './MemorialModal';
 
 function TextWithLinks({ text, className = '' }) {
   if (!text) return null;
@@ -334,22 +335,13 @@ export default function ArchivePanel({ onClose }) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center"
-        style={{ background: 'rgba(0,0,0,0.45)' }}
-        onClick={onClose}
-      >
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-4 flex flex-col"
-          style={{ maxHeight: '85vh' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <MemorialModal onClose={onClose} zClass="z-[9999]" panelClassName="max-w-3xl">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-memorial-border">
             <div className="flex items-center gap-2">
               <span className="text-xl">📁</span>
               <div>
-                <h2 className="text-base font-bold text-gray-800">{t('archive.title')}</h2>
-                <p className="text-xs text-gray-400">{getBranding().archivePanelSubtitle}</p>
+                <h2 className="text-base font-bold font-memorial text-memorial-navy">{t('archive.title')}</h2>
+                <p className="text-xs text-memorial-muted">{getBranding().archivePanelSubtitle}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -519,17 +511,16 @@ export default function ArchivePanel({ onClose }) {
             )}
           </div>
 
-          <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
-            <span className="text-xs text-gray-400">{t('archive.total', { count: filtered.length })}</span>
+          <div className="px-6 py-3 border-t border-memorial-border flex items-center justify-between">
+            <span className="text-xs text-memorial-muted">{t('archive.total', { count: filtered.length })}</span>
             <button
               onClick={onClose}
-              className="px-4 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg"
+              className="px-4 py-1.5 text-xs font-medium memorial-btn-secondary"
             >
               {t('archive.close')}
             </button>
           </div>
-        </div>
-      </div>
+      </MemorialModal>
 
       {showForm && (
         <ArchiveForm

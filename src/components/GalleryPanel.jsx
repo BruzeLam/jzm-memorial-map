@@ -6,6 +6,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import GalleryImageEditor from './GalleryImageEditor';
 import ImageViewer from './ImageViewer';
 import ImageUploadInput from './ImageUploadInput';
+import MemorialModal from './MemorialModal';
 
 export default function GalleryPanel({
   gallery,
@@ -113,22 +114,14 @@ export default function GalleryPanel({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[5000] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 flex flex-col"
-        style={{ maxHeight: '85vh' }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
+    <MemorialModal onClose={onClose} panelClassName="max-w-4xl">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-800">🖼️ {t('gallery.title')}</h2>
+        <div className="px-6 py-4 border-b border-memorial-border flex items-center justify-between flex-shrink-0">
+          <h2 className="text-xl font-bold font-memorial text-memorial-navy">🖼️ {t('gallery.title')}</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none transition-colors"
+            className="text-memorial-muted hover:text-memorial-ink text-2xl leading-none transition-colors"
           >
             ✕
           </button>
@@ -271,22 +264,21 @@ export default function GalleryPanel({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between flex-shrink-0">
-          <span className="text-xs text-gray-400">
+        <div className="px-6 py-3 border-t border-memorial-border flex items-center justify-between flex-shrink-0">
+          <span className="text-xs text-memorial-muted">
             {searchQuery.trim()
               ? t('gallery.found', { found: filteredGallery.length, total: gallery.length })
               : t('gallery.total', { total: gallery.length })}
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium memorial-btn-primary"
           >
             {t('gallery.close')}
           </button>
         </div>
-      </div>
+    </MemorialModal>
 
-      {/* Image Viewer */}
       {viewingImageIndex !== null && filteredGallery.length > 0 && (
         <ImageViewer
           images={filteredGallery}
@@ -294,6 +286,6 @@ export default function GalleryPanel({
           onClose={() => setViewingImageIndex(null)}
         />
       )}
-    </div>
+    </>
   );
 }

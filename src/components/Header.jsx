@@ -100,15 +100,15 @@ function CountdownBadge({ seconds, compact = false }) {
   );
 }
 
-function NavButton({ emoji, label, onClick, className }) {
+function NavButton({ emoji, label, onClick, className = '' }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${className}`}
+      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all hover:-translate-y-px ${className}`}
     >
       <span>{emoji}</span>
-      <span>{label}</span>
+      <span className="hidden lg:inline">{label}</span>
     </button>
   );
 }
@@ -137,14 +137,14 @@ export default function Header({
   };
 
   const navItems = [
-    { emoji: '🖼️', label: t('nav.gallery'), onClick: onOpenGallery, className: 'bg-purple-600 hover:bg-purple-700 text-white' },
-    { emoji: '📚', label: t('nav.quotes'), onClick: onOpenQuotes, className: 'bg-red-700 hover:bg-red-800 text-white' },
-    { emoji: '📁', label: t('nav.archive'), onClick: onOpenArchive, className: 'bg-amber-800 hover:bg-amber-900 text-white' },
-    { emoji: '📋', label: t('nav.changelog'), onClick: onOpenChangeLog, className: 'bg-blue-100 hover:bg-blue-200 text-blue-700' },
+    { emoji: '🖼️', label: t('nav.gallery'), onClick: onOpenGallery, className: 'bg-memorial-surface border-memorial-border text-memorial-navy hover:border-memorial-gold hover:bg-memorial-cream' },
+    { emoji: '📚', label: t('nav.quotes'), onClick: onOpenQuotes, className: 'bg-red-800/90 border-red-900/30 text-white hover:bg-red-800' },
+    { emoji: '📁', label: t('nav.archive'), onClick: onOpenArchive, className: 'bg-amber-900/90 border-amber-950/30 text-white hover:bg-amber-900' },
+    { emoji: '📋', label: t('nav.changelog'), onClick: onOpenChangeLog, className: 'bg-memorial-surface border-memorial-border text-memorial-muted hover:text-memorial-navy hover:border-memorial-gold' },
   ];
 
   return (
-    <header className="bg-gray-200 border-b border-gray-300 shadow-sm flex-shrink-0 relative z-[500] pt-safe">
+    <header className="bg-memorial-cream border-b border-memorial-border shadow-memorial flex-shrink-0 relative z-[500] pt-safe">
       <div className="px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3">
         <AccountMenu
           onLoginClick={onLoginClick}
@@ -155,23 +155,23 @@ export default function Header({
         <img
           src={`${process.env.PUBLIC_URL}/logo.png?v=3`}
           alt=""
-          className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-white object-contain ring-1 ring-gray-300 shadow-sm"
+          className="w-9 h-9 md:w-10 md:h-10 flex-shrink-0 rounded-lg bg-memorial-surface object-contain ring-1 ring-memorial-border shadow-sm"
         />
-        <h1 className="flex-1 min-w-0 text-[13px] md:text-lg font-serif font-bold leading-snug">
+        <h1 className="flex-1 min-w-0 text-[13px] md:text-lg font-memorial font-bold leading-snug">
           {branding.headerLink ? (
             <a
               href={branding.headerLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-800 hover:text-blue-600 transition-colors line-clamp-2 md:line-clamp-none"
+              className="text-memorial-navy hover:text-memorial-gold-dark transition-colors line-clamp-2 md:line-clamp-none"
             >
               {branding.siteTitle}
             </a>
           ) : (
-            <span className="text-gray-800 line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
+            <span className="text-memorial-navy line-clamp-2 md:line-clamp-none">{branding.siteTitle}</span>
           )}
           {isPortfolioMode() && (
-            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-slate-100 text-slate-600 align-middle">
+            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-medium bg-memorial-surface text-memorial-muted border border-memorial-border align-middle">
               作品集
             </span>
           )}
@@ -186,7 +186,7 @@ export default function Header({
               <button
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
-                className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm"
+                className="w-10 h-10 flex items-center justify-center rounded-lg border border-memorial-border bg-memorial-surface text-memorial-navy shadow-sm"
                 aria-label={t('nav.openMenu')}
                 aria-expanded={menuOpen}
               >
@@ -208,11 +208,11 @@ export default function Header({
         <>
           <button
             type="button"
-            className="fixed inset-0 z-[498] bg-black/20 border-0 p-0 cursor-pointer"
+            className="fixed inset-0 z-[498] bg-memorial-navy/20 backdrop-blur-[2px] border-0 p-0 cursor-pointer"
             aria-label={t('nav.closeMenu')}
             onClick={closeMenu}
           />
-          <div className="absolute left-0 right-0 top-full z-[499] border-b border-gray-200 bg-white shadow-lg px-3 py-3 space-y-2 mobile-header-menu pb-safe">
+          <div className="absolute left-0 right-0 top-full z-[499] border-b border-memorial-border bg-memorial-cream shadow-memorial-lg px-3 py-3 space-y-2 mobile-header-menu pb-safe">
             {navItems.map((item) => (
               <button
                 key={item.label}

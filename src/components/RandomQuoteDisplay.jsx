@@ -5,18 +5,18 @@ export default function RandomQuoteDisplay() {
   const { quotes } = useQuotesContext();
   const [currentQuote, setCurrentQuote] = useState(null);
   const [usedIndices, setUsedIndices] = useState(new Set());
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [fadeClass, setFadeClass] = useState('header-quote-fade--in');
 
   const shortQuotes = quotes.filter((q) => q.text.length < 50);
 
   const selectNewQuote = (used) => {
-    setIsTransitioning(true);
+    setFadeClass('header-quote-fade--out');
 
     setTimeout(() => {
       const filtered = shortQuotes;
       if (!filtered.length) {
         setCurrentQuote(null);
-        setIsTransitioning(false);
+        setFadeClass('header-quote-fade--in');
         return;
       }
 
@@ -34,8 +34,8 @@ export default function RandomQuoteDisplay() {
       newUsed.add(randomIdx);
       setUsedIndices(newUsed);
       setCurrentQuote(filtered[randomIdx]);
-      setIsTransitioning(false);
-    }, 200);
+      setFadeClass('header-quote-fade--in');
+    }, 220);
   };
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function RandomQuoteDisplay() {
   }, [quotes.length]);
 
   const handleClick = () => {
-    if (!isTransitioning && shortQuotes.length) {
+    if (fadeClass !== 'header-quote-fade--out' && shortQuotes.length) {
       selectNewQuote(usedIndices);
     }
   };
@@ -58,10 +58,12 @@ export default function RandomQuoteDisplay() {
   return (
     <div
       onClick={handleClick}
-      className="flex-1 mx-4 px-4 py-1 text-center cursor-pointer transition-opacity hover:opacity-60 flex items-center justify-center"
-      style={{ opacity: isTransitioning ? 0.3 : 1 }}
+      className="flex-1 mx-2 md:mx-4 px-3 py-1 text-center cursor-pointer hover:opacity-80 flex items-center justify-center min-w-0"
+      title="点击换一条"
     >
-      <p className="text-xs text-gray-500 font-light leading-tight line-clamp-2 max-w-md transition-opacity duration-200">
+      <p
+        className={`text-xs text-memorial-muted font-light leading-tight line-clamp-2 max-w-md header-quote-fade ${fadeClass}`}
+      >
         {currentQuote.text}
       </p>
     </div>

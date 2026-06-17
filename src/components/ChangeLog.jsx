@@ -3,6 +3,7 @@ import updatesDefault from '../data/updates.json';
 import portfolioUpdates from '../data/portfolio/updates.json';
 import { isPortfolioMode } from '../config/branding';
 import { useI18n } from '../i18n/LanguageContext';
+import MemorialModal from './MemorialModal';
 
 const updates = isPortfolioMode() ? portfolioUpdates : updatesDefault;
 
@@ -77,22 +78,14 @@ export default function ChangeLog({ onClose }) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-        style={{ background: 'rgba(240, 244, 255, 0.8)' }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget && onClose) {
-            onClose();
-          }
-        }}
+      <MemorialModal
+        onClose={onClose}
+        zClass="z-[9999]"
+        panelClassName="max-w-2xl"
+        overlayClassName="!bg-memorial-cream/80"
       >
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col"
-          style={{ maxHeight: '85vh', backgroundImage: 'linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-            <h2 className="text-xl font-bold text-gray-800">📋 {t('changelog.title')}</h2>
+          <div className="px-6 py-4 border-b border-memorial-border flex items-center justify-between flex-shrink-0">
+            <h2 className="text-xl font-bold font-memorial text-memorial-navy">📋 {t('changelog.title')}</h2>
             <button
               type="button"
               onClick={onClose}
@@ -193,8 +186,7 @@ export default function ChangeLog({ onClose }) {
               );
             })}
           </div>
-        </div>
-      </div>
+      </MemorialModal>
 
       {previewImage && (
         <div

@@ -5,6 +5,7 @@ import { compareMarkerDates } from '../utils/markerDates';
 import { formatRegionPath } from '../utils/regionFormat';
 import { useI18n } from '../i18n/LanguageContext';
 import ImageViewer from './ImageViewer';
+import MemorialModal from './MemorialModal';
 
 function OnThisDayCard({ marker, markerTypeLabel, onSelectLabel, onSelect, onViewImages }) {
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
@@ -105,19 +106,8 @@ export default function OnThisDayModal({ markers, onClose, onViewOnMap, onSelect
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-[10050] flex items-center justify-center p-4"
-        style={{ background: 'rgba(30, 20, 10, 0.55)' }}
-        onClick={onClose}
-        role="presentation"
-      >
-        <div
-          className="flex flex-col w-full max-w-md max-h-[min(520px,85vh)] rounded-xl shadow-2xl overflow-hidden bg-gradient-to-b from-amber-50 to-white border border-amber-200/80"
-          onClick={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-labelledby="on-this-day-title"
-        >
-          <header className="flex-shrink-0 px-4 pt-3 pb-2 border-b border-amber-100/80">
+      <MemorialModal onClose={onClose} zClass="z-[10050]" panelClassName="max-w-md !max-h-[min(520px,85vh)]">
+          <header className="flex-shrink-0 px-4 pt-3 pb-2 border-b border-memorial-border">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold tracking-wide text-amber-700">
@@ -176,8 +166,7 @@ export default function OnThisDayModal({ markers, onClose, onViewOnMap, onSelect
               {t('onThisDayModal.close')}
             </button>
           </footer>
-        </div>
-      </div>
+      </MemorialModal>
 
       {imageView && (
         <ImageViewer

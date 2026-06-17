@@ -478,7 +478,7 @@ export default function App() {
     <LanguageProvider>
     <QuotesProvider isEditor={isEditor}>
     <ArchivesProvider isEditor={isEditor}>
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-memorial-cream-dark">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}
         onOpenArchive={() => setShowArchive(true)}

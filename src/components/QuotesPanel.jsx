@@ -4,6 +4,7 @@ import { useI18n } from '../i18n/LanguageContext';
 import { getBranding } from '../config/branding';
 import { useQuotesContext } from '../context/QuotesContext';
 import { exportQuotesBackup } from '../utils/quotesStorage';
+import MemorialModal from './MemorialModal';
 
 function UploadForm({ onSave, onCancel, initialData }) {
   const { t } = useI18n();
@@ -29,15 +30,8 @@ function UploadForm({ onSave, onCancel, initialData }) {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
-      onClick={onCancel}
-    >
-      <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <MemorialModal onClose={onCancel} zClass="z-[10000]">
+      <div className="p-6">
         <h3 className="text-base font-bold text-gray-800 mb-4">
           {isEditing ? t('quotes.editQuote') : t('quotes.uploadQuote')}
         </h3>
@@ -98,7 +92,7 @@ function UploadForm({ onSave, onCancel, initialData }) {
           </button>
         </div>
       </div>
-    </div>
+    </MemorialModal>
   );
 }
 
@@ -135,22 +129,13 @@ export default function QuotesPanel({ onClose }) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center"
-        style={{ background: 'rgba(0,0,0,0.45)' }}
-        onClick={onClose}
-      >
-        <div
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col"
-          style={{ maxHeight: '85vh' }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <MemorialModal onClose={onClose} zClass="z-[9999]" panelClassName="max-w-2xl">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-memorial-border">
             <div className="flex items-center gap-2">
               <span className="text-xl">📚</span>
               <div>
-                <h2 className="text-base font-bold text-gray-800">{t('quotes.title')}</h2>
-                <p className="text-xs text-gray-400">{getBranding().quotesPanelSubtitle}</p>
+                <h2 className="text-base font-bold font-memorial text-memorial-navy">{t('quotes.title')}</h2>
+                <p className="text-xs text-memorial-muted">{getBranding().quotesPanelSubtitle}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -256,21 +241,20 @@ export default function QuotesPanel({ onClose }) {
             )}
           </div>
 
-          <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between gap-3">
-            <div className="text-xs text-gray-400">
+          <div className="px-6 py-3 border-t border-memorial-border flex items-center justify-between gap-3">
+            <div className="text-xs text-memorial-muted">
               <span>{t('quotes.total', { count: filteredQuotes.length })}</span>
               <span className="mx-1">·</span>
               <span>{t('quotes.statsBreakdown', { builtin: stats.builtin, user: stats.userAdded })}</span>
             </div>
             <button
               onClick={onClose}
-              className="px-4 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
+              className="px-4 py-1.5 text-xs font-medium memorial-btn-secondary"
             >
               {t('quotes.close')}
             </button>
           </div>
-        </div>
-      </div>
+      </MemorialModal>
 
       {showUploadForm && (
         <UploadForm

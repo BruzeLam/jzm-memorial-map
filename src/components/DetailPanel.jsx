@@ -11,6 +11,7 @@ import TripSiblingsSection from './TripSiblingsSection';
 import ImageViewer from './ImageViewer';
 import MarkerDistance from './MarkerDistance';
 import PilgrimageSection from './PilgrimageSection';
+import MemorialModal from './MemorialModal';
 
 export default function DetailPanel({
   marker,
@@ -31,15 +32,8 @@ export default function DetailPanel({
   const siblings = getTripSiblings(markers, marker);
 
   return (
-    <div
-      className="fixed inset-0 z-[5000] flex items-end md:items-center justify-center p-0 md:p-4"
-      style={{ background: 'rgba(0,0,0,0.5)' }}
-      onClick={onClose}
-    >
-      <div
-        className="bg-memorial-cream rounded-t-2xl md:rounded-2xl shadow-memorial-lg border border-memorial-border w-full max-w-2xl mx-0 md:mx-4 flex flex-col mobile-detail-panel pb-safe"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
+    <MemorialModal onClose={onClose} panelClassName="max-w-2xl mobile-detail-panel pb-safe">
         <div
           className="px-4 md:px-6 py-3 md:py-4 border-b border-memorial-border flex items-center justify-between flex-shrink-0"
           style={{ backgroundColor: marker.color + '18' }}
@@ -176,7 +170,7 @@ export default function DetailPanel({
             onGalleryUpdated={onGalleryUpdated}
           />
         </div>
-      </div>
+    </MemorialModal>
 
       {viewingImageIndex !== null && marker.images?.length > 0 && (
         <ImageViewer
@@ -185,6 +179,6 @@ export default function DetailPanel({
           onClose={() => setViewingImageIndex(null)}
         />
       )}
-    </div>
+    </>
   );
 }
