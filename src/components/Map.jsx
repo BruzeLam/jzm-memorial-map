@@ -178,7 +178,6 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
 
     return () => {
       markerInstances.forEach((lm) => lm.remove());
-      markerInstancesRef.current.clear();
     };
   }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds, markerIdsKey]);
 
