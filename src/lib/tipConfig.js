@@ -9,12 +9,10 @@ function readEnv(key) {
 }
 
 export function getStripeTierUrls() {
-  const legacy = readEnv('REACT_APP_STRIPE_TIP_URL') || readEnv('REACT_APP_TIP_URL');
-  return TIP_TIERS.map((tier) => {
-    let url = readEnv(tier.stripeEnv);
-    if (!url && tier.id === 'toosimple' && legacy) url = legacy;
-    return { ...tier, paymentUrl: url };
-  }).filter((t) => t.paymentUrl);
+  return TIP_TIERS.map((tier) => ({
+    ...tier,
+    paymentUrl: readEnv(tier.stripeEnv),
+  })).filter((t) => t.paymentUrl);
 }
 
 export function getTipConfig() {
