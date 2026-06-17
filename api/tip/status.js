@@ -1,4 +1,6 @@
-/** GET · 赞赏是否可用（前端无需 REACT_APP_TIP_*） */
+/** GET · 赞赏是否可用 */
+
+import { isTipConfigured } from '../lib/tipProducts.js';
 
 function getApiBase() {
   return (process.env.BAGELPAY_API_BASE || 'https://test.bagelpay.io').replace(/\/$/, '');
@@ -10,12 +12,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  const enabled = Boolean(
-    process.env.BAGELPAY_API_KEY && process.env.BAGELPAY_TIP_PRODUCT_ID
-  );
-
   res.status(200).json({
-    enabled,
+    enabled: isTipConfigured(),
     testMode: getApiBase().includes('test.'),
   });
 }

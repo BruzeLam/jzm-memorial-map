@@ -1,15 +1,9 @@
 /** POST · BagelPay Checkout Session（弹窗 iframe） */
 
-const UNIT_PRODUCT_NAME = 'memorial-map-tip-unit';
+import { resolveTipProduct } from '../lib/tipProducts.js';
 
 function getApiBase() {
   return (process.env.BAGELPAY_API_BASE || 'https://test.bagelpay.io').replace(/\/$/, '');
-}
-
-function resolveUnits(amountCny) {
-  const units = Math.round(amountCny * 100);
-  if (units < 1) return null;
-  return units;
 }
 
 export default async function handler(req, res) {
@@ -19,11 +13,10 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.BAGELPAY_API_KEY;
-  const productId = (process.env.BAGELPAY_TIP_PRODUCT_ID || '').trim();
-  if (!apiKey || !productId) {
+  if (!apiKey) {
     res.status(503).json({
       error: 'not_configured',
-      message: '赞赏尚未配置。运行：BAGELPAY_API_KEY=xxx node scripts/setup-bagelpay-tip.mjs',
+      message: '赞赏尚未配置。运行：BAGELPAY_API_KEY=xxx npm run setup:tip -- --vercel',
     });
     return;
   }
@@ -38,27 +31,34 @@ export default async function handler(req, res) {
     }
   }
 
+  const tierId = typeof body?.tierId === 'string' ? body.tierId.trim() : '';
   const amountCny = Number(body?.amountCny);
-  if (!Number.isFinite(amountCny) || amountCny < 0.01 || amountCny > 9999) {
+  if (!tierId && (!Number.isFinite(amountCny) || amountCny < 0.01 || amountCny > 9999)) {
     res.status(400).json({ error: 'invalid_amount', message: '金额需在 ¥0.01 – ¥9999 之间' });
     return;
   }
 
-  const rounded = Math.round(amountCny * 100) / 100;
-  const units = resolveUnits(rounded);
-  if (!units) {
-    res.status(400).json({ error: 'invalid_amount', message: '金额无效' });
+  const resolved = resolveTipProduct({
+    tierId,
+    amountCny: tierId ? undefined : Math.round(amountCny * 100) / 100,
+  });
+
+  if (!resolved) {
+    res.status(503).json({
+      error: 'not_configured',
+      message: '未配置档位产品。运行 npm run setup:tip 或设置 BAGELPAY_TIP_PRODUCT_*',
+    });
     return;
   }
 
   const email = typeof body?.email === 'string' ? body.email.trim().slice(0, 200) : '';
   const payload = {
-    product_id: productId,
-    units,
+    product_id: resolved.productId,
+    units: resolved.units,
     metadata: {
       source: 'memorial-map',
-      amount_cny: String(rounded),
-      product_ref: UNIT_PRODUCT_NAME,
+      tier_id: resolved.tier?.id || 'custom',
+      amount_cny: String(resolved.tier?.amountCny ?? amountCny),
     },
   };
   if (email) payload.customer = { email };

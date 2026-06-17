@@ -5,11 +5,11 @@ import {
   formatTipCny,
 } from '../lib/tipConfig';
 
-async function createCheckoutSession(amountCny) {
+async function createCheckoutSession({ tierId, amountCny }) {
   const res = await fetch('/api/tip/checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amountCny }),
+    body: JSON.stringify(tierId ? { tierId } : { amountCny }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -51,12 +51,12 @@ export default function TipModal({ open, testMode = false, onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, loading, checkoutUrl, onClose, resetCheckout]);
 
-  const startCheckout = async (amountCny) => {
+  const startCheckout = async ({ tierId, amountCny }) => {
     setLoading(true);
     setError('');
     setIframeBlocked(false);
     try {
-      const url = await createCheckoutSession(amountCny);
+      const url = await createCheckoutSession({ tierId, amountCny });
       setCheckoutUrl(url);
     } catch (err) {
       setError(err.message || t('tip.checkoutError'));
@@ -65,21 +65,21 @@ export default function TipModal({ open, testMode = false, onClose }) {
     }
   };
 
-  const handleTier = (amountCny) => {
-    startCheckout(amountCny);
+  const handleTier = (tier) => {
+    startCheckout({ tierId: tier.id, amountCny: tier.amountCny });
   };
 
   const handleCustom = () => {
     const amount = Number.parseFloat(customAmount);
-    if (!Number.isFinite(amount) || amount < 0.01) {
-      setError(t('tip.invalidAmount'));
+    if (!Number.isFinite(amount) || amount < 1) {
+      setError(t('tip.invalidAmountCustom'));
       return;
     }
     if (amount > 9999) {
       setError(t('tip.amountTooLarge'));
       return;
     }
-    startCheckout(Math.round(amount * 100) / 100);
+    startCheckout({ amountCny: Math.round(amount * 100) / 100 });
   };
 
   if (!open) return null;
@@ -167,7 +167,7 @@ export default function TipModal({ open, testMode = false, onClose }) {
                   key={tier.id}
                   type="button"
                   disabled={loading}
-                  onClick={() => handleTier(tier.amountCny)}
+                  onClick={() => handleTier(tier)}
                   className="w-full flex items-center gap-3 rounded-xl border border-[#d4bc8a] bg-white/80 hover:bg-white hover:border-[#c9a86c] px-3 py-3 text-left transition-colors disabled:opacity-60"
                 >
                   <span className="text-2xl leading-none" aria-hidden>
@@ -222,6 +222,8 @@ export default function TipModal({ open, testMode = false, onClose }) {
             {loading && (
               <p className="text-xs text-center text-[#6b5b45] animate-pulse">{t('tip.loading')}</p>
             )}
+
+            <p className="text-[10px] text-center text-[#6b5b45]/80">{t('tip.usdNote')}</p>
           </div>
         )}
       </div>
