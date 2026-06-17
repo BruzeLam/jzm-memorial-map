@@ -22,6 +22,27 @@ import { flyToLatLng, normalizeLng } from './utils/mapWrap';
 
 const MARKER_FLY_OPTIONS = { duration: 1.05, easeLinearity: 0.18 };
 
+function SidebarToggleIcon({ open }) {
+  return (
+    <svg
+      className="sidebar-toggle-icon"
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d={open ? 'M4 2.5 7.5 6 4 9.5' : 'M8 2.5 4.5 6 8 9.5'}
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 const QuotesPanel = lazy(() => import('./components/QuotesPanel'));
 const ArchivePanel = lazy(() => import('./components/ArchivePanel'));
 const DetailPanel = lazy(() => import('./components/DetailPanel'));
@@ -579,7 +600,7 @@ export default function App() {
                 aria-label="展开侧边栏"
                 title="展开侧边栏"
               >
-                <span aria-hidden>›</span>
+                <SidebarToggleIcon open={false} />
               </button>
             )}
 
@@ -596,7 +617,7 @@ export default function App() {
                   aria-label="收起侧边栏"
                   title="收起侧边栏"
                 >
-                  ‹
+                  <SidebarToggleIcon open />
                 </button>
               )}
             </aside>
