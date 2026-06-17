@@ -67,8 +67,8 @@ const zh = {
       pendingReview: '待审核',
       myComments: '我评论过的',
       supportTip: '赞赏 · 支持维护',
-      supportTipHint: '自愿支持服务器与地图维护，将跳转 Stripe 安全支付页',
-      supportTipTest: '当前为 Stripe 测试模式，不会真实扣款',
+      supportTipHint: '自愿支持服务器与地图维护，将跳转安全支付页',
+      supportTipTest: '当前为支付测试模式，不会真实扣款',
     },
     editorLogin: {
       title: '登录以贡献内容',
@@ -306,8 +306,8 @@ const en = {
       pendingReview: 'Pending',
       myComments: 'My comments',
       supportTip: 'Tip · Support the project',
-      supportTipHint: 'Optional support for hosting and maintenance — opens Stripe Checkout',
-      supportTipTest: 'Stripe test mode — no real charges',
+      supportTipHint: 'Optional support for hosting and maintenance — opens secure checkout',
+      supportTipTest: 'Payment test mode — no real charges',
     },
     editorLogin: {
       title: 'Sign in to contribute',

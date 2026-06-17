@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
-import { getStripeTipUrl, isStripeTipEnabled, isStripeTipTestMode } from '../lib/tipConfig';
+import { getTipUrl, isTipEnabled, isTipTestMode } from '../lib/tipConfig';
 import { fetchMySubmissionStats } from '../services/submissions';
 
 function getDisplayName(email) {
@@ -315,18 +315,18 @@ export default function AccountMenu({
             </div>
           )}
 
-          {isStripeTipEnabled() && (
+          {isTipEnabled() && (
             <div className="px-1.5 py-1.5 border-b border-gray-100">
               <MenuRow
                 icon="☕"
-                href={getStripeTipUrl()}
+                href={getTipUrl()}
                 label={t('account.supportTip')}
                 onClick={close}
               />
               <p className="px-3 pt-0.5 pb-1 text-[10px] text-gray-500 leading-snug">
                 {t('account.supportTipHint')}
               </p>
-              {isStripeTipTestMode() && (
+              {isTipTestMode() && (
                 <p className="px-3 pb-1 text-[10px] text-amber-700 font-medium">
                   {t('account.supportTipTest')}
                 </p>
