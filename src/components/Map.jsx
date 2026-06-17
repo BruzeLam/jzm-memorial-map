@@ -134,7 +134,6 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
   const { location } = useUserLocation();
   const [zoom, setZoom] = useState(() => map.getZoom());
   const prevMarkerIdsKeyRef = useRef('');
-  const markerInstancesRef = useRef(new Map());
   const markerIdsKey = useMemo(() => markers.map((m) => m.id).join(','), [markers]);
   const tripMateIds = useMemo(
     () => getTripMateIds(allMarkers || markers, selectedMarker),
@@ -146,7 +145,6 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
     prevMarkerIdsKeyRef.current = markerIdsKey;
 
     const markerInstances = [];
-    markerInstancesRef.current.clear();
 
     markers.forEach((m) => {
       const isSelected = m.id === selectedMarkerId;
@@ -173,23 +171,12 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
 
       leafletMarker.addTo(map);
       markerInstances.push(leafletMarker);
-      markerInstancesRef.current.set(m.id, leafletMarker);
     });
 
     return () => {
       markerInstances.forEach((lm) => lm.remove());
     };
   }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds, markerIdsKey]);
-
-  useEffect(() => {
-    markerInstancesRef.current.forEach((leafletMarker, id) => {
-      if (id === selectedMarkerId) {
-        leafletMarker.openPopup();
-      } else {
-        leafletMarker.closePopup();
-      }
-    });
-  }, [selectedMarkerId, markerIdsKey]);
 
   useEffect(() => {
     const updateZoom = () => setZoom(map.getZoom());

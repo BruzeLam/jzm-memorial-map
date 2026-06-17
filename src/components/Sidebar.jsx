@@ -164,7 +164,7 @@ export default function Sidebar({
   };
 
   const showAgentChat =
-    inputMode === 'agent' && !showModePicker && !showAddForm && !selectedMarkerId;
+    inputMode === 'agent' && !showModePicker && !showAddForm && !selectedMarker;
 
   const markerDetailsProps = selectedMarker
     ? {
@@ -206,9 +206,8 @@ export default function Sidebar({
         sortedMarkers.map((m) => {
           const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
           const isActive = m.id === selectedMarkerId;
-          const showInlineDetail = isActive && selectedMarker && !compactMobile;
           return (
-            <li key={m.id} className={isActive ? 'marker-accordion-item marker-accordion-item--open' : 'marker-accordion-item'}>
+            <li key={m.id}>
               <button
                 type="button"
                 data-marker-type={m.type}
@@ -267,20 +266,12 @@ export default function Sidebar({
                   </div>
                 )}
               </button>
-              {showInlineDetail && (
-                <div className="marker-accordion-panel px-2 pb-2">
-                  <MarkerDetails {...markerDetailsProps} />
-                </div>
-              )}
             </li>
           );
         })
       )}
     </ul>
   );
-
-  const showMobileDetailSheet =
-    compactMobile && selectedMarker && !showModePicker && !showAddForm;
 
   const agentChatPanel = (
     <AgentChatInline
@@ -293,7 +284,13 @@ export default function Sidebar({
     />
   );
 
-  const sidebarViewKey = showModePicker ? 'picker' : showAddForm ? 'form' : 'list';
+  const sidebarViewKey = showModePicker
+    ? 'picker'
+    : showAddForm
+      ? 'form'
+      : selectedMarker
+        ? 'detail'
+        : 'list';
 
   const markerListContent = (
     <div key={sidebarViewKey} className="sidebar-panel-view">
@@ -355,6 +352,11 @@ export default function Sidebar({
         mapPickCoords={mapPickCoords}
         onMapPickConsumed={onMapPickConsumed}
       />
+    </div>
+  ) : selectedMarker ? (
+    /* ── Marker Details ──────────────────────────────────── */
+    <div className="p-2">
+      <MarkerDetails {...markerDetailsProps} />
     </div>
   ) : (
     renderMarkerList()
@@ -459,22 +461,6 @@ export default function Sidebar({
           </div>
         </div>
 
-        {showMobileDetailSheet && markerDetailsProps && (
-          <>
-            <button
-              type="button"
-              className="mobile-detail-backdrop"
-              onClick={() => onMarkerSelect(selectedMarkerId)}
-              aria-label={t('sidebar.cancel')}
-            />
-            <div className="mobile-detail-sheet pb-safe">
-              <div className="mobile-detail-sheet-handle" aria-hidden />
-              <div className="px-2 pt-1 pb-2 overflow-y-auto max-h-[inherit]">
-                <MarkerDetails {...markerDetailsProps} />
-              </div>
-            </div>
-          </>
-        )}
       </div>
     );
   }
