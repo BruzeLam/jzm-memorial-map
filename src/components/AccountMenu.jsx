@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
-import { getTipUrl, isTipEnabled, isTipTestMode } from '../lib/tipConfig';
+import { useTipAvailable } from '../hooks/useTipAvailable';
+import TipModal from './TipModal';
 import { fetchMySubmissionStats } from '../services/submissions';
 
 function getDisplayName(email) {
@@ -153,6 +154,8 @@ export default function AccountMenu({
   const cloudOn = isCloudEnabled();
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
+  const { enabled: tipEnabled, testMode: tipTestMode } = useTipAvailable();
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const rootRef = useRef(null);
@@ -315,22 +318,19 @@ export default function AccountMenu({
             </div>
           )}
 
-          {isTipEnabled() && (
+          {tipEnabled && (
             <div className="px-1.5 py-1.5 border-b border-gray-100">
               <MenuRow
                 icon="☕"
-                href={getTipUrl()}
                 label={t('account.supportTip')}
-                onClick={close}
+                onClick={() => {
+                  setTipOpen(true);
+                  close();
+                }}
               />
               <p className="px-3 pt-0.5 pb-1 text-[10px] text-gray-500 leading-snug">
                 {t('account.supportTipHint')}
               </p>
-              {isTipTestMode() && (
-                <p className="px-3 pb-1 text-[10px] text-amber-700 font-medium">
-                  {t('account.supportTipTest')}
-                </p>
-              )}
             </div>
           )}
 
@@ -343,6 +343,7 @@ export default function AccountMenu({
           />
         </div>
       )}
+      <TipModal open={tipOpen} testMode={tipTestMode} onClose={() => setTipOpen(false)} />
     </div>
   );
 }
