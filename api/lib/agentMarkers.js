@@ -6,6 +6,7 @@ import {
   SITE_META_REMOVED_MARKER_IDS_KEY,
   combineRemovedMarkerIds,
 } from '../../src/utils/removedMarkers.js';
+import { mergeMarkerCatalog } from '../../src/utils/markerCatalog.js';
 import {
   buildMarkerIndex,
   buildRetrievalIntent,
@@ -62,9 +63,11 @@ export async function loadMarkersForAgent() {
 
     if (error) throw error;
 
-    return (data || [])
+    const remote = (data || [])
       .map((row) => row.payload)
       .filter((m) => m?.id && !removed.has(m.id));
+    const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
+    return mergeMarkerCatalog(remote, SAMPLE_MARKERS, [...removed]);
   } catch (err) {
     console.warn('[agent/markers] Supabase load failed:', err?.message || err);
     return loadFallbackSampleMarkers();

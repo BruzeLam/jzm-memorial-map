@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS } from '../utils/constants';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
@@ -13,6 +13,7 @@ import {
   addCloudRemovedMarkerId,
 } from '../services/cloudData';
 import { readJsonCache } from '../utils/storageCache';
+import { mergeMarkerCatalog } from '../utils/markerCatalog';
 
 const { markersCache: CACHE_KEY, removedMarkerIdsCache: REMOVED_CACHE_KEY } = getStorageKeys();
 
@@ -26,8 +27,8 @@ function normalizeMarkerFields(marker) {
   };
 }
 
-/** 云端为准：仅做迁移与已删过滤，不再合并 Git 内置样本 */
-function applyCloudMarkers(markers, removedIds) {
+/** 云端记录优先，内置样本补全缺口；已删 ID 永不复活 */
+function finalizeMarkers(markers, removedIds) {
   const removed = new Set(removedIds);
   const withoutRemoved = (markers || []).filter((m) => m?.id && !removed.has(m.id));
   const migrated = migrateAllMarkerRegions(withoutRemoved).map(normalizeMarkerFields);
@@ -35,10 +36,17 @@ function applyCloudMarkers(markers, removedIds) {
   return migrated;
 }
 
+function mergeCatalogMarkers(remoteMarkers, removedIds) {
+  return finalizeMarkers(
+    mergeMarkerCatalog(remoteMarkers, SAMPLE_MARKERS, removedIds),
+    removedIds
+  );
+}
+
 function loadCloudCacheMarkers(removedIds) {
   const cached = readJsonCache(CACHE_KEY);
-  if (Array.isArray(cached)) {
-    return applyCloudMarkers(cached, removedIds);
+  if (Array.isArray(cached) && cached.length > 0) {
+    return mergeCatalogMarkers(cached, removedIds);
   }
   return null;
 }
@@ -55,22 +63,19 @@ function loadFromStorage() {
       if (storedVersion < DATA_VERSION) {
         const storedIds = new Set(stored.map((m) => m.id));
         const newItems = SAMPLE_MARKERS.filter((m) => !storedIds.has(m.id) && !removedIds.includes(m.id));
-        const merged = applyCloudMarkers([...stored, ...newItems], removedIds);
+        const merged = mergeCatalogMarkers([...stored, ...newItems], removedIds);
         localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
         return merged;
       }
-      return applyCloudMarkers(stored, removedIds);
+      return finalizeMarkers(stored, removedIds);
     }
   } catch (e) {
     console.error('Failed to load markers from localStorage:', e);
   }
 
   localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
-  return applyCloudMarkers(
-    SAMPLE_MARKERS,
-    combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY))
-  );
+  return mergeCatalogMarkers([], combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY)));
 }
 
 function saveToStorage(markers) {
@@ -95,18 +100,14 @@ function persistMarkersCache(markers) {
 
 export function useMarkers({ isEditor = false } = {}) {
   const cloudMode = isCloudEnabled();
-  const [removedMarkerIds, setRemovedMarkerIds] = useState(
+  const [, setRemovedMarkerIds] = useState(
     () => readJsonCache(REMOVED_CACHE_KEY) || []
-  );
-
-  const effectiveRemovedIds = useMemo(
-    () => combineRemovedMarkerIds(removedMarkerIds),
-    [removedMarkerIds]
   );
 
   const [markers, setMarkers] = useState(() => {
     if (!cloudMode) return loadFromStorage();
-    return loadCloudCacheMarkers(effectiveRemovedIds) ?? [];
+    const removed = combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY) || []);
+    return loadCloudCacheMarkers(removed) ?? mergeCatalogMarkers([], removed);
   });
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
   const [cloudLoading, setCloudLoading] = useState(cloudMode);
@@ -130,7 +131,7 @@ export function useMarkers({ isEditor = false } = {}) {
         const combinedRemoved = combineRemovedMarkerIds(removed);
         setRemovedMarkerIds(removed);
         persistRemovedCache(removed);
-        const next = applyCloudMarkers(rows || [], combinedRemoved);
+        const next = mergeCatalogMarkers(rows || [], combinedRemoved);
         setMarkers(next);
         persistMarkersCache(next);
         setCloudError(null);
@@ -142,9 +143,7 @@ export function useMarkers({ isEditor = false } = {}) {
         const cachedRemoved = readJsonCache(REMOVED_CACHE_KEY) || [];
         const combinedRemoved = combineRemovedMarkerIds(cachedRemoved);
         const cached = readJsonCache(CACHE_KEY);
-        if (Array.isArray(cached)) {
-          setMarkers(applyCloudMarkers(cached, combinedRemoved));
-        }
+        setMarkers(mergeCatalogMarkers(Array.isArray(cached) ? cached : [], combinedRemoved));
       })
       .finally(() => {
         if (!cancelled) setCloudLoading(false);

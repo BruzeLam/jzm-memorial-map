@@ -37,8 +37,8 @@
     {
       "type": "fix",
       "emoji": "☁️",
-      "title": "云端为唯一数据源",
-      "description": "启用 Supabase 后地点/语录/档案/影像馆均以云端为准，不再与 Git 内置或 localStorage 合并；超管删改即时写云。"
+      "title": "恢复地点全量合并策略",
+      "description": "云端记录 + 内置样本补全（同 id 以云为准）；已删 ID 仍写入 removed_marker_ids，删除不再复活。"
     },
     {
       "type": "feature",
