@@ -155,7 +155,7 @@ export default function AccountMenu({
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
-  const { enabled: tipEnabled, testMode: tipTestMode } = useTipAvailable();
+  const { enabled: tipEnabled, testMode: tipTestMode, customUnitUsd } = useTipAvailable();
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const rootRef = useRef(null);
@@ -343,7 +343,12 @@ export default function AccountMenu({
           />
         </div>
       )}
-      <TipModal open={tipOpen} testMode={tipTestMode} onClose={() => setTipOpen(false)} />
+      <TipModal
+        open={tipOpen}
+        testMode={tipTestMode}
+        customUnitUsd={customUnitUsd}
+        onClose={() => setTipOpen(false)}
+      />
     </div>
   );
 }

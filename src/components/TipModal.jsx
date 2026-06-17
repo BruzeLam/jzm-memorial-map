@@ -1,15 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../i18n/LanguageContext';
-import {
-  TIP_TIERS,
-  formatTipCny,
-} from '../lib/tipConfig';
+import { TIP_TIERS, TIP_CUSTOM_UNIT_USD, formatTipUsd } from '../lib/tipConfig';
 
-async function createCheckoutSession({ tierId, amountCny }) {
+async function createCheckoutSession({ tierId, amountUsd }) {
   const res = await fetch('/api/tip/checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(tierId ? { tierId } : { amountCny }),
+    body: JSON.stringify(tierId ? { tierId } : { amountUsd }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -18,7 +15,7 @@ async function createCheckoutSession({ tierId, amountCny }) {
   return data.checkoutUrl;
 }
 
-export default function TipModal({ open, testMode = false, onClose }) {
+export default function TipModal({ open, testMode = false, customUnitUsd = TIP_CUSTOM_UNIT_USD, onClose }) {
   const { t } = useI18n();
   const [customAmount, setCustomAmount] = useState('');
   const [checkoutUrl, setCheckoutUrl] = useState('');
@@ -51,12 +48,12 @@ export default function TipModal({ open, testMode = false, onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, loading, checkoutUrl, onClose, resetCheckout]);
 
-  const startCheckout = async ({ tierId, amountCny }) => {
+  const startCheckout = async ({ tierId, amountUsd }) => {
     setLoading(true);
     setError('');
     setIframeBlocked(false);
     try {
-      const url = await createCheckoutSession({ tierId, amountCny });
+      const url = await createCheckoutSession({ tierId, amountUsd });
       setCheckoutUrl(url);
     } catch (err) {
       setError(err.message || t('tip.checkoutError'));
@@ -66,20 +63,20 @@ export default function TipModal({ open, testMode = false, onClose }) {
   };
 
   const handleTier = (tier) => {
-    startCheckout({ tierId: tier.id, amountCny: tier.amountCny });
+    startCheckout({ tierId: tier.id });
   };
 
   const handleCustom = () => {
     const amount = Number.parseFloat(customAmount);
-    if (!Number.isFinite(amount) || amount < 1) {
-      setError(t('tip.invalidAmountCustom'));
+    if (!Number.isFinite(amount) || amount < customUnitUsd) {
+      setError(t('tip.invalidAmountCustom', { min: formatTipUsd(customUnitUsd) }));
       return;
     }
     if (amount > 9999) {
       setError(t('tip.amountTooLarge'));
       return;
     }
-    startCheckout({ amountCny: Math.round(amount * 100) / 100 });
+    startCheckout({ amountUsd: Math.round(amount * 100) / 100 });
   };
 
   if (!open) return null;
@@ -178,7 +175,7 @@ export default function TipModal({ open, testMode = false, onClose }) {
                     <span className="block text-[11px] text-[#6b5b45] mt-0.5 truncate">{tier.subtitle}</span>
                   </span>
                   <span className="shrink-0 text-sm font-bold text-[#8b6914] tabular-nums">
-                    {formatTipCny(tier.amountCny)}
+                    {formatTipUsd(tier.priceUsd)}
                   </span>
                 </button>
               ))}
@@ -188,14 +185,14 @@ export default function TipModal({ open, testMode = false, onClose }) {
               <p className="text-xs font-medium text-[#1e3a5f] mb-2">{t('tip.customLabel')}</p>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#6b5b45]">¥</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#6b5b45]">$</span>
                   <input
                     type="number"
-                    min="0.01"
+                    min={customUnitUsd}
                     max="9999"
                     step="0.01"
                     inputMode="decimal"
-                    placeholder="0.00"
+                    placeholder={String(customUnitUsd)}
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
                     className="w-full pl-7 pr-3 py-2.5 rounded-lg border border-[#d4bc8a] bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
@@ -210,7 +207,7 @@ export default function TipModal({ open, testMode = false, onClose }) {
                   {loading ? '…' : t('tip.pay')}
                 </button>
               </div>
-              <p className="text-[10px] text-[#6b5b45] mt-2">{t('tip.customHint')}</p>
+              <p className="text-[10px] text-[#6b5b45] mt-2">{t('tip.customHint', { min: formatTipUsd(customUnitUsd) })}</p>
             </div>
 
             {error && (
@@ -223,7 +220,7 @@ export default function TipModal({ open, testMode = false, onClose }) {
               <p className="text-xs text-center text-[#6b5b45] animate-pulse">{t('tip.loading')}</p>
             )}
 
-            <p className="text-[10px] text-center text-[#6b5b45]/80">{t('tip.usdNote')}</p>
+            <p className="text-[10px] text-center text-[#6b5b45]/80 leading-relaxed">{t('tip.walletNote')}</p>
           </div>
         )}
       </div>

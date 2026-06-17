@@ -1,6 +1,7 @@
-/** POST · BagelPay Checkout Session（弹窗 iframe） */
+/** POST · BagelPay Checkout Session */
 
 import { resolveTipProduct } from '../lib/tipProducts.js';
+import { TIP_CUSTOM_UNIT_USD } from '../../src/lib/tipTiers.js';
 
 function getApiBase() {
   return (process.env.BAGELPAY_API_BASE || 'https://test.bagelpay.io').replace(/\/$/, '');
@@ -32,21 +33,26 @@ export default async function handler(req, res) {
   }
 
   const tierId = typeof body?.tierId === 'string' ? body.tierId.trim() : '';
-  const amountCny = Number(body?.amountCny);
-  if (!tierId && (!Number.isFinite(amountCny) || amountCny < 0.01 || amountCny > 9999)) {
-    res.status(400).json({ error: 'invalid_amount', message: '金额需在 ¥0.01 – ¥9999 之间' });
+  const amountUsd = tierId ? undefined : Number(body?.amountUsd);
+  const minCustom = Number(process.env.BAGELPAY_TIP_UNIT_USD || TIP_CUSTOM_UNIT_USD);
+
+  if (!tierId && (!Number.isFinite(amountUsd) || amountUsd < minCustom || amountUsd > 9999)) {
+    res.status(400).json({
+      error: 'invalid_amount',
+      message: `自定义金额需在 $${minCustom} – $9999 之间`,
+    });
     return;
   }
 
   const resolved = resolveTipProduct({
     tierId,
-    amountCny: tierId ? undefined : Math.round(amountCny * 100) / 100,
+    amountUsd: tierId ? undefined : Math.round(amountUsd * 100) / 100,
   });
 
   if (!resolved) {
     res.status(503).json({
       error: 'not_configured',
-      message: '未配置档位产品。运行 npm run setup:tip 或设置 BAGELPAY_TIP_PRODUCT_*',
+      message: '未配置档位产品。运行 npm run setup:tip',
     });
     return;
   }
@@ -58,7 +64,7 @@ export default async function handler(req, res) {
     metadata: {
       source: 'memorial-map',
       tier_id: resolved.tier?.id || 'custom',
-      amount_cny: String(resolved.tier?.amountCny ?? amountCny),
+      charge_usd: String(resolved.chargeUsd),
     },
   };
   if (email) payload.customer = { email };
@@ -84,6 +90,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       checkoutUrl: data.data.checkout_url,
+      chargeUsd: resolved.chargeUsd,
       testMode: getApiBase().includes('test.'),
     });
   } catch (err) {
