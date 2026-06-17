@@ -9,10 +9,11 @@ function readEnv(key) {
 }
 
 export function getStripeTierUrls() {
-  return TIP_TIERS.map((tier) => ({
-    ...tier,
-    paymentUrl: readEnv(tier.stripeEnv),
-  })).filter((t) => t.paymentUrl);
+  const defaultUrl = readEnv('REACT_APP_STRIPE_TIP_URL');
+  return TIP_TIERS.map((tier) => {
+    const url = readEnv(tier.stripeEnv) || defaultUrl;
+    return { ...tier, paymentUrl: url };
+  }).filter((t) => t.paymentUrl);
 }
 
 export function getTipConfig() {

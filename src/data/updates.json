@@ -41,10 +41,10 @@
       "description": "启用 Supabase 后地点/语录/档案/影像馆均以云端为准，不再与 Git 内置或 localStorage 合并；超管删改即时写云。"
     },
     {
-      "type": "refactor",
+      "type": "feature",
       "emoji": "☕",
-      "title": "赞赏仅 Stripe USD 三档",
-      "description": "移除 BagelPay 与国内收款码；三档 $1 / $8.17 / $19.26 对应 REACT_APP_STRIPE_TIP_URL_001 / _817 / _1926。"
+      "title": "Stripe 赞赏三档上线",
+      "description": "图样图森破 $1、续一秒 $8.17、谈笑风生 $19.26；配置 REACT_APP_STRIPE_TIP_URL 或分档链接后可用。"
     }
   ],
   "2026-5-25": [
