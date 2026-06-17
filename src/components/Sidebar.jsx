@@ -177,7 +177,17 @@ export default function Sidebar({
     />
   );
 
-  const markerListContent = showModePicker ? (
+  const sidebarViewKey = showModePicker
+    ? 'picker'
+    : showAddForm
+      ? 'form'
+      : selectedMarker
+        ? `detail-${selectedMarkerId}`
+        : 'list';
+
+  const markerListContent = (
+    <div key={sidebarViewKey} className="sidebar-panel-view">
+      {showModePicker ? (
     /* ── Mode Picker ─────────────────────────────────────── */
     <div className={compactMobile ? 'p-2' : 'p-4'}>
       <div className="memorial-card">
@@ -341,6 +351,8 @@ export default function Sidebar({
         })
       )}
     </ul>
+      )}
+    </div>
   );
 
   if (compactMobile) {

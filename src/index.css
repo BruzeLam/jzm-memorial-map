@@ -141,7 +141,7 @@ body {
 }
 
 .marker-list-item {
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .marker-list-item:hover {
@@ -151,6 +151,97 @@ body {
 .marker-list-item.active {
   background-color: rgba(212, 188, 138, 0.28);
   border-left: 3px solid var(--memorial-gold-dark);
+  transform: translateX(2px);
+}
+
+/* 地图标点 */
+.marker-pin-inner {
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.marker-pin-inner--trip-mate {
+  box-shadow:
+    0 0 0 2px rgba(30, 136, 229, 0.55),
+    0 2px 8px rgba(30, 58, 95, 0.28);
+}
+
+.marker-pin-inner--selected {
+  animation: markerSelectedPulse 2.2s ease-in-out infinite;
+}
+
+.marker-pin-inner--fade-in {
+  animation: markerFadeIn 0.28s ease-out both;
+}
+
+.marker-pin-icon {
+  transform: rotate(45deg);
+  line-height: 1;
+}
+
+@keyframes markerSelectedPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(201, 168, 108, 0.45),
+      0 0 0 4px rgba(212, 188, 138, 0.9),
+      0 4px 14px rgba(30, 58, 95, 0.35);
+    transform: rotate(-45deg) scale(1.06);
+  }
+  50% {
+    box-shadow:
+      0 0 0 10px rgba(201, 168, 108, 0),
+      0 0 0 5px rgba(212, 188, 138, 1),
+      0 6px 18px rgba(30, 58, 95, 0.42);
+    transform: rotate(-45deg) scale(1.1);
+  }
+}
+
+@keyframes markerFadeIn {
+  from {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-45deg) scale(1);
+  }
+}
+
+/* 侧栏视图切换 */
+@keyframes sidebarPanelViewIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sidebar-panel-view {
+  animation: sidebarPanelViewIn 0.22s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker-pin-inner--selected,
+  .marker-pin-inner--fade-in,
+  .sidebar-panel-view {
+    animation: none;
+  }
+
+  .marker-list-item.active {
+    transform: none;
+  }
 }
 
 /* 地图全屏铺底，侧边栏独立浮层（收起不改变地图尺寸） */

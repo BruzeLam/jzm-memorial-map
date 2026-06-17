@@ -20,6 +20,8 @@ import { isCloudEnabled } from './lib/cloudConfig';
 import { submitMarkerForReview } from './services/submissions';
 import { flyToLatLng, normalizeLng } from './utils/mapWrap';
 
+const MARKER_FLY_OPTIONS = { duration: 1.05, easeLinearity: 0.18 };
+
 const QuotesPanel = lazy(() => import('./components/QuotesPanel'));
 const ArchivePanel = lazy(() => import('./components/ArchivePanel'));
 const DetailPanel = lazy(() => import('./components/DetailPanel'));
@@ -174,7 +176,7 @@ export default function App() {
           firstResult.latitude,
           firstResult.longitude,
           8,
-          { duration: 1 }
+          MARKER_FLY_OPTIONS
         );
       }
     }
@@ -197,10 +199,7 @@ export default function App() {
       // 计算目标缩放级别：如果已经足够近，保持不变；否则缩放到 10-12 范围
       const targetZoom = Math.max(currentZoom, 10);
       const constrainedZoom = Math.min(targetZoom, 12);
-      flyToLatLng(map, marker.latitude, marker.longitude, constrainedZoom, {
-        duration: 0.8,
-        easeLinearity: 0.5, // 使动画更流畅
-      });
+      flyToLatLng(map, marker.latitude, marker.longitude, constrainedZoom, MARKER_FLY_OPTIONS);
     }
   };
 

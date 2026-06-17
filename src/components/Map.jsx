@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { DEFAULT_CENTER, DEFAULT_ZOOM, MARKER_TYPES } from '../utils/constants';
@@ -33,36 +33,27 @@ function getMarkerDimensions(zoom, isSelected) {
   };
 }
 
-function createDivIcon(marker, isSelected, isTripMate, zoom) {
+function createDivIcon(marker, isSelected, isTripMate, zoom, animateIn) {
   const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
   const color = marker.color || typeInfo.color;
   const icon = marker.icon || typeInfo.icon;
-  const { size, fontSize, borderWidth, ringWidth } = getMarkerDimensions(zoom, isSelected || isTripMate);
+  const { size, fontSize, borderWidth } = getMarkerDimensions(zoom, isSelected || isTripMate);
 
-  const tripRing = isTripMate && !isSelected
-    ? `0 0 0 ${ringWidth}px rgba(30,136,229,0.65)`
-    : null;
-  const shadow = isSelected
-    ? `0 0 0 ${ringWidth}px ${color}, 0 4px 12px rgba(0,0,0,0.5)`
-    : tripRing
-      ? `${tripRing}, 0 2px 8px rgba(0,0,0,0.4)`
-      : '0 2px 8px rgba(0,0,0,0.4)';
+  const classes = [
+    'marker-pin-inner',
+    isSelected ? 'marker-pin-inner--selected' : '',
+    isTripMate && !isSelected ? 'marker-pin-inner--trip-mate' : '',
+    animateIn && !isSelected ? 'marker-pin-inner--fade-in' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const html = `
-    <div style="
-      width:${size}px;
-      height:${size}px;
-      background:${color};
-      border-radius:50% 50% 50% 0;
-      transform:rotate(-45deg);
-      border:${borderWidth}px solid rgba(255,255,255,0.9);
-      box-shadow:${shadow};
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    ">
-      <span style="transform:rotate(45deg);font-size:${fontSize}px;line-height:1;">${icon}</span>
+    <div
+      class="${classes}"
+      style="width:${size}px;height:${size}px;background:${color};border-width:${borderWidth}px"
+    >
+      <span class="marker-pin-icon" style="font-size:${fontSize}px">${icon}</span>
     </div>
   `;
   return L.divIcon({
@@ -106,29 +97,27 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
   const map = useMap();
   const { location } = useUserLocation();
   const [zoom, setZoom] = useState(() => map.getZoom());
+  const prevMarkerIdsKeyRef = useRef('');
+  const markerIdsKey = useMemo(() => markers.map((m) => m.id).join(','), [markers]);
   const tripMateIds = useMemo(
     () => getTripMateIds(allMarkers || markers, selectedMarker),
     [allMarkers, markers, selectedMarker]
   );
 
   useEffect(() => {
-    const updateZoom = () => setZoom(map.getZoom());
-    map.on('zoom', updateZoom);
-    map.on('zoomend', updateZoom);
-    return () => {
-      map.off('zoom', updateZoom);
-      map.off('zoomend', updateZoom);
-    };
-  }, [map]);
+    const animateFilterChange = prevMarkerIdsKeyRef.current !== markerIdsKey;
+    prevMarkerIdsKeyRef.current = markerIdsKey;
 
-  useEffect(() => {
     const markerInstances = [];
 
     markers.forEach((m) => {
       const isSelected = m.id === selectedMarkerId;
       const isTripMate = tripMateIds.has(m.id);
-      const icon = createDivIcon(m, isSelected, isTripMate, zoom);
-      const leafletMarker = L.marker([m.latitude, m.longitude], { icon });
+      const icon = createDivIcon(m, isSelected, isTripMate, zoom, animateFilterChange);
+      const leafletMarker = L.marker([m.latitude, m.longitude], {
+        icon,
+        zIndexOffset: isSelected ? 1000 : isTripMate ? 200 : 0,
+      });
 
       const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
       const distance = location
@@ -160,7 +149,17 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
     return () => {
       markerInstances.forEach((lm) => lm.remove());
     };
-  }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds]);
+  }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds, markerIdsKey]);
+
+  useEffect(() => {
+    const updateZoom = () => setZoom(map.getZoom());
+    map.on('zoom', updateZoom);
+    map.on('zoomend', updateZoom);
+    return () => {
+      map.off('zoom', updateZoom);
+      map.off('zoomend', updateZoom);
+    };
+  }, [map]);
 
   return null;
 }
@@ -181,19 +180,19 @@ function ZoomControl({ mapRef }) {
   };
 
   return (
-    <div className="map-zoom-control absolute z-[400] flex flex-col gap-1 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div className="map-zoom-control absolute z-[400] flex flex-col gap-1 bg-memorial-surface rounded-lg shadow-memorial border border-memorial-border overflow-hidden">
       <button
         onClick={() => handleZoom('in')}
-        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors text-lg font-bold text-gray-600"
+        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-memorial-cream active:bg-memorial-cream-dark transition-colors text-lg font-bold text-memorial-muted"
         title="放大"
         aria-label="放大"
       >
         +
       </button>
-      <div className="w-full h-px bg-gray-200" />
+      <div className="w-full h-px bg-memorial-border" />
       <button
         onClick={() => handleZoom('out')}
-        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-gray-100 active:bg-gray-200 transition-colors text-lg font-bold text-gray-600"
+        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-memorial-cream active:bg-memorial-cream-dark transition-colors text-lg font-bold text-memorial-muted"
         title="缩小"
         aria-label="缩小"
       >
