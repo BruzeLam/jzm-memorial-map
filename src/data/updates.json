@@ -43,8 +43,8 @@
     {
       "type": "feature",
       "emoji": "☕",
-      "title": "Stripe 赞赏三档上线",
-      "description": "图样图森破 $1、续一秒 $8.17、谈笑风生 $19.26；配置 REACT_APP_STRIPE_TIP_URL 或分档链接后可用。"
+      "title": "Stripe 赞赏三档（HKD）",
+      "description": "续一秒 HK$4、微小的贡献 HK$8.17、谈笑风生 HK$19.26；金额与 Stripe 收银台一致。"
     }
   ],
   "2026-5-25": [

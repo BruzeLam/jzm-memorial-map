@@ -1,33 +1,34 @@
-/** 赞赏档位 · Stripe USD */
+/** 赞赏档位 · Stripe HKD */
 
 export const TIP_TIERS = [
   {
-    id: 'toosimple',
-    priceUsd: 1,
-    label: '图样图森破',
-    subtitle: 'Too young, too simple · 略表心意',
-    stripeEnv: 'REACT_APP_STRIPE_TIP_URL_001',
+    id: 'plus1s',
+    priceHkd: 4,
+    label: '续一秒',
+    subtitle: '为地图续一秒',
+    stripeEnv: 'REACT_APP_STRIPE_TIP_URL_4',
   },
   {
-    id: 'plus1s',
-    priceUsd: 8.17,
-    label: '续一秒 (+1s)',
-    subtitle: '8·17 · 为服务器续命',
+    id: 'small',
+    priceHkd: 8.17,
+    label: '微小的贡献',
+    subtitle: '8·17 · 略表心意',
     stripeEnv: 'REACT_APP_STRIPE_TIP_URL_817',
   },
   {
     id: 'talk',
-    priceUsd: 19.26,
+    priceHkd: 19.26,
     label: '谈笑风生',
     subtitle: '1926 · 经验丰富的一杯茶',
     stripeEnv: 'REACT_APP_STRIPE_TIP_URL_1926',
   },
 ];
 
-export function formatTipUsd(amount) {
+export function formatTipHkd(amount) {
   const n = Number(amount);
-  if (!Number.isFinite(n)) return '$—';
-  return `$${n.toFixed(2).replace(/\.?0+$/, '')}`;
+  if (!Number.isFinite(n)) return 'HK$—';
+  const fixed = n.toFixed(2).replace(/\.?0+$/, '');
+  return `HK$${fixed}`;
 }
 
 export function getTierById(tierId) {

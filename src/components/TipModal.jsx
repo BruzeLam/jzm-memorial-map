@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../i18n/LanguageContext';
-import { formatTipUsd } from '../lib/tipConfig';
+import { formatTipHkd } from '../lib/tipConfig';
 
 function TierIcon({ tierId }) {
-  if (tierId === 'toosimple') return '🍵';
   if (tierId === 'plus1s') return '⏱️';
+  if (tierId === 'small') return '🍵';
   return '🎙️';
 }
 
@@ -111,7 +111,7 @@ export default function TipModal({ open, tiers = [], stripeTestMode = false, onC
                   <span className="block text-[11px] text-[#6b5b45] mt-0.5 truncate">{tier.subtitle}</span>
                 </span>
                 <span className="shrink-0 text-sm font-bold text-[#8b6914] tabular-nums">
-                  {formatTipUsd(tier.priceUsd)}
+                  {formatTipHkd(tier.priceHkd)}
                 </span>
               </button>
             ))}
