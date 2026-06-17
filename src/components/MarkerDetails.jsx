@@ -30,8 +30,8 @@ export default function MarkerDetails({
 
   return (
     <div className="space-y-2">
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="px-3 py-2 flex items-center justify-between" style={{ backgroundColor: marker.color + '18' }}>
+      <div className="memorial-card">
+      <div className="px-3 py-2 flex items-center justify-between border-b border-memorial-border" style={{ backgroundColor: marker.color + '18' }}>
         <div className="flex items-center gap-2">
           <span className="text-lg">{marker.icon}</span>
           <span
@@ -41,16 +41,16 @@ export default function MarkerDetails({
             {typeInfo.label}
           </span>
         </div>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-sm">✕</button>
+        <button onClick={onClose} className="text-memorial-muted hover:text-memorial-ink text-sm">✕</button>
       </div>
 
       <div className="px-3 py-3">
-        <h3 className="font-bold text-gray-900 text-base mb-1">{marker.name}</h3>
+        <h3 className="font-bold font-memorial text-memorial-navy text-base mb-1">{marker.name}</h3>
         {marker.title && (
-          <p className="text-sm font-medium text-gray-600 mb-2">{marker.title}</p>
+          <p className="text-sm font-medium text-memorial-muted mb-2">{marker.title}</p>
         )}
         {marker.date && (
-          <p className="text-xs text-gray-400 mb-2">
+          <p className="text-xs text-memorial-muted mb-2">
             📅 {marker.date}{marker.endDate ? ` — ${marker.endDate}` : ''}
           </p>
         )}
@@ -58,15 +58,15 @@ export default function MarkerDetails({
           <MarkerTagPills tags={marker.tags} onTagClick={onTagSearch} className="mb-2" />
         )}
         {tripSummary && (
-          <p className="text-sm text-gray-600 leading-relaxed mb-2 border-l-2 border-blue-200 pl-2">
+          <p className="text-sm text-memorial-muted leading-relaxed mb-2 border-l-2 border-memorial-gold pl-2">
             {tripSummary.length > 120 ? `${tripSummary.slice(0, 120)}…` : tripSummary}
           </p>
         )}
         {localDesc && (
-          <p className="text-sm text-gray-700 leading-relaxed mb-3">{localDesc}</p>
+          <p className="text-sm text-memorial-ink leading-relaxed mb-3">{localDesc}</p>
         )}
         <TripSiblingsSection siblings={siblings} onSelectMarker={onSelectMarker} compact />
-        <div className="flex items-center justify-between gap-2 text-xs text-gray-400 mb-3">
+        <div className="flex items-center justify-between gap-2 text-xs text-memorial-muted mb-3">
           <span className="min-w-0 truncate">
             📍 {marker.latitude.toFixed(4)}, {marker.longitude.toFixed(4)}
           </span>
@@ -75,14 +75,14 @@ export default function MarkerDetails({
 
         {hasImages && (
           <div className="mb-3">
-            <p className="text-xs font-medium text-gray-500 mb-2">📸 图片库 ({marker.images.length})</p>
+            <p className="text-xs font-medium text-memorial-muted mb-2">📸 图片库 ({marker.images.length})</p>
             <div className="grid grid-cols-3 gap-1.5">
               {marker.images.map((img, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => onViewImage?.(i)}
-                  className="aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors bg-gray-100"
+                  className="aspect-square rounded-lg overflow-hidden border border-memorial-border hover:border-memorial-gold transition-colors bg-memorial-cream-dark"
                 >
                   <img
                     src={img.data}
@@ -97,10 +97,10 @@ export default function MarkerDetails({
 
         {marker.sources && marker.sources.length > 0 && (
           <div className="mb-3">
-            <p className="text-xs font-medium text-gray-500 mb-1">资料来源</p>
+            <p className="text-xs font-medium text-memorial-muted mb-1">资料来源</p>
             <ul className="space-y-1">
               {marker.sources.map((s, i) => (
-                <li key={i} className="text-xs text-gray-600">
+                <li key={i} className="text-xs text-memorial-muted">
                   📄 {s.title}{s.note ? ` — ${s.note}` : ''}
                 </li>
               ))}
@@ -108,17 +108,17 @@ export default function MarkerDetails({
           </div>
         )}
 
-        <div className="flex gap-2 pt-2 border-t border-gray-100">
+        <div className="flex gap-2 pt-2 border-t border-memorial-border">
           <button
             onClick={() => onOpenDetail && onOpenDetail(marker)}
-            className="flex-1 text-sm py-1.5 px-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors font-medium"
+            className="flex-1 text-sm py-1.5 px-3 rounded-lg memorial-btn-primary"
           >
             📖 详情
           </button>
           {onEdit && (
           <button
             onClick={() => onEdit(marker)}
-            className="flex-1 text-sm py-1.5 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+            className="flex-1 text-sm py-1.5 px-3 rounded-lg memorial-btn-secondary"
           >
             ✏️ 编辑
           </button>
@@ -136,7 +136,7 @@ export default function MarkerDetails({
       </div>
 
       {isCloudEnabled() && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="memorial-card">
           <PilgrimageSection
             embedded
             marker={marker}

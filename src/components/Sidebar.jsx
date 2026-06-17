@@ -180,13 +180,13 @@ export default function Sidebar({
   const markerListContent = showModePicker ? (
     /* ── Mode Picker ─────────────────────────────────────── */
     <div className={compactMobile ? 'p-2' : 'p-4'}>
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-          <span className="text-sm font-semibold text-gray-700">{t('sidebar.chooseAddMode')}</span>
+      <div className="memorial-card">
+        <div className="px-4 py-3 bg-memorial-cream-dark border-b border-memorial-border flex items-center justify-between">
+          <span className="text-sm font-semibold font-memorial text-memorial-navy">{t('sidebar.chooseAddMode')}</span>
           <button
             type="button"
             onClick={onCancelAdd}
-            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600"
+            className="w-10 h-10 flex items-center justify-center text-memorial-muted hover:text-memorial-ink"
             aria-label={t('sidebar.cancel')}
           >
             ✕
@@ -196,23 +196,23 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onPickMapMode}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition-colors text-left"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-memorial-gold/60 bg-memorial-cream hover:bg-memorial-cream-dark hover:border-memorial-gold transition-colors text-left"
           >
             <span className="text-2xl">🗺️</span>
             <div>
-              <div className="text-sm font-semibold text-blue-700">{t('sidebar.mapPick')}</div>
-              <div className="text-xs text-blue-500 mt-0.5">{t('sidebar.mapPickHint')}</div>
+              <div className="text-sm font-semibold font-memorial text-memorial-navy">{t('sidebar.mapPick')}</div>
+              <div className="text-xs text-memorial-muted mt-0.5">{t('sidebar.mapPickHint')}</div>
             </div>
           </button>
           <button
             type="button"
             onClick={onPickManualMode}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors text-left"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-memorial-border bg-memorial-surface hover:bg-memorial-cream hover:border-memorial-gold/70 transition-colors text-left"
           >
             <span className="text-2xl">✏️</span>
             <div>
-              <div className="text-sm font-semibold text-gray-700">{t('sidebar.manualInput')}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{t('sidebar.manualInputHint')}</div>
+              <div className="text-sm font-semibold text-memorial-ink">{t('sidebar.manualInput')}</div>
+              <div className="text-xs text-memorial-muted mt-0.5">{t('sidebar.manualInputHint')}</div>
             </div>
           </button>
         </div>
@@ -258,7 +258,7 @@ export default function Sidebar({
     <ul className="py-0.5">
       {sortedMarkers.length === 0 ? (
         <li className="px-3 py-4 text-center">
-          <div className="text-sm text-gray-400 mb-2">
+          <div className="text-sm text-memorial-muted mb-2">
             {onThisDayActive
               ? t('sidebar.noMarkersOnThisDay', { date: onThisDayLabel })
               : t('sidebar.noMarkers')}
@@ -266,7 +266,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onStartAddMode}
-            className="text-sm text-blue-500 hover:text-blue-700 underline transition-colors py-2"
+            className="text-sm text-memorial-navy hover:text-memorial-gold-dark underline transition-colors py-2"
           >
             {onThisDayActive
               ? t('sidebar.addMarkerOnThisDay')
@@ -294,9 +294,9 @@ export default function Sidebar({
                     >
                       {typeInfo.icon}
                     </span>
-                    <span className="flex-1 min-w-0 text-sm font-medium text-gray-800 truncate">{m.name}</span>
+                    <span className="flex-1 min-w-0 text-sm font-medium font-memorial text-memorial-ink truncate">{m.name}</span>
                     {m.date && (
-                      <span className="text-[10px] text-gray-400 flex-shrink-0 tabular-nums">
+                      <span className="text-[10px] text-memorial-muted flex-shrink-0 tabular-nums">
                         {m.date}
                       </span>
                     )}
@@ -311,9 +311,9 @@ export default function Sidebar({
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium text-gray-800 truncate">{m.name}</span>
+                        <span className="text-sm font-medium font-memorial text-memorial-ink truncate">{m.name}</span>
                       </div>
-                      <div className="text-xs text-gray-400 mt-0.5 flex items-center gap-2 flex-wrap">
+                      <div className="text-xs text-memorial-muted mt-0.5 flex items-center gap-2 flex-wrap">
                         <span
                           className="px-1.5 py-0.5 rounded-full text-white"
                           style={{ backgroundColor: typeInfo.color, fontSize: 10 }}
@@ -323,7 +323,7 @@ export default function Sidebar({
                         {m.date && <span>{m.date}{m.endDate ? ` — ${m.endDate}` : ''}</span>}
                       </div>
                       {m.title && (
-                        <p className="text-xs text-gray-500 mt-0.5 truncate">{m.title}</p>
+                        <p className="text-xs text-memorial-muted mt-0.5 truncate">{m.title}</p>
                       )}
                       {m.tags?.length > 0 && (
                         <MarkerTagPills
@@ -345,12 +345,12 @@ export default function Sidebar({
 
   if (compactMobile) {
     return (
-      <div className="sidebar-panel flex flex-col bg-white h-full min-h-0">
-        <div className="px-2 pt-2 pb-1.5 border-b border-gray-100 flex-shrink-0">
+      <div className="sidebar-panel flex flex-col bg-memorial-cream h-full min-h-0">
+        <div className="px-2 pt-2 pb-1.5 border-b border-memorial-border flex-shrink-0">
           <SidebarSearch {...searchBlockProps} compact />
         </div>
 
-        <div className="px-2 py-1 border-b border-gray-100 flex-shrink-0">
+        <div className="px-2 py-1 border-b border-memorial-border flex-shrink-0">
           <div className="flex items-center gap-1">
             <div className="flex gap-1 flex-shrink-0">
               {Object.entries(MARKER_TYPES).map(([key, typeInfo]) => {
@@ -367,14 +367,14 @@ export default function Sidebar({
                     className={`relative flex items-center justify-center w-9 h-9 rounded-lg text-sm border transition-colors ${
                       active
                         ? 'text-white border-transparent'
-                        : 'bg-gray-50 border-gray-200 text-gray-700'
+                        : 'bg-memorial-surface border-memorial-border text-memorial-ink'
                     }`}
                     style={active ? { backgroundColor: typeInfo.color, borderColor: typeInfo.color } : {}}
                   >
                     <span>{typeInfo.icon}</span>
                     <span
                       className={`absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 rounded-full text-[9px] font-bold leading-[14px] text-center ${
-                        active ? 'bg-white text-gray-800' : 'bg-gray-600 text-white'
+                        active ? 'bg-memorial-surface text-memorial-ink' : 'bg-memorial-navy text-white'
                       }`}
                     >
                       {count}
@@ -401,7 +401,7 @@ export default function Sidebar({
               className={`flex-shrink-0 w-9 h-9 text-sm rounded-lg border transition-colors flex items-center justify-center ${
                 onThisDayActive
                   ? 'bg-amber-50 border-amber-400 text-amber-900'
-                  : 'bg-gray-50 border-gray-200 text-gray-600'
+                  : 'bg-memorial-surface border-memorial-border text-memorial-muted'
               }`}
             >
               📜
@@ -409,7 +409,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-              className="flex-shrink-0 w-9 h-9 text-xs rounded-lg bg-gray-50 text-gray-600 border border-gray-200 font-medium flex items-center justify-center"
+              className="flex-shrink-0 w-9 h-9 text-xs rounded-lg bg-memorial-surface text-memorial-muted border border-memorial-border font-medium flex items-center justify-center hover:bg-memorial-cream-dark hover:text-memorial-navy transition-colors"
               title={t('sidebar.sortTime')}
               aria-label={t('sidebar.sortTime')}
             >
@@ -425,7 +425,7 @@ export default function Sidebar({
           {showAgentChat ? agentChatPanel : markerListContent}
         </MobileScrollList>
 
-        <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+        <div className="flex-shrink-0 border-t border-memorial-border bg-memorial-cream">
           <div className="px-2 py-1 flex gap-1.5">
             <button
               type="button"
@@ -433,7 +433,7 @@ export default function Sidebar({
               className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors min-h-[40px] ${
                 inActiveAddFlow
                   ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'memorial-btn-primary'
               }`}
             >
               {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
@@ -443,19 +443,19 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={() => setShowExportMenu(!showExportMenu)}
-                className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors flex items-center justify-center"
+                className="min-h-[40px] min-w-[40px] text-xs rounded-lg border border-memorial-border hover:bg-memorial-cream-dark text-memorial-muted transition-colors flex items-center justify-center"
                 aria-label={t('sidebar.export')}
               >
                 ⬇️
               </button>
               {showExportMenu && (
-                <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-20 min-w-[7rem]">
+                <div className="absolute bottom-full mb-1 right-0 bg-memorial-surface rounded-lg shadow-memorial-lg border border-memorial-border overflow-hidden z-20 min-w-[7rem]">
                   {['json', 'csv', 'geojson'].map((fmt) => (
                     <button
                       key={fmt}
                       type="button"
                       onClick={() => handleExport(fmt)}
-                      className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 uppercase"
+                      className="block w-full text-left px-4 py-2 text-xs text-memorial-ink hover:bg-memorial-cream uppercase"
                     >
                       {fmt}
                     </button>
@@ -471,24 +471,24 @@ export default function Sidebar({
 
   return (
     <div
-      className="sidebar-panel flex flex-col bg-white border-r border-gray-200 flex-shrink-0 h-full"
+      className="sidebar-panel flex flex-col bg-memorial-cream border-r border-memorial-border flex-shrink-0 h-full"
     >
-      <div className="px-3 pt-3 pb-2 border-b border-gray-100">
+      <div className="px-3 pt-3 pb-2 border-b border-memorial-border">
         <SidebarSearch {...searchBlockProps} />
       </div>
 
-      <div className="px-3 py-2 border-b border-gray-100">
+      <div className="px-3 py-2 border-b border-memorial-border">
         <FilterPanel activeFilters={activeFilters} toggleFilter={toggleFilter} stats={stats} />
       </div>
 
-      <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
+      <div className="px-3 py-2 border-b border-memorial-border flex items-center justify-between text-xs text-memorial-muted">
         <span>{t('sidebar.totalMarkers', { total: stats.total })}</span>
         {filteredMarkers.length !== stats.total && (
           <span>{t('sidebar.showingMarkers', { count: filteredMarkers.length })}</span>
         )}
       </div>
 
-      <div className="px-3 py-2 border-b border-gray-100 grid grid-cols-3 gap-2">
+      <div className="px-3 py-2 border-b border-memorial-border grid grid-cols-3 gap-2">
         <RegionFilter
           selectedRegionKeys={selectedRegionKeys}
           regionTree={regionTree}
@@ -502,7 +502,7 @@ export default function Sidebar({
           className={`min-w-0 text-xs py-1.5 px-1.5 rounded border transition-colors font-medium flex items-center justify-center gap-0.5 ${
             onThisDayActive
               ? 'bg-amber-50 border-amber-400 text-amber-900'
-              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-amber-50 hover:text-amber-800'
+              : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:bg-amber-50 hover:text-amber-800'
           }`}
         >
           <span className="flex-shrink-0">📜</span>
@@ -511,7 +511,7 @@ export default function Sidebar({
         <button
           type="button"
           onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-          className="min-w-0 text-xs py-1.5 px-2 rounded bg-gray-50 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium flex items-center justify-center gap-1 border border-gray-200"
+          className="min-w-0 text-xs py-1.5 px-2 rounded bg-memorial-surface text-memorial-muted hover:bg-memorial-cream-dark hover:text-memorial-navy transition-colors font-medium flex items-center justify-center gap-1 border border-memorial-border"
         >
           📅 {t('sidebar.sortTime')} {sortOrder === 'date-asc' ? '↑' : '↓'}
         </button>
@@ -521,14 +521,14 @@ export default function Sidebar({
         {showAgentChat ? agentChatPanel : markerListContent}
       </div>
 
-      <div className="flex-shrink-0 border-t border-gray-100 bg-white">
+      <div className="flex-shrink-0 border-t border-memorial-border bg-memorial-cream">
         <div className="px-3 py-2 flex gap-1.5">
           <button
             onClick={handleAddButtonClick}
             className={`flex-1 text-xs py-2 rounded-lg font-medium transition-colors ${
               inActiveAddFlow
                 ? 'bg-orange-100 text-orange-600 hover:bg-orange-200'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'memorial-btn-primary'
             }`}
           >
             {inActiveAddFlow ? `✕ ${t('sidebar.cancel')}` : `➕ ${t('sidebar.addNewMarker')}`}
@@ -537,17 +537,17 @@ export default function Sidebar({
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="text-xs py-2 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
+              className="text-xs py-2 px-3 rounded-lg border border-memorial-border hover:bg-memorial-cream-dark text-memorial-muted transition-colors"
             >
               ⬇️ {t('sidebar.export')}
             </button>
             {showExportMenu && (
-              <div className="absolute bottom-full mb-1 right-0 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-20 min-w-[7rem]">
+              <div className="absolute bottom-full mb-1 right-0 bg-memorial-surface rounded-lg shadow-memorial-lg border border-memorial-border overflow-hidden z-20 min-w-[7rem]">
                 {['json', 'csv', 'geojson'].map((fmt) => (
                   <button
                     key={fmt}
                     onClick={() => handleExport(fmt)}
-                    className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 uppercase"
+                    className="block w-full text-left px-4 py-2 text-xs text-memorial-ink hover:bg-memorial-cream uppercase"
                   >
                     {fmt}
                   </button>

@@ -35,9 +35,9 @@ export default function FilterPanel({ activeFilters, toggleFilter, stats }) {
               {typeInfo.icon}
             </span>
             <span className="flex-1 min-w-0 text-sm leading-tight">
-              <span className="text-gray-700">{markerTypeLabel(key)}</span>
+              <span className="text-memorial-ink">{markerTypeLabel(key)}</span>
               {hint && (
-                <span className="text-[11px] text-gray-400 ml-1">{hint}</span>
+                <span className="text-[11px] text-memorial-muted ml-1">{hint}</span>
               )}
             </span>
             <span

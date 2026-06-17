@@ -7,7 +7,7 @@ function renderSimpleMarkdown(text) {
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
-        <strong key={i} className="font-semibold text-gray-900">
+        <strong key={i} className="font-semibold text-memorial-navy">
           {part.slice(2, -2)}
         </strong>
       );
@@ -19,14 +19,14 @@ function renderSimpleMarkdown(text) {
 function MessageBody({ content }) {
   const blocks = content.split(/\n(?=## )/);
   return (
-    <div className="space-y-2 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+    <div className="space-y-2 text-sm text-memorial-ink leading-relaxed whitespace-pre-wrap">
       {blocks.map((block, i) => {
         const lines = block.split('\n');
         const first = lines[0];
         if (first.startsWith('## ')) {
           return (
             <div key={i}>
-              <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-1">
+              <h3 className="text-[10px] font-bold text-memorial-muted uppercase tracking-wide mb-1">
                 {first.replace(/^##\s*/, '')}
               </h3>
               <div>{renderSimpleMarkdown(lines.slice(1).join('\n').trim())}</div>
@@ -65,7 +65,7 @@ export default function AgentChatInline({
   if (messages.length === 0 && !loading) {
     return (
       <div className={`text-center ${compact ? 'py-4 px-2' : 'py-6 px-3'} space-y-3`}>
-        <p className="text-xs text-gray-500">{t('agent.emptyHint')}</p>
+        <p className="text-xs text-memorial-muted">{t('agent.emptyHint')}</p>
         <div className="flex flex-wrap gap-1.5 justify-center">
           {AGENT_SUGGESTIONS.map((q) => (
             <button
@@ -90,7 +90,7 @@ export default function AgentChatInline({
             className={`max-w-[95%] rounded-xl px-3 py-2 ${
               msg.role === 'user'
                 ? 'bg-violet-600 text-white text-sm'
-                : 'bg-gray-50 border border-gray-100'
+                : 'bg-memorial-surface border border-memorial-border'
             }`}
           >
             {msg.role === 'user' ? (
@@ -99,15 +99,15 @@ export default function AgentChatInline({
               <>
                 <MessageBody content={msg.content} />
                 {msg.mapHits?.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-gray-200">
-                    <p className="text-[10px] text-gray-500 mb-1">{t('agent.mapHits')}</p>
+                  <div className="mt-2 pt-2 border-t border-memorial-border">
+                    <p className="text-[10px] text-memorial-muted mb-1">{t('agent.mapHits')}</p>
                     <div className="flex flex-wrap gap-1">
                       {msg.mapHits.map((hit) => (
                         <button
                           key={hit.id}
                           type="button"
                           onClick={() => onNavigateMarker?.(hit.id)}
-                          className="text-[10px] px-2 py-0.5 rounded-md bg-white border border-violet-200 text-violet-700 hover:bg-violet-50"
+                          className="text-[10px] px-2 py-0.5 rounded-md bg-memorial-cream border border-violet-200 text-violet-700 hover:bg-violet-50"
                         >
                           📍 {hit.name}
                           {hit.date ? ` · ${hit.date}` : ''}
@@ -124,7 +124,7 @@ export default function AgentChatInline({
 
       {loading && (
         <div className="flex justify-start">
-          <div className="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs text-gray-500">
+          <div className="bg-memorial-surface border border-memorial-border rounded-xl px-3 py-2 text-xs text-memorial-muted">
             {t('agent.thinking')}
           </div>
         </div>

@@ -11,7 +11,7 @@ function TreeCheckbox({ checked, indeterminate, onChange }) {
         if (el) el.indeterminate = indeterminate;
       }}
       onChange={onChange}
-      className="w-3.5 h-3.5 accent-blue-500 flex-shrink-0"
+      className="w-3.5 h-3.5 accent-memorial-gold-dark flex-shrink-0"
       onClick={(e) => e.stopPropagation()}
     />
   );
@@ -20,10 +20,10 @@ function TreeCheckbox({ checked, indeterminate, onChange }) {
 function CityNode({ city, selectedKeys, onToggle }) {
   const checked = selectedKeys.has(city.key);
   return (
-    <label className="flex items-center gap-2 pl-8 pr-2 py-1 hover:bg-gray-50 rounded cursor-pointer text-xs">
+    <label className="flex items-center gap-2 pl-8 pr-2 py-1 hover:bg-memorial-cream rounded cursor-pointer text-xs">
       <TreeCheckbox checked={checked} indeterminate={false} onChange={() => onToggle(city.key)} />
-      <span className="text-gray-700 flex-1 truncate">{city.label}</span>
-      <span className="text-gray-400 tabular-nums">{city.count}</span>
+      <span className="text-memorial-ink flex-1 truncate">{city.label}</span>
+      <span className="text-memorial-muted tabular-nums">{city.count}</span>
     </label>
   );
 }
@@ -42,18 +42,18 @@ function ProvinceNode({ province, selectedKeys, onToggle, expandedSet, onToggleE
         <button
           type="button"
           onClick={() => onToggleExpand(province.key)}
-          className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 text-[10px]"
+          className="w-5 h-5 flex items-center justify-center text-memorial-muted hover:text-memorial-ink text-[10px]"
         >
           {province.cities.length > 0 ? (expanded ? '▼' : '▶') : ''}
         </button>
-        <label className="flex items-center gap-2 flex-1 py-1 hover:bg-gray-50 rounded cursor-pointer text-xs">
+        <label className="flex items-center gap-2 flex-1 py-1 hover:bg-memorial-cream rounded cursor-pointer text-xs">
           <TreeCheckbox
             checked={checked}
             indeterminate={indeterminate}
             onChange={() => onToggle(province.key)}
           />
-          <span className="text-gray-800 font-medium flex-1 truncate">{province.label}</span>
-          <span className="text-gray-400 tabular-nums">{province.count}</span>
+          <span className="text-memorial-ink font-medium flex-1 truncate">{province.label}</span>
+          <span className="text-memorial-muted tabular-nums">{province.count}</span>
         </label>
       </div>
       {expanded &&
@@ -78,18 +78,18 @@ function CountryNode({ country, selectedKeys, onToggle, expandedSet, onToggleExp
         <button
           type="button"
           onClick={() => onToggleExpand(country.key)}
-          className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 text-[10px]"
+          className="w-5 h-5 flex items-center justify-center text-memorial-muted hover:text-memorial-ink text-[10px]"
         >
           {country.provinces.length > 0 ? (expanded ? '▼' : '▶') : ''}
         </button>
-        <label className="flex items-center gap-2 flex-1 py-1.5 hover:bg-gray-50 rounded cursor-pointer text-xs font-semibold">
+        <label className="flex items-center gap-2 flex-1 py-1.5 hover:bg-memorial-cream rounded cursor-pointer text-xs font-semibold">
           <TreeCheckbox
             checked={checked}
             indeterminate={indeterminate}
             onChange={() => onToggle(country.key)}
           />
-          <span className="text-gray-800 flex-1">{country.label}</span>
-          <span className="text-gray-400 tabular-nums font-normal">{country.count}</span>
+          <span className="text-memorial-navy flex-1">{country.label}</span>
+          <span className="text-memorial-muted tabular-nums font-normal">{country.count}</span>
         </label>
       </div>
       {expanded &&
@@ -171,8 +171,8 @@ export default function RegionFilter({
 
   const hasSelection = selectedRegionKeys.size > 0;
   const activeClass = hasSelection
-    ? 'bg-blue-50 border-blue-300 text-blue-700'
-    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600';
+    ? 'bg-amber-50 border-memorial-gold text-memorial-navy'
+    : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:bg-memorial-cream-dark hover:text-memorial-navy hover:border-memorial-gold/70';
 
   return (
     <div className="min-w-0">
@@ -184,7 +184,7 @@ export default function RegionFilter({
       >
         🌍 {t('region.label')}
         {hasSelection && (
-          <span className="text-blue-600 font-bold">({selectedRegionKeys.size})</span>
+          <span className="text-memorial-gold-dark font-bold">({selectedRegionKeys.size})</span>
         )}
       </button>
 
@@ -193,15 +193,15 @@ export default function RegionFilter({
           <div className="fixed inset-0 z-[500]" onClick={() => setIsOpen(false)} />
           <div
             style={{ position: 'fixed', top: menuPosition.top, left: menuPosition.left }}
-            className="bg-white border border-gray-200 rounded-lg shadow-xl z-[600] w-72 max-h-[min(420px,70vh)] flex flex-col"
+            className="bg-memorial-cream border border-memorial-border rounded-xl shadow-memorial-lg z-[600] w-72 max-h-[min(420px,70vh)] flex flex-col"
           >
-            <div className="p-2 border-b border-gray-100">
+            <div className="p-2 border-b border-memorial-border">
               <input
                 type="text"
                 placeholder={t('region.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-2 py-1.5 text-xs border border-gray-200 rounded focus:outline-none focus:border-blue-400"
+                className="w-full px-2 py-1.5 text-xs memorial-input"
               />
             </div>
 
@@ -218,7 +218,7 @@ export default function RegionFilter({
               ))}
               {filterTree.overseas.length > 0 && (
                 <>
-                  <div className="text-[10px] font-semibold text-gray-400 px-1 pt-1">海外</div>
+                  <div className="text-[10px] font-semibold text-memorial-muted px-1 pt-1">海外</div>
                   {filterTree.overseas.map((country) => (
                     <CountryNode
                       key={country.key}
@@ -232,19 +232,19 @@ export default function RegionFilter({
                 </>
               )}
               {filterTree.china.length === 0 && filterTree.overseas.length === 0 && (
-                <p className="text-xs text-gray-400 text-center py-4">{t('region.noMatch')}</p>
+                <p className="text-xs text-memorial-muted text-center py-4">{t('region.noMatch')}</p>
               )}
             </div>
 
             {hasSelection && (
-              <div className="border-t border-gray-100 p-2">
+              <div className="border-t border-memorial-border p-2">
                 <button
                   type="button"
                   onClick={() => {
                     onClearRegions();
                     setSearchQuery('');
                   }}
-                  className="w-full py-1.5 text-xs text-gray-600 hover:bg-gray-50 rounded transition-colors"
+                  className="w-full py-1.5 text-xs text-memorial-muted hover:bg-memorial-cream-dark rounded transition-colors"
                 >
                   {t('region.clearFilter')}
                 </button>

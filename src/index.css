@@ -4,6 +4,43 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --memorial-cream: #faf6ef;
+  --memorial-cream-dark: #f5efe3;
+  --memorial-surface: #fffef9;
+  --memorial-gold: #d4bc8a;
+  --memorial-gold-dark: #c9a86c;
+  --memorial-border: #e8dcc8;
+  --memorial-navy: #1e3a5f;
+  --memorial-ink: #3d3429;
+  --memorial-muted: #8a7b6a;
+}
+
+@layer components {
+  .memorial-card {
+    @apply bg-memorial-surface rounded-xl border border-memorial-border shadow-memorial overflow-hidden;
+  }
+
+  .memorial-input {
+    @apply bg-memorial-surface border border-memorial-border rounded-lg text-memorial-ink placeholder:text-memorial-muted/70
+      focus:outline-none focus:border-memorial-gold focus:ring-1 focus:ring-memorial-gold/30 transition-colors;
+  }
+
+  .memorial-btn-primary {
+    @apply bg-memorial-navy text-white font-medium rounded-lg transition-colors
+      hover:bg-[#162d4a] active:bg-[#12243d];
+  }
+
+  .memorial-btn-secondary {
+    @apply border border-memorial-border bg-memorial-surface text-memorial-ink rounded-lg transition-colors
+      hover:bg-memorial-cream-dark hover:border-memorial-gold;
+  }
+
+  .memorial-divider {
+    @apply border-memorial-border;
+  }
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(-100%);
@@ -30,7 +67,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
+  background-color: var(--memorial-cream-dark);
+  color: var(--memorial-ink);
 }
 
 #root {
@@ -78,14 +116,15 @@ body {
 }
 
 .leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  border: 1px solid var(--memorial-border);
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.12);
 }
 
 .sidebar-scrollable {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-color: var(--memorial-gold) transparent;
 }
 
 .sidebar-scrollable::-webkit-scrollbar {
@@ -97,21 +136,21 @@ body {
 }
 
 .sidebar-scrollable::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
+  background-color: var(--memorial-gold);
   border-radius: 2px;
 }
 
 .marker-list-item {
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .marker-list-item:hover {
-  background-color: #f1f5f9;
+  background-color: rgba(212, 188, 138, 0.18);
 }
 
 .marker-list-item.active {
-  background-color: #e0f2fe;
-  border-left: 3px solid #1E88E5;
+  background-color: rgba(212, 188, 138, 0.28);
+  border-left: 3px solid var(--memorial-gold-dark);
 }
 
 /* 地图全屏铺底，侧边栏独立浮层（收起不改变地图尺寸） */
@@ -149,7 +188,7 @@ body {
 .sidebar-overlay .sidebar-panel {
   width: 100%;
   height: 100%;
-  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
+  box-shadow: 4px 0 24px rgba(30, 58, 95, 0.14);
 }
 
 .sidebar-collapse-btn {
@@ -163,12 +202,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--memorial-surface);
+  border: 1px solid var(--memorial-border);
   border-left: none;
   border-radius: 0 8px 8px 0;
-  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.08);
-  color: #64748b;
+  box-shadow: 2px 0 8px rgba(30, 58, 95, 0.1);
+  color: var(--memorial-muted);
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
@@ -176,8 +215,8 @@ body {
 }
 
 .sidebar-collapse-btn:hover {
-  color: #1e88e5;
-  background: #f8fafc;
+  color: var(--memorial-navy);
+  background: var(--memorial-cream);
 }
 
 .sidebar-expand-tab {
@@ -191,20 +230,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--memorial-surface);
+  border: 1px solid var(--memorial-border);
   border-left: none;
   border-radius: 0 8px 8px 0;
-  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.1);
-  color: #64748b;
+  box-shadow: 2px 0 8px rgba(30, 58, 95, 0.1);
+  color: var(--memorial-muted);
   font-size: 1.25rem;
   cursor: pointer;
   transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .sidebar-expand-tab:hover {
-  color: #1e88e5;
-  background: #f8fafc;
+  color: var(--memorial-navy);
+  background: var(--memorial-cream);
 }
 
 .sidebar-backdrop {
@@ -269,8 +308,8 @@ body {
   flex: 0 0 36vh;
   min-height: 300px;
   max-height: 380px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #fff;
+  border-bottom: 1px solid var(--memorial-border);
+  background: var(--memorial-cream);
   overflow: hidden;
   z-index: 100;
 }
@@ -315,7 +354,7 @@ body {
   right: 0;
   pointer-events: none;
   padding: 20px 8px 6px;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 55%, rgba(255, 255, 255, 0));
+  background: linear-gradient(to top, rgba(250, 246, 239, 0.98) 55%, rgba(250, 246, 239, 0));
   text-align: center;
 }
 
@@ -324,9 +363,9 @@ body {
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: #64748b;
-  background: rgba(241, 245, 249, 0.95);
-  border: 1px solid #e2e8f0;
+  color: var(--memorial-muted);
+  background: rgba(255, 254, 249, 0.95);
+  border: 1px solid var(--memorial-border);
   padding: 3px 10px;
   border-radius: 999px;
 }

@@ -37,17 +37,17 @@ export default function DetailPanel({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full max-w-2xl mx-0 md:mx-4 flex flex-col mobile-detail-panel pb-safe"
+        className="bg-memorial-cream rounded-t-2xl md:rounded-2xl shadow-memorial-lg border border-memorial-border w-full max-w-2xl mx-0 md:mx-4 flex flex-col mobile-detail-panel pb-safe"
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0"
+          className="px-4 md:px-6 py-3 md:py-4 border-b border-memorial-border flex items-center justify-between flex-shrink-0"
           style={{ backgroundColor: marker.color + '18' }}
         >
           <div className="flex items-center gap-3 min-w-0">
             <span className="text-2xl md:text-3xl flex-shrink-0">{marker.icon}</span>
             <div className="min-w-0">
-              <h2 className="text-lg md:text-xl font-bold text-gray-800 truncate">{marker.name}</h2>
+              <h2 className="text-lg md:text-xl font-bold font-memorial text-memorial-navy truncate">{marker.name}</h2>
               <span
                 className="inline-block text-xs px-2 py-0.5 rounded-full text-white font-medium mt-1"
                 style={{ backgroundColor: marker.color }}
@@ -59,7 +59,7 @@ export default function DetailPanel({
           <button
             type="button"
             onClick={onClose}
-            className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 text-2xl leading-none transition-colors flex-shrink-0 -mr-1"
+            className="w-11 h-11 flex items-center justify-center text-memorial-muted hover:text-memorial-ink text-2xl leading-none transition-colors flex-shrink-0 -mr-1"
             aria-label="关闭"
           >
             ✕
@@ -75,30 +75,30 @@ export default function DetailPanel({
             />
           )}
 
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+          <div className="bg-memorial-surface rounded-xl p-4 border border-memorial-border mb-4">
             {marker.title && (
-              <h3 className="font-bold text-lg text-gray-800 mb-3">{marker.title}</h3>
+              <h3 className="font-bold font-memorial text-lg text-memorial-navy mb-3">{marker.title}</h3>
             )}
 
             <div className="space-y-2 mb-3">
               {marker.date && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-600 min-w-16">📅 时间:</span>
-                  <span className="text-gray-800 font-medium">
+                  <span className="text-memorial-muted min-w-16">📅 时间:</span>
+                  <span className="text-memorial-ink font-medium">
                     {marker.date}{marker.endDate ? ` — ${marker.endDate}` : ''}
                   </span>
                 </div>
               )}
               {formatRegionPath(marker) && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-600 min-w-16">🌍 地区:</span>
-                  <span className="text-gray-800">{formatRegionPath(marker)}</span>
+                  <span className="text-memorial-muted min-w-16">🌍 地区:</span>
+                  <span className="text-memorial-ink">{formatRegionPath(marker)}</span>
                 </div>
               )}
               <div className="flex items-center justify-between gap-2 text-sm flex-wrap">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-gray-600 min-w-16">📍 坐标:</span>
-                  <span className="text-gray-800 font-mono">
+                  <span className="text-memorial-muted min-w-16">📍 坐标:</span>
+                  <span className="text-memorial-ink font-mono">
                     {marker.latitude.toFixed(6)}, {marker.longitude.toFixed(6)}
                   </span>
                 </div>
@@ -112,8 +112,8 @@ export default function DetailPanel({
 
             {tripSummary && (
               <div className="mb-3">
-                <h4 className="text-xs font-semibold text-gray-700 mb-1">行程总述</h4>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                <h4 className="text-xs font-semibold text-memorial-navy mb-1">行程总述</h4>
+                <p className="text-sm text-memorial-muted leading-relaxed whitespace-pre-wrap">
                   {tripSummary}
                 </p>
               </div>
@@ -121,8 +121,8 @@ export default function DetailPanel({
 
             {localDesc && (
               <div className="mb-3">
-                <h4 className="text-xs font-semibold text-gray-700 mb-1">本地点说明</h4>
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                <h4 className="text-xs font-semibold text-memorial-navy mb-1">本地点说明</h4>
+                <p className="text-sm text-memorial-muted leading-relaxed whitespace-pre-wrap">
                   {localDesc}
                 </p>
               </div>
@@ -130,15 +130,15 @@ export default function DetailPanel({
 
             {marker.sources && marker.sources.length > 0 && (
               <div className="mb-3">
-                <h4 className="text-xs font-semibold text-gray-700 mb-1">资料来源</h4>
+                <h4 className="text-xs font-semibold text-memorial-navy mb-1">资料来源</h4>
                 <ul className="space-y-1">
                   {marker.sources.map((s, i) => (
-                    <li key={i} className="text-xs text-gray-600">
+                    <li key={i} className="text-xs text-memorial-muted">
                       <div className="flex gap-2">
-                        <span className="text-gray-400">•</span>
+                        <span className="text-memorial-gold">•</span>
                         <div>
-                          <div className="font-medium text-gray-700">{s.title}</div>
-                          {s.note && <div className="text-xs text-gray-500">{s.note}</div>}
+                          <div className="font-medium text-memorial-ink">{s.title}</div>
+                          {s.note && <div className="text-xs text-memorial-muted">{s.note}</div>}
                         </div>
                       </div>
                     </li>
@@ -152,7 +152,7 @@ export default function DetailPanel({
 
           {marker.images && marker.images.length > 0 && (
             <div className="mt-6 mb-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">
+              <h4 className="text-sm font-semibold text-memorial-navy mb-2">
                 📸 图片库 ({marker.images.length})
               </h4>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-w-sm">
@@ -161,7 +161,7 @@ export default function DetailPanel({
                     key={i}
                     type="button"
                     onClick={() => setViewingImageIndex(i)}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 hover:opacity-95 transition-colors bg-gray-100"
+                    className="relative aspect-square rounded-lg overflow-hidden border border-memorial-border hover:border-memorial-gold hover:opacity-95 transition-colors bg-memorial-cream-dark"
                   >
                     <img src={img.data} alt={img.name || ''} className="w-full h-full object-cover" />
                   </button>
