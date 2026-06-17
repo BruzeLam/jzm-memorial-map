@@ -1,6 +1,36 @@
 {
   "2026-6-16": [
     {
+      "type": "optimize",
+      "emoji": "🎨",
+      "title": "纪念暖色界面全面升级",
+      "description": "统一 design token（纸感底色、海军蓝/琥珀金）；侧栏、详情、筛选、弹窗全面换肤；Header 与语录区过渡动效更柔和；MemorialModal 统一弹窗样式。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "✨",
+      "title": "地图与侧栏联动动效",
+      "description": "选中标点 flyTo 动画与脉冲高亮；同行行程伴生标记；筛选结果淡入；侧栏收起/展开把手重设计，视图切换更流畅。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "💬",
+      "title": "地图浮窗与类型色联动",
+      "description": "Leaflet 弹窗改为暖色卡片；列表选中项与弹窗 accent 随足迹/事件/题字类型着色；云端加载遮罩与空列表状态视觉抛光。"
+    },
+    {
+      "type": "fix",
+      "emoji": "🔍",
+      "title": "筛选栏恢复分类说明",
+      "description": "保留 FilterPanel 名称、提示与数量，去掉纯图标 chip，避免看不出筛选依据。"
+    },
+    {
+      "type": "fix",
+      "emoji": "👆",
+      "title": "恢复地图点击与侧栏详情交互",
+      "description": "移除强制开关 popup，点击标点气泡响应更灵敏；选中地点侧栏整页展示简介，点 ✕ 返回列表。"
+    },
+    {
       "type": "feature",
       "emoji": "🤖",
       "title": "智能问（侧栏集成）",
