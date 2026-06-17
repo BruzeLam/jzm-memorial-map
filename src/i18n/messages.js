@@ -73,6 +73,11 @@ const zh = {
     tip: {
       title: '赞赏 · 支持维护',
       subtitle: '自愿支持地图与服务器维护。下列金额为实际扣款（USD），与收银台一致。',
+      domesticSubtitle: '扫码赞赏，金额自定。下列推荐金额与收银台一致（人民币）。',
+      scanToPay: '打开{channel}扫一扫',
+      domesticScanHint: '保存二维码到相册，或长按识别（手机访问时）',
+      suggestAmounts: '推荐金额（扫码后自行输入）',
+      domesticFooter: '自愿支持，感谢每一份心意。收款码为个人赞赏，非商业交易。',
       customLabel: '闷声发大财 · 自定义金额（USD）',
       customHint: '最低 {min}，支持微信 / 支付宝 / 银行卡',
       walletNote: '使用微信或支付宝时，按收银台实时汇率折算为本地货币',
@@ -328,6 +333,11 @@ const en = {
     tip: {
       title: 'Tip · Support the project',
       subtitle: 'Voluntary support. Prices shown are the actual USD charge at checkout.',
+      domesticSubtitle: 'Scan to tip any amount in CNY. Suggested amounts match what you enter.',
+      scanToPay: 'Scan with {channel}',
+      domesticScanHint: 'Save the QR or long-press to scan on mobile',
+      suggestAmounts: 'Suggested amounts (enter when paying)',
+      domesticFooter: 'Voluntary support — personal tip QR, not a commercial checkout.',
       customLabel: 'Custom amount (USD)',
       customHint: 'Minimum {min} · WeChat Pay, Alipay, cards accepted',
       walletNote: 'WeChat / Alipay pay at the checkout exchange rate',

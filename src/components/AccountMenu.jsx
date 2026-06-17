@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
 import { useTipAvailable } from '../hooks/useTipAvailable';
-import TipModal from './TipModal';
+import TipModalRouter from './TipModalRouter';
 import { fetchMySubmissionStats } from '../services/submissions';
 
 function getDisplayName(email) {
@@ -155,7 +155,8 @@ export default function AccountMenu({
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const [tipOpen, setTipOpen] = useState(false);
-  const { enabled: tipEnabled, testMode: tipTestMode, customUnitUsd } = useTipAvailable();
+  const { enabled: tipEnabled, mode: tipMode, testMode: tipTestMode, customUnitUsd, channels: tipChannels } =
+    useTipAvailable();
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const rootRef = useRef(null);
@@ -343,8 +344,10 @@ export default function AccountMenu({
           />
         </div>
       )}
-      <TipModal
+      <TipModalRouter
         open={tipOpen}
+        mode={tipMode}
+        channels={tipChannels}
         testMode={tipTestMode}
         customUnitUsd={customUnitUsd}
         onClose={() => setTipOpen(false)}
