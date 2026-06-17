@@ -78,6 +78,7 @@ export default function App() {
     resetToSample,
     clearAll,
     readOnly: dataReadOnly,
+    cloudLoading,
   } = useMarkers({ isEditor: isEditor });
 
   const {
@@ -550,11 +551,15 @@ export default function App() {
         )}
 
         <div className={`${isMobile ? 'flex-1 min-h-0 relative' : 'absolute inset-0'} map-panel z-0`}>
+          {cloudLoading && (
+            <div className="map-loading-overlay" role="status" aria-live="polite">
+              <div className="memorial-loading-spinner" aria-hidden />
+              <p className="text-sm font-medium text-memorial-navy">正在加载地图数据…</p>
+            </div>
+          )}
           {(isAddingMode || mapPickForForm) && (
             <div
-              className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white px-4 py-2 rounded-full shadow-lg text-sm font-medium pointer-events-none ${
-                mapPickForForm ? 'bg-orange-600' : 'bg-blue-600'
-              }`}
+              className={`map-pick-banner ${mapPickForForm ? 'map-pick-banner--update' : 'map-pick-banner--add'}`}
             >
               {mapPickForForm ? '点击地图更新标点位置' : '点击地图选择位置'}
             </div>

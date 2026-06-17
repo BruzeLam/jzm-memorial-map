@@ -185,7 +185,8 @@ export default function Sidebar({
   const renderMarkerList = () => (
     <ul className="py-0.5">
       {sortedMarkers.length === 0 ? (
-        <li className="px-3 py-4 text-center">
+        <li className="memorial-empty-state">
+          <span className="memorial-empty-icon" aria-hidden>🗺️</span>
           <div className="text-sm text-memorial-muted mb-2">
             {onThisDayActive
               ? t('sidebar.noMarkersOnThisDay', { date: onThisDayLabel })
@@ -194,7 +195,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onStartAddMode}
-            className="text-sm text-memorial-navy hover:text-memorial-gold-dark underline transition-colors py-2"
+            className="memorial-btn-secondary text-sm px-3 py-1.5 inline-flex"
           >
             {onThisDayActive
               ? t('sidebar.addMarkerOnThisDay')
@@ -210,6 +211,7 @@ export default function Sidebar({
             <li key={m.id} className={isActive ? 'marker-accordion-item marker-accordion-item--open' : 'marker-accordion-item'}>
               <button
                 type="button"
+                data-marker-type={m.type}
                 className={`marker-list-item w-full text-left px-2.5 md:px-3 border-l-2 ${
                   compactMobile ? 'py-2 min-h-[42px]' : 'py-3 md:py-2.5 min-h-[48px]'
                 } ${isActive ? 'active' : 'border-transparent'}`}

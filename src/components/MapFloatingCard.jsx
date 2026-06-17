@@ -28,12 +28,12 @@ function AddMarkerCardBody({
 }) {
   return (
     <>
-      <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between rounded-t-xl md:rounded-t-xl">
-        <span className="text-xs font-semibold text-gray-600">📍 添加地点标记</span>
+      <div className="px-3 py-2 bg-memorial-cream-dark border-b border-memorial-border flex items-center justify-between rounded-t-xl md:rounded-t-xl">
+        <span className="text-xs font-semibold font-memorial text-memorial-navy">📍 添加地点标记</span>
         <button
           type="button"
           onClick={onCancel}
-          className="w-10 h-10 md:w-auto md:h-auto flex items-center justify-center text-gray-400 hover:text-gray-600 text-lg leading-none -mr-2"
+          className="w-10 h-10 md:w-auto md:h-auto flex items-center justify-center text-memorial-muted hover:text-memorial-navy text-lg leading-none -mr-2 transition-colors"
           aria-label="关闭"
         >
           ✕
@@ -52,7 +52,7 @@ function AddMarkerCardBody({
                 className={`flex-1 py-2 md:py-1 text-xs rounded-lg border transition-colors ${
                   type === key
                     ? 'text-white border-transparent'
-                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                    : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:border-memorial-gold'
                 }`}
                 style={type === key ? { backgroundColor: t.color, borderColor: t.color } : {}}
               >
@@ -111,7 +111,7 @@ function AddMarkerCardBody({
           )}
         </div>
 
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-memorial-muted tabular-nums">
           {lat}, {lng}
         </div>
       </div>
@@ -129,7 +129,7 @@ function AddMarkerCardBody({
         <button
           type="button"
           onClick={onMoreDetails}
-          className="flex-1 py-2.5 md:py-1.5 text-xs rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium"
+          className="flex-1 py-2.5 md:py-1.5 text-xs rounded-lg memorial-btn-secondary font-medium"
         >
           更多详情
         </button>
@@ -162,8 +162,8 @@ export default function MapFloatingCard({
   const padding = 12;
 
   const inputClass =
-    'w-full text-xs border border-gray-200 rounded-lg px-2.5 py-2 md:py-1.5 focus:outline-none focus:border-blue-400 bg-white';
-  const labelClass = 'text-xs font-medium text-gray-500 mb-1 block';
+    'w-full text-xs memorial-input px-2.5 py-2 md:py-1.5';
+  const labelClass = 'text-xs font-medium text-memorial-muted mb-1 block';
 
   const buildData = () => {
     const typeInfo = MARKER_TYPES[type];
@@ -226,14 +226,14 @@ export default function MapFloatingCard({
       <>
         <button
           type="button"
-          className="fixed inset-0 z-[9998] bg-black/35 border-0 p-0 cursor-pointer"
+          className="fixed inset-0 z-[9998] bg-memorial-navy/30 backdrop-blur-[2px] border-0 p-0 cursor-pointer"
           aria-label="关闭"
           onClick={onCancel}
         />
         <div className="fixed inset-x-0 bottom-0 z-[9999] pointer-events-auto mobile-bottom-sheet pb-safe">
-          <div className="bg-white rounded-t-2xl shadow-2xl border border-gray-200 border-b-0 max-h-[min(88dvh,640px)] overflow-y-auto">
+          <div className="bg-memorial-surface rounded-t-2xl shadow-2xl border border-memorial-border border-b-0 max-h-[min(88dvh,640px)] overflow-y-auto">
             <div className="flex justify-center pt-2 pb-1">
-              <div className="w-10 h-1 rounded-full bg-gray-300" />
+              <div className="w-10 h-1 rounded-full bg-memorial-gold/60" />
             </div>
             <AddMarkerCardBody
               {...bodyProps}
@@ -269,7 +269,7 @@ export default function MapFloatingCard({
       className="absolute z-[9999] pointer-events-auto"
       style={{ left: clampedLeft, top: clampedTop, width: cardW }}
     >
-      <div className="bg-white rounded-xl shadow-xl border border-gray-200 overflow-visible">
+      <div className="memorial-card overflow-visible">
         <AddMarkerCardBody
           {...bodyProps}
           datePickerStyle={{
@@ -289,7 +289,7 @@ export default function MapFloatingCard({
             top: '100%',
             borderLeft: '8px solid transparent',
             borderRight: '8px solid transparent',
-            borderTop: '10px solid white',
+            borderTop: '10px solid var(--memorial-surface)',
             filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.1))',
           }}
         />

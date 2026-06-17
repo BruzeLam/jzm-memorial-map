@@ -118,7 +118,216 @@ body {
 .leaflet-popup-content-wrapper {
   border-radius: 12px;
   border: 1px solid var(--memorial-border);
+  background: var(--memorial-surface);
   box-shadow: 0 4px 16px rgba(30, 58, 95, 0.12);
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  min-width: 180px;
+}
+
+.leaflet-popup-tip {
+  background: var(--memorial-surface);
+  border: 1px solid var(--memorial-border);
+  box-shadow: none;
+}
+
+.memorial-map-popup .leaflet-popup-content-wrapper {
+  border-color: var(--memorial-border);
+}
+
+.memorial-popup--selected {
+  background: color-mix(in srgb, var(--popup-accent) 10%, var(--memorial-surface));
+  box-shadow: inset 3px 0 0 var(--popup-accent);
+  border-radius: 8px;
+}
+
+.memorial-map-popup--selected .leaflet-popup-content-wrapper {
+  border-color: color-mix(in srgb, var(--popup-accent, var(--memorial-gold-dark)) 55%, var(--memorial-border));
+}
+
+.memorial-popup {
+  padding: 10px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--memorial-ink);
+}
+
+.memorial-popup-header {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.memorial-popup-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  box-shadow: 0 1px 4px rgba(30, 58, 95, 0.15);
+}
+
+.memorial-popup-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.memorial-popup-name {
+  font-family: 'Noto Serif SC', Georgia, serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--memorial-navy);
+}
+
+.memorial-popup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--memorial-muted);
+}
+
+.memorial-popup-type {
+  color: #fff;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.memorial-popup-desc {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--memorial-muted);
+}
+
+.marker-list-item {
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  border-left-width: 2px;
+  border-left-style: solid;
+}
+
+.marker-list-item:hover {
+  background-color: rgba(212, 188, 138, 0.14);
+}
+
+.marker-list-item.active {
+  transform: translateX(2px);
+  border-left-width: 3px;
+}
+
+.marker-list-item[data-marker-type='spot']:hover {
+  background-color: rgba(30, 136, 229, 0.1);
+}
+
+.marker-list-item[data-marker-type='spot'].active {
+  background-color: rgba(30, 136, 229, 0.13);
+  border-left-color: #1e88e5;
+}
+
+.marker-list-item[data-marker-type='event']:hover {
+  background-color: rgba(211, 47, 47, 0.08);
+}
+
+.marker-list-item[data-marker-type='event'].active {
+  background-color: rgba(211, 47, 47, 0.12);
+  border-left-color: #d32f2f;
+}
+
+.marker-list-item[data-marker-type='inscription']:hover {
+  background-color: rgba(245, 127, 23, 0.1);
+}
+
+.marker-list-item[data-marker-type='inscription'].active {
+  background-color: rgba(245, 127, 23, 0.14);
+  border-left-color: #f57f17;
+}
+
+.memorial-empty-state {
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.memorial-empty-icon {
+  display: block;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.map-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 450;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(250, 246, 239, 0.72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.memorial-loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--memorial-border);
+  border-top-color: var(--memorial-gold-dark);
+  border-radius: 50%;
+  animation: memorialSpin 0.75s linear infinite;
+}
+
+@keyframes memorialSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.map-pick-banner {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(30, 58, 95, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.map-pick-banner--add {
+  background: var(--memorial-navy);
+}
+
+.map-pick-banner--update {
+  background: #c2410c;
+}
+
+.map-zoom-btn {
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.map-zoom-btn:hover {
+  background-color: var(--memorial-cream);
+  color: var(--memorial-gold-dark);
+}
+
+.map-zoom-btn:active {
+  background-color: var(--memorial-cream-dark);
 }
 
 .sidebar-scrollable {
@@ -138,20 +347,6 @@ body {
 .sidebar-scrollable::-webkit-scrollbar-thumb {
   background-color: var(--memorial-gold);
   border-radius: 2px;
-}
-
-.marker-list-item {
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.marker-list-item:hover {
-  background-color: rgba(212, 188, 138, 0.18);
-}
-
-.marker-list-item.active {
-  background-color: rgba(212, 188, 138, 0.28);
-  border-left: 3px solid var(--memorial-gold-dark);
-  transform: translateX(2px);
 }
 
 /* 地图标点 */
@@ -176,6 +371,7 @@ body {
 
 .marker-pin-inner--selected {
   animation: markerSelectedPulse 2.2s ease-in-out infinite;
+  --marker-accent: #c9a86c;
 }
 
 .marker-pin-inner--fade-in {
@@ -191,15 +387,15 @@ body {
   0%,
   100% {
     box-shadow:
-      0 0 0 0 rgba(201, 168, 108, 0.45),
-      0 0 0 4px rgba(212, 188, 138, 0.9),
+      0 0 0 0 color-mix(in srgb, var(--marker-accent) 45%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--marker-accent) 75%, white),
       0 4px 14px rgba(30, 58, 95, 0.35);
     transform: rotate(-45deg) scale(1.06);
   }
   50% {
     box-shadow:
-      0 0 0 10px rgba(201, 168, 108, 0),
-      0 0 0 5px rgba(212, 188, 138, 1),
+      0 0 0 10px color-mix(in srgb, var(--marker-accent) 0%, transparent),
+      0 0 0 5px color-mix(in srgb, var(--marker-accent) 90%, white),
       0 6px 18px rgba(30, 58, 95, 0.42);
     transform: rotate(-45deg) scale(1.1);
   }
@@ -604,7 +800,7 @@ body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: #94a3b8 #f1f5f9;
+  scrollbar-color: var(--memorial-gold) #f5efe3;
 }
 
 .mobile-list-scroll::-webkit-scrollbar {
@@ -612,7 +808,7 @@ body {
 }
 
 .mobile-list-scroll::-webkit-scrollbar-thumb {
-  background-color: #94a3b8;
+  background-color: var(--memorial-gold);
   border-radius: 4px;
 }
 

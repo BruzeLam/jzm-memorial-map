@@ -7,6 +7,42 @@ import { useUserLocation } from '../hooks/useUserLocation';
 import { calculateDistanceKm, formatDistance } from '../utils/geo';
 import { normalizeLng } from '../utils/mapWrap';
 
+function escapeHtml(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function buildPopupHtml(marker, typeInfo, distance, isSelected) {
+  const accent = marker.color || typeInfo.color;
+  const title = marker.title ? `<p class="memorial-popup-desc">${escapeHtml(marker.title)}</p>` : '';
+  const dateLine = marker.date
+    ? `<span class="memorial-popup-date">${escapeHtml(marker.date)}${marker.endDate ? ` — ${escapeHtml(marker.endDate)}` : ''}</span>`
+    : '';
+  const distanceLine = distance
+    ? `<span class="memorial-popup-distance">距您 ${escapeHtml(distance)} km</span>`
+    : '';
+
+  return `
+    <div class="memorial-popup ${isSelected ? 'memorial-popup--selected' : ''}" style="--popup-accent:${accent}">
+      <div class="memorial-popup-header">
+        <span class="memorial-popup-badge" style="background:${accent}">${typeInfo.icon}</span>
+        <div class="memorial-popup-meta">
+          <div class="memorial-popup-name">${escapeHtml(marker.name)}</div>
+          <div class="memorial-popup-tags">
+            <span class="memorial-popup-type" style="background:${accent}">${escapeHtml(typeInfo.label)}</span>
+            ${dateLine}
+            ${distanceLine}
+          </div>
+        </div>
+      </div>
+      ${title}
+    </div>
+  `;
+}
+
 // 放大时保持原始标点大小；仅在缩小到较大尺度（世界/区域视图）时适度缩小
 function getMarkerDimensions(zoom, isSelected) {
   const fullSizeZoom = 8;
@@ -51,7 +87,7 @@ function createDivIcon(marker, isSelected, isTripMate, zoom, animateIn) {
   const html = `
     <div
       class="${classes}"
-      style="width:${size}px;height:${size}px;background:${color};border-width:${borderWidth}px"
+      style="width:${size}px;height:${size}px;background:${color};border-width:${borderWidth}px;${isSelected ? `--marker-accent:${color};` : ''}"
     >
       <span class="marker-pin-icon" style="font-size:${fontSize}px">${icon}</span>
     </div>
@@ -98,6 +134,7 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
   const { location } = useUserLocation();
   const [zoom, setZoom] = useState(() => map.getZoom());
   const prevMarkerIdsKeyRef = useRef('');
+  const markerInstancesRef = useRef(new Map());
   const markerIdsKey = useMemo(() => markers.map((m) => m.id).join(','), [markers]);
   const tripMateIds = useMemo(
     () => getTripMateIds(allMarkers || markers, selectedMarker),
@@ -109,6 +146,7 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
     prevMarkerIdsKeyRef.current = markerIdsKey;
 
     const markerInstances = [];
+    markerInstancesRef.current.clear();
 
     markers.forEach((m) => {
       const isSelected = m.id === selectedMarkerId;
@@ -124,32 +162,35 @@ function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, o
         ? formatDistance(calculateDistanceKm(location.lat, location.lng, m.latitude, m.longitude))
         : null;
 
-      const popupContent = `
-        <div style="min-width:160px;font-family:system-ui,sans-serif">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px">${m.name}</div>
-          <div style="font-size:12px;color:#666;margin-bottom:4px">
-            <span style="background:${m.color};color:white;padding:1px 6px;border-radius:10px;font-size:11px">
-              ${typeInfo.label}
-            </span>
-            ${m.date ? `<span style="margin-left:6px">${m.date}${m.endDate ? ` — ${m.endDate}` : ''}</span>` : ''}
-            ${distance ? `<span style="margin-left:6px">距离您${distance}km</span>` : ''}
-          </div>
-          <div style="font-size:12px;color:#444">${m.title}</div>
-        </div>
-      `;
-      leafletMarker.bindPopup(popupContent, { maxWidth: 220 });
+      const popupContent = buildPopupHtml(m, typeInfo, distance, isSelected);
+      leafletMarker.bindPopup(popupContent, {
+        maxWidth: 260,
+        className: `memorial-map-popup${isSelected ? ' memorial-map-popup--selected' : ''}`,
+      });
       leafletMarker.on('click', () => {
         onMarkerSelect(m.id);
       });
 
       leafletMarker.addTo(map);
       markerInstances.push(leafletMarker);
+      markerInstancesRef.current.set(m.id, leafletMarker);
     });
 
     return () => {
       markerInstances.forEach((lm) => lm.remove());
+      markerInstancesRef.current.clear();
     };
   }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds, markerIdsKey]);
+
+  useEffect(() => {
+    markerInstancesRef.current.forEach((leafletMarker, id) => {
+      if (id === selectedMarkerId) {
+        leafletMarker.openPopup();
+      } else {
+        leafletMarker.closePopup();
+      }
+    });
+  }, [selectedMarkerId, markerIdsKey]);
 
   useEffect(() => {
     const updateZoom = () => setZoom(map.getZoom());
@@ -180,10 +221,11 @@ function ZoomControl({ mapRef }) {
   };
 
   return (
-    <div className="map-zoom-control absolute z-[400] flex flex-col gap-1 bg-memorial-surface rounded-lg shadow-memorial border border-memorial-border overflow-hidden">
+    <div className="map-zoom-control memorial-card absolute z-[400] flex flex-col overflow-hidden p-0">
       <button
+        type="button"
         onClick={() => handleZoom('in')}
-        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-memorial-cream active:bg-memorial-cream-dark transition-colors text-lg font-bold text-memorial-muted"
+        className="map-zoom-btn w-11 h-11 md:w-10 md:h-10 flex items-center justify-center text-lg font-bold text-memorial-navy"
         title="放大"
         aria-label="放大"
       >
@@ -191,8 +233,9 @@ function ZoomControl({ mapRef }) {
       </button>
       <div className="w-full h-px bg-memorial-border" />
       <button
+        type="button"
         onClick={() => handleZoom('out')}
-        className="w-11 h-11 md:w-10 md:h-10 flex items-center justify-center hover:bg-memorial-cream active:bg-memorial-cream-dark transition-colors text-lg font-bold text-memorial-muted"
+        className="map-zoom-btn w-11 h-11 md:w-10 md:h-10 flex items-center justify-center text-lg font-bold text-memorial-navy"
         title="缩小"
         aria-label="缩小"
       >
