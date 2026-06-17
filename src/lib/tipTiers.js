@@ -5,14 +5,14 @@ export const TIP_TIERS = [
     id: 'plus1s',
     priceHkd: 4,
     label: '续一秒',
-    subtitle: '为地图续一秒',
+    subtitle: '+1s · 略表心意',
     stripeEnv: 'REACT_APP_STRIPE_TIP_URL_4',
   },
   {
     id: 'small',
     priceHkd: 8.17,
     label: '微小的贡献',
-    subtitle: '8·17 · 略表心意',
+    subtitle: '8·17 · 为服务器续命',
     stripeEnv: 'REACT_APP_STRIPE_TIP_URL_817',
   },
   {
