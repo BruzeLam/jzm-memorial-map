@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS } from '../utils/constants';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
@@ -12,7 +12,7 @@ import {
   deleteCloudMarker,
   addCloudRemovedMarkerId,
 } from '../services/cloudData';
-import { readJsonCache } from '../utils/storageCache';
+import { readJsonCache, runWhenIdle } from '../utils/storageCache';
 import { mergeMarkerCatalog } from '../utils/markerCatalog';
 
 const { markersCache: CACHE_KEY, removedMarkerIdsCache: REMOVED_CACHE_KEY } = getStorageKeys();
@@ -110,7 +110,7 @@ export function useMarkers({ isEditor = false } = {}) {
     return loadCloudCacheMarkers(removed) ?? mergeCatalogMarkers([], removed);
   });
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
-  const [cloudLoading, setCloudLoading] = useState(cloudMode);
+  const [cloudLoading, setCloudLoading] = useState(false);
   const [cloudError, setCloudError] = useState(null);
 
   useEffect(() => {
@@ -123,34 +123,41 @@ export function useMarkers({ isEditor = false } = {}) {
     if (!cloudMode) return undefined;
 
     let cancelled = false;
-    setCloudLoading(true);
 
-    Promise.all([fetchCloudMarkers(), fetchCloudRemovedMarkerIds()])
-      .then(([rows, removed]) => {
-        if (cancelled) return;
-        const combinedRemoved = combineRemovedMarkerIds(removed);
-        setRemovedMarkerIds(removed);
-        persistRemovedCache(removed);
-        const next = mergeCatalogMarkers(rows || [], combinedRemoved);
-        setMarkers(next);
-        persistMarkersCache(next);
-        setCloudError(null);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error('Cloud markers fetch failed:', err);
-        setCloudError(err.message);
-        const cachedRemoved = readJsonCache(REMOVED_CACHE_KEY) || [];
-        const combinedRemoved = combineRemovedMarkerIds(cachedRemoved);
-        const cached = readJsonCache(CACHE_KEY);
-        setMarkers(mergeCatalogMarkers(Array.isArray(cached) ? cached : [], combinedRemoved));
-      })
-      .finally(() => {
-        if (!cancelled) setCloudLoading(false);
-      });
+    const syncFromCloud = () => {
+      if (cancelled) return;
+      setCloudLoading(true);
+
+      Promise.all([fetchCloudMarkers(), fetchCloudRemovedMarkerIds()])
+        .then(([rows, removed]) => {
+          if (cancelled) return;
+          const combinedRemoved = combineRemovedMarkerIds(removed);
+          setRemovedMarkerIds(removed);
+          persistRemovedCache(removed);
+          const next = mergeCatalogMarkers(rows || [], combinedRemoved);
+          setMarkers(next);
+          persistMarkersCache(next);
+          setCloudError(null);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          console.error('Cloud markers fetch failed:', err);
+          setCloudError(err.message);
+          const cachedRemoved = readJsonCache(REMOVED_CACHE_KEY) || [];
+          const combinedRemoved = combineRemovedMarkerIds(cachedRemoved);
+          const cached = readJsonCache(CACHE_KEY);
+          setMarkers(mergeCatalogMarkers(Array.isArray(cached) ? cached : [], combinedRemoved));
+        })
+        .finally(() => {
+          if (!cancelled) setCloudLoading(false);
+        });
+    };
+
+    const cancelIdle = runWhenIdle(syncFromCloud, 400);
 
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, [cloudMode]);
 
@@ -237,12 +244,15 @@ export function useMarkers({ isEditor = false } = {}) {
     setSelectedMarkerId(null);
   }, []);
 
-  const stats = {
-    total: markers.length,
-    spot: markers.filter((m) => m.type === 'spot').length,
-    event: markers.filter((m) => m.type === 'event').length,
-    inscription: markers.filter((m) => m.type === 'inscription').length,
-  };
+  const stats = useMemo(
+    () => ({
+      total: markers.length,
+      spot: markers.filter((m) => m.type === 'spot').length,
+      event: markers.filter((m) => m.type === 'event').length,
+      inscription: markers.filter((m) => m.type === 'inscription').length,
+    }),
+    [markers]
+  );
 
   return {
     markers,

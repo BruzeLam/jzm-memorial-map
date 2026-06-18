@@ -129,54 +129,86 @@ function MapWorldScroll({ mapRef }) {
   return null;
 }
 
+function applyMarkerAppearance(leafletMarker, marker, { isSelected, isTripMate, zoom, location, animateIn }) {
+  const typeInfo = MARKER_TYPES[marker.type] || MARKER_TYPES.spot;
+  const distance = location
+    ? formatDistance(calculateDistanceKm(location.lat, location.lng, marker.latitude, marker.longitude))
+    : null;
+
+  leafletMarker.setIcon(createDivIcon(marker, isSelected, isTripMate, zoom, animateIn));
+  leafletMarker.setZIndexOffset(isSelected ? 1000 : isTripMate ? 200 : 0);
+
+  const popupContent = buildPopupHtml(marker, typeInfo, distance, isSelected);
+  if (leafletMarker.getPopup()) {
+    leafletMarker.setPopupContent(popupContent);
+  } else {
+    leafletMarker.bindPopup(popupContent, {
+      maxWidth: 260,
+      className: `memorial-map-popup${isSelected ? ' memorial-map-popup--selected' : ''}`,
+    });
+  }
+}
+
 function MarkersLayer({ markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect }) {
   const map = useMap();
   const { location } = useUserLocation();
   const [zoom, setZoom] = useState(() => map.getZoom());
   const prevMarkerIdsKeyRef = useRef('');
+  const markerInstancesRef = useRef(new Map());
+  const onMarkerSelectRef = useRef(onMarkerSelect);
+  const markersRef = useRef(markers);
   const markerIdsKey = useMemo(() => markers.map((m) => m.id).join(','), [markers]);
   const tripMateIds = useMemo(
     () => getTripMateIds(allMarkers || markers, selectedMarker),
     [allMarkers, markers, selectedMarker]
   );
 
+  onMarkerSelectRef.current = onMarkerSelect;
+  markersRef.current = markers;
+
+  const shouldAnimateRef = useRef(false);
+
   useEffect(() => {
     const animateFilterChange = prevMarkerIdsKeyRef.current !== markerIdsKey;
     prevMarkerIdsKeyRef.current = markerIdsKey;
+    shouldAnimateRef.current = animateFilterChange;
 
-    const markerInstances = [];
+    const currentMarkers = markersRef.current;
 
-    markers.forEach((m) => {
-      const isSelected = m.id === selectedMarkerId;
-      const isTripMate = tripMateIds.has(m.id);
-      const icon = createDivIcon(m, isSelected, isTripMate, zoom, animateFilterChange);
-      const leafletMarker = L.marker([m.latitude, m.longitude], {
-        icon,
-        zIndexOffset: isSelected ? 1000 : isTripMate ? 200 : 0,
-      });
+    const instances = markerInstancesRef.current;
 
-      const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
-      const distance = location
-        ? formatDistance(calculateDistanceKm(location.lat, location.lng, m.latitude, m.longitude))
-        : null;
-
-      const popupContent = buildPopupHtml(m, typeInfo, distance, isSelected);
-      leafletMarker.bindPopup(popupContent, {
-        maxWidth: 260,
-        className: `memorial-map-popup${isSelected ? ' memorial-map-popup--selected' : ''}`,
-      });
+    currentMarkers.forEach((m) => {
+      const leafletMarker = L.marker([m.latitude, m.longitude]);
       leafletMarker.on('click', () => {
-        onMarkerSelect(m.id);
+        onMarkerSelectRef.current(m.id);
       });
-
       leafletMarker.addTo(map);
-      markerInstances.push(leafletMarker);
+      instances.set(m.id, leafletMarker);
     });
 
     return () => {
-      markerInstances.forEach((lm) => lm.remove());
+      instances.forEach((leafletMarker) => leafletMarker.remove());
+      instances.clear();
     };
-  }, [markers, allMarkers, selectedMarker, selectedMarkerId, onMarkerSelect, map, location, zoom, tripMateIds, markerIdsKey]);
+  }, [markerIdsKey, map]);
+
+  useEffect(() => {
+    const animateIn = shouldAnimateRef.current;
+    shouldAnimateRef.current = false;
+
+    markers.forEach((m) => {
+      const leafletMarker = markerInstancesRef.current.get(m.id);
+      if (!leafletMarker) return;
+
+      applyMarkerAppearance(leafletMarker, m, {
+        isSelected: m.id === selectedMarkerId,
+        isTripMate: tripMateIds.has(m.id),
+        zoom,
+        location,
+        animateIn,
+      });
+    });
+  }, [markers, selectedMarkerId, zoom, tripMateIds, location, markerIdsKey]);
 
   useEffect(() => {
     const updateZoom = () => setZoom(map.getZoom());

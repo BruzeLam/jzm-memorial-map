@@ -551,7 +551,7 @@ export default function App() {
         )}
 
         <div className={`${isMobile ? 'flex-1 min-h-0 relative' : 'absolute inset-0'} map-panel z-0`}>
-          {cloudLoading && (
+          {cloudLoading && markers.length === 0 && (
             <div className="map-loading-overlay" role="status" aria-live="polite">
               <div className="memorial-loading-spinner" aria-hidden />
               <p className="text-sm font-medium text-memorial-navy">正在加载地图数据…</p>
