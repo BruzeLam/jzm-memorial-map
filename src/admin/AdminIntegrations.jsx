@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { useAdminAuth } from './useAdminAuth';
 import { getTipConfig } from '../lib/tipConfig';
 import { isCloudEnabled } from '../lib/cloudConfig';
+import {
+  fetchCloudMarkers,
+  fetchCloudQuotes,
+  fetchCloudArchives,
+} from '../services/cloudData';
 
 const PLATFORM_LINKS = {
   supabase: 'https://supabase.com/dashboard',
@@ -40,22 +45,12 @@ function PlatformCard({ platform }) {
         <StatusBadge configured={platform.configured} ok={platform.ok} />
       </div>
 
-      <p className={`text-sm ${platform.ok ? 'text-gray-700' : 'text-red-700'}`}>
+      <p className={`text-sm ${platform.ok || !platform.configured ? 'text-gray-700' : 'text-red-700'}`}>
         {platform.detail || platform.error || '—'}
         {platform.ms != null && platform.configured && (
           <span className="text-gray-400 ml-1">({platform.ms}ms)</span>
         )}
       </p>
-
-      {platform.counts && (
-        <p className="text-xs text-gray-500">
-          云端：地点 {platform.counts.markers} · 语录 {platform.counts.quotes} · 档案{' '}
-          {platform.counts.archives}
-          {platform.adminEmailConfigured != null && (
-            <> · 超管邮箱 {platform.adminEmailConfigured ? '✓' : '✗'}</>
-          )}
-        </p>
-      )}
 
       {platform.tiers?.length > 0 && (
         <ul className="text-xs text-gray-600 space-y-1">
@@ -74,7 +69,10 @@ function PlatformCard({ platform }) {
       {platform.envKeys?.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {platform.envKeys.map((key) => (
-            <code key={key} className="text-[10px] bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 text-gray-600">
+            <code
+              key={key}
+              className="text-[10px] bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 text-gray-600"
+            >
               {key}
             </code>
           ))}
@@ -102,36 +100,161 @@ function PlatformCard({ platform }) {
   );
 }
 
+async function timed(label, fn) {
+  const started = Date.now();
+  try {
+    const result = await fn();
+    return { ok: true, ms: Date.now() - started, result };
+  } catch (err) {
+    return { ok: false, ms: Date.now() - started, error: err.message || String(err) };
+  }
+}
+
+async function checkStripeLinks(tiers) {
+  const checks = await Promise.all(
+    tiers.map(async (tier) => {
+      try {
+        const res = await fetch(tier.paymentUrl, { method: 'HEAD', mode: 'no-cors' });
+        void res;
+        return {
+          id: tier.id,
+          label: tier.label,
+          ok: true,
+          testMode: /\/test_/.test(tier.paymentUrl),
+        };
+      } catch {
+        return {
+          id: tier.id,
+          label: tier.label,
+          ok: false,
+          testMode: /\/test_/.test(tier.paymentUrl),
+        };
+      }
+    })
+  );
+  return checks;
+}
+
+async function runClientIntegrationChecks(sessionToken) {
+  const platforms = [];
+  const tip = getTipConfig();
+
+  const supabase = await timed('supabase', async () => {
+    if (!isCloudEnabled()) throw new Error('REACT_APP_SUPABASE_URL / ANON_KEY 未配置');
+    const [markers, quotes, archives] = await Promise.all([
+      fetchCloudMarkers(),
+      fetchCloudQuotes(),
+      fetchCloudArchives(),
+    ]);
+    return {
+      markers: markers?.length ?? 0,
+      quotes: quotes?.length ?? 0,
+      archives: archives?.length ?? 0,
+    };
+  });
+
+  platforms.push({
+    id: 'supabase',
+    name: 'Supabase',
+    role: '云端数据 · 登录 · 影像存储',
+    configured: isCloudEnabled(),
+    ok: supabase.ok,
+    ms: supabase.ms,
+    envKeys: ['REACT_APP_SUPABASE_URL', 'REACT_APP_SUPABASE_ANON_KEY', 'REACT_APP_ADMIN_EMAIL'],
+    detail: supabase.ok
+      ? `地点 ${supabase.result.markers} · 语录 ${supabase.result.quotes} · 档案 ${supabase.result.archives}`
+      : supabase.error,
+    error: supabase.error,
+  });
+
+  const deepseek = await timed('deepseek', async () => {
+    if (!sessionToken) throw new Error('需要协作者登录');
+    const res = await fetch('/api/agent-health', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionToken}`,
+      },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+    const envStep = (data.steps || []).find((s) => s.name === 'env');
+    const ping = (data.steps || []).find((s) => s.name === 'deepseekPing');
+    if (!envStep?.deepseekKey) throw new Error('DEEPSEEK_API_KEY 未配置');
+    if (!ping?.ok) throw new Error(ping?.error || 'DeepSeek 检测失败');
+    return { configured: true, ping };
+  });
+
+  platforms.push({
+    id: 'deepseek',
+    name: 'DeepSeek',
+    role: '智能问 · 导览 Agent',
+    configured: deepseek.ok || (deepseek.error && !/未配置/.test(deepseek.error)),
+    ok: deepseek.ok,
+    ms: deepseek.ms,
+    envKeys: ['DEEPSEEK_API_KEY'],
+    detail: deepseek.ok
+      ? `模型 ${deepseek.result.ping.model} · ${deepseek.result.ping.replyPreview || 'ok'}`
+      : deepseek.error,
+    error: deepseek.error,
+    adminPath: '/admin/agent',
+  });
+
+  const stripeTiers = tip.tiers;
+  const stripeChecks = stripeTiers.length ? await checkStripeLinks(stripeTiers) : [];
+  platforms.push({
+    id: 'stripe',
+    name: 'Stripe',
+    role: '随缘打赏 · Payment Link',
+    configured: tip.enabled,
+    ok: !tip.enabled || stripeChecks.every((t) => t.ok),
+    envKeys: ['REACT_APP_STRIPE_TIP_URL', 'REACT_APP_STRIPE_TIP_URL_4', 'REACT_APP_STRIPE_TIP_URL_817', 'REACT_APP_STRIPE_TIP_URL_1926'],
+    tiers: stripeChecks,
+    detail: tip.enabled
+      ? `${stripeChecks.length} 档已配置${tip.stripeTestMode ? '（测试链接）' : ''}`
+      : '未配置 Payment Link URL',
+  });
+
+  const amap = await timed('amap', async () => {
+    const res = await fetch('/api/amap/place?keywords=北京');
+    if (res.status === 503) throw new Error('高德 Key 未配置');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return { hits: data.results?.length ?? 0 };
+  });
+
+  platforms.push({
+    id: 'amap',
+    name: '高德地图',
+    role: '国内 POI 地点搜索',
+    configured: amap.ok || !/未配置/.test(amap.error || ''),
+    ok: amap.ok,
+    ms: amap.ms,
+    envKeys: ['AMAP_WEB_SERVICE_KEY', 'REACT_APP_AMAP_KEY'],
+    detail: amap.ok ? `POI 检索正常 · ${amap.result.hits} 条样例` : amap.error,
+    error: amap.error,
+  });
+
+  return {
+    ok: platforms.every((p) => !p.configured || p.ok),
+    platforms,
+    note: 'Supabase / DeepSeek 为核心服务；Stripe / 高德为可选。DeepSeek 通过服务端 agent-health 探测。',
+  };
+}
+
 export default function AdminIntegrations() {
   const { session, isEditor } = useAdminAuth();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
-  const clientTip = getTipConfig();
-  const cloudClient = isCloudEnabled();
-
   const refresh = useCallback(async () => {
-    if (!session?.access_token) {
-      setError('请先登录协作者账号');
-      return;
-    }
     setBusy(true);
     setError('');
     try {
-      const res = await fetch('/api/agent-health', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ scope: 'integrations' }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || data.error || `HTTP ${res.status}`);
-      }
-      setResult(data);
+      const data = await runClientIntegrationChecks(session?.access_token);
+      setResult({ ...data, checkedAt: new Date().toISOString() });
     } catch (err) {
       setError(err.message || '检测失败');
     } finally {
@@ -140,10 +263,8 @@ export default function AdminIntegrations() {
   }, [session?.access_token]);
 
   useEffect(() => {
-    if (session?.access_token && isEditor) {
-      refresh();
-    }
-  }, [session?.access_token, isEditor, refresh]);
+    if (isEditor) refresh();
+  }, [isEditor, refresh]);
 
   if (!isEditor) {
     return <p className="text-sm text-gray-600">需要协作者权限。</p>;
@@ -155,7 +276,7 @@ export default function AdminIntegrations() {
         <div>
           <h1 className="text-lg font-bold text-gray-900">外接服务</h1>
           <p className="text-sm text-gray-600 mt-1">
-            检测 Vercel 环境变量对应的平台连通性。密钥仅存于服务端，此处只显示是否配置与探测结果。
+            检测各平台连通性。Supabase / Stripe 前端变量在构建时注入；DeepSeek 仅存在于 Vercel 服务端。
           </p>
         </div>
         <button
@@ -166,18 +287,6 @@ export default function AdminIntegrations() {
         >
           {busy ? '检测中…' : '重新检测'}
         </button>
-      </div>
-
-      <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-700 space-y-1">
-        <p>
-          <strong>浏览器侧（构建时注入）：</strong>
-          Supabase {cloudClient ? '✓ 已启用' : '✗ 未配'} · Stripe 打赏{' '}
-          {clientTip.enabled ? `✓ ${clientTip.tiers.length} 档` : '✗ 未配'}
-          {clientTip.stripeTestMode ? '（测试链接）' : ''}
-        </p>
-        <p className="text-slate-500">
-          修改环境变量后需在 Vercel 重新部署；Stripe / Supabase 的 REACT_APP_* 变量还要触发一次 build 才会反映到前端。
-        </p>
       </div>
 
       {error && (
@@ -194,9 +303,6 @@ export default function AdminIntegrations() {
             }`}
           >
             {result.ok ? '已配置的服务均正常' : '部分服务需关注'} · {result.checkedAt}
-            {result.totalMs != null && (
-              <span className="text-gray-500 font-normal ml-2">总耗时 {result.totalMs}ms</span>
-            )}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
