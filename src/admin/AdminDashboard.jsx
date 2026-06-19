@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SAMPLE_MARKERS, DATA_VERSION } from '../utils/constants';
+import { mergeMarkerCatalog } from '../utils/markerCatalog';
 import { loadLegacyLocalMarkers, loadLegacyLocalGallery } from '../utils/legacyStorage';
 import {
   BUILTIN_QUOTES,
@@ -30,6 +31,11 @@ import {
 } from '../services/cloudData';
 import { migrateCloudImagesToStorage } from '../services/imageStorage';
 
+function buildFullMarkerCatalog() {
+  const local = loadLegacyLocalMarkers();
+  return mergeMarkerCatalog(local, SAMPLE_MARKERS);
+}
+
 export default function AdminDashboard() {
   const [status, setStatus] = useState('');
   const [quoteStatus, setQuoteStatus] = useState('');
@@ -45,6 +51,7 @@ export default function AdminDashboard() {
   const [quoteCount, setQuoteCount] = useState(null);
   const [archiveCount, setArchiveCount] = useState(null);
   const [localMarkerCount] = useState(() => loadLegacyLocalMarkers().length);
+  const [fullMarkerCatalogCount] = useState(() => buildFullMarkerCatalog().length);
   const [localGalleryCount] = useState(() => loadLegacyLocalGallery().length);
   const [localQuotes] = useState(() => loadLegacyLocalQuotes());
   const [localArchives] = useState(() => loadLegacyLocalArchives());
@@ -92,24 +99,19 @@ export default function AdminDashboard() {
   };
 
   const handleSyncAllLocal = async () => {
-    const markers = loadLegacyLocalMarkers();
+    const markers = buildFullMarkerCatalog();
     const gallery = loadLegacyLocalGallery();
     const quotes = loadLegacyLocalQuotes();
     const archives = loadLegacyLocalArchives();
-    const parts = [];
-    if (markers.length) parts.push(`${markers.length} 条地点`);
+    const parts = [`${markers.length} 条地点（Git + 本地合并）`];
     if (gallery.length) parts.push(`${gallery.length} 条影像`);
     if (quotes.length) parts.push(`${quotes.length} 条语录`);
     if (archives.length) parts.push(`${archives.length} 条档案`);
 
-    if (!parts.length) {
-      setSyncAllStatus('失败：本浏览器未找到可同步的 localStorage 数据。');
-      return;
-    }
-
     if (
       !window.confirm(
-        `将本浏览器全部数据一次性上传到云端：${parts.join('、')}（相同 id 会覆盖）。继续？`
+        `将完整数据一次性上传到 Supabase：${parts.join('、')}。\n` +
+          '相同 id 以本浏览器本地为准覆盖 Git 内置；语录/档案一并同步。继续？'
       )
     ) {
       return;
@@ -121,9 +123,7 @@ export default function AdminDashboard() {
     setQuoteStatus('');
     setArchiveStatus('');
     try {
-      if (markers.length) {
-        await syncMarkersToCloud(markers, '全部同步', gallery);
-      }
+      await syncMarkersToCloud(markers, '全部同步', gallery);
       if (quotes.length) {
         await syncQuotesToCloud(quotes, '全部同步');
       }
@@ -348,38 +348,45 @@ export default function AdminDashboard() {
     }
   };
 
-  const hasLocalData =
-    localMarkerCount > 0 || localQuoteStats.total > 0 || localArchiveStats.total > 0;
+  const cloudMarkersIncomplete = count != null && count < SAMPLE_MARKERS.length;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-bold text-gray-900">概览</h1>
-        <p className="text-sm text-gray-600 mt-1">MVP：仅超级管理员可编辑云端主数据；访客从云端只读加载。</p>
+        <p className="text-sm text-gray-600 mt-1">
+          MVP：仅超级管理员可编辑云端主数据；访客从云端 + Git 内置合并只读加载。
+          {cloudMarkersIncomplete && (
+            <span className="block mt-1 text-amber-800">
+              云端地点（{count}）少于 Git 内置（{SAMPLE_MARKERS.length}），请点下方「全部上云」补全。
+            </span>
+          )}
+        </p>
       </div>
 
-      {hasLocalData && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 space-y-3">
-          <h2 className="text-sm font-semibold text-green-900">一键同步本浏览器全部数据</h2>
-          <p className="text-sm text-green-800">
-            地点 {localMarkerCount} · 影像 {localGalleryCount} · 语录 {localQuoteStats.total} · 档案{' '}
-            {localArchiveStats.total}
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-green-900">一键完整上云</h2>
+        <p className="text-sm text-green-800">
+          合并 Git 内置 {SAMPLE_MARKERS.length} 条 + 本浏览器本地 {localMarkerCount} 条 → 共{' '}
+          <strong>{fullMarkerCatalogCount}</strong> 条地点；影像 {localGalleryCount} · 语录{' '}
+          {localQuoteStats.total} · 档案 {localArchiveStats.total}
+        </p>
+        <button
+          type="button"
+          onClick={handleSyncAllLocal}
+          disabled={syncAllBusy || busy || quoteBusy || archiveBusy}
+          className="px-4 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {syncAllBusy
+            ? '同步中…'
+            : `全部上云（${fullMarkerCatalogCount} 地点 + 影像 + 语录 + 档案）`}
+        </button>
+        {syncAllStatus && (
+          <p className={`text-sm ${syncAllStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
+            {syncAllStatus}
           </p>
-          <button
-            type="button"
-            onClick={handleSyncAllLocal}
-            disabled={syncAllBusy || busy || quoteBusy || archiveBusy}
-            className="px-4 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-sm font-medium disabled:opacity-50"
-          >
-            {syncAllBusy ? '同步中…' : '全部上云（地点 + 影像 + 语录 + 档案）'}
-          </button>
-          {syncAllStatus && (
-            <p className={`text-sm ${syncAllStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
-              {syncAllStatus}
-            </p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-4">
