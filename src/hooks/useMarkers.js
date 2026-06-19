@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { STORAGE_KEY, VERSION_KEY, DATA_VERSION, SAMPLE_MARKERS } from '../utils/constants';
+import { STORAGE_KEY, VERSION_KEY, DATA_VERSION } from '../utils/constants';
 import { migrateAllMarkerRegions } from '../utils/regionFormat';
 import { normalizeMarkerTagList, registerMarkerTags, collectAllMarkerTags } from '../utils/markerTags';
 import { combineRemovedMarkerIds } from '../utils/removedMarkers';
@@ -14,6 +14,11 @@ import {
 } from '../services/cloudData';
 import { readJsonCache, runWhenIdle } from '../utils/storageCache';
 import { mergeMarkerCatalog } from '../utils/markerCatalog';
+import {
+  getCoreBuiltInMarkers,
+  loadExtendedBuiltInMarkers,
+  getFullBuiltInMarkers,
+} from '../utils/sampleMarkerCatalog';
 
 const { markersCache: CACHE_KEY, removedMarkerIdsCache: REMOVED_CACHE_KEY } = getStorageKeys();
 
@@ -38,7 +43,7 @@ function finalizeMarkers(markers, removedIds) {
 
 function mergeCatalogMarkers(remoteMarkers, removedIds) {
   return finalizeMarkers(
-    mergeMarkerCatalog(remoteMarkers, SAMPLE_MARKERS, removedIds),
+    mergeMarkerCatalog(remoteMarkers, getCoreBuiltInMarkers(), removedIds),
     removedIds
   );
 }
@@ -62,7 +67,7 @@ function loadFromStorage() {
     if (Array.isArray(stored) && stored.length > 0) {
       if (storedVersion < DATA_VERSION) {
         const storedIds = new Set(stored.map((m) => m.id));
-        const newItems = SAMPLE_MARKERS.filter((m) => !storedIds.has(m.id) && !removedIds.includes(m.id));
+        const newItems = getCoreBuiltInMarkers().filter((m) => !storedIds.has(m.id) && !removedIds.includes(m.id));
         const merged = mergeCatalogMarkers([...stored, ...newItems], removedIds);
         localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
@@ -161,6 +166,33 @@ export function useMarkers({ isEditor = false } = {}) {
     };
   }, [cloudMode]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadExtended = async () => {
+      try {
+        const extended = await loadExtendedBuiltInMarkers();
+        if (cancelled || !extended.length) return;
+
+        const removed = combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY) || []);
+        setMarkers((prev) => {
+          const next = finalizeMarkers(mergeMarkerCatalog(prev, extended, removed), removed);
+          if (cloudMode) persistMarkersCache(next);
+          return next;
+        });
+      } catch (err) {
+        console.error('Extended markers load failed:', err);
+      }
+    };
+
+    const cancelIdle = runWhenIdle(loadExtended, 300);
+
+    return () => {
+      cancelled = true;
+      cancelIdle();
+    };
+  }, [cloudMode]);
+
   const readOnly = cloudMode && !isEditor;
 
   const addMarker = useCallback((markerData) => {
@@ -224,8 +256,11 @@ export function useMarkers({ isEditor = false } = {}) {
 
   const resetToSample = useCallback(() => {
     if (readOnly || cloudMode) return;
-    setMarkers(SAMPLE_MARKERS);
-    setSelectedMarkerId(null);
+    getFullBuiltInMarkers().then((full) => {
+      const removed = combineRemovedMarkerIds(readJsonCache(REMOVED_CACHE_KEY) || []);
+      setMarkers(finalizeMarkers(full, removed));
+      setSelectedMarkerId(null);
+    });
   }, [readOnly, cloudMode]);
 
   const clearAll = useCallback(() => {

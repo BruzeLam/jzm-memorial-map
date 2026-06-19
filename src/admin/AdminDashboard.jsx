@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SAMPLE_MARKERS, DATA_VERSION } from '../utils/constants';
+import { DATA_VERSION } from '../utils/constants';
 import { mergeMarkerCatalog } from '../utils/markerCatalog';
+import { getCoreBuiltInMarkers, getFullBuiltInMarkers } from '../utils/sampleMarkerCatalog';
 import { loadLegacyLocalMarkers, loadLegacyLocalGallery } from '../utils/legacyStorage';
 import {
   BUILTIN_QUOTES,
@@ -31,9 +32,10 @@ import {
 } from '../services/cloudData';
 import { migrateCloudImagesToStorage } from '../services/imageStorage';
 
-function buildFullMarkerCatalog() {
+async function buildFullMarkerCatalog() {
   const local = loadLegacyLocalMarkers();
-  return mergeMarkerCatalog(local, SAMPLE_MARKERS);
+  const builtIn = await getFullBuiltInMarkers();
+  return mergeMarkerCatalog(local, builtIn);
 }
 
 export default function AdminDashboard() {
@@ -51,7 +53,8 @@ export default function AdminDashboard() {
   const [quoteCount, setQuoteCount] = useState(null);
   const [archiveCount, setArchiveCount] = useState(null);
   const [localMarkerCount] = useState(() => loadLegacyLocalMarkers().length);
-  const [fullMarkerCatalogCount] = useState(() => buildFullMarkerCatalog().length);
+  const [fullBuiltInCount, setFullBuiltInCount] = useState(() => getCoreBuiltInMarkers().length);
+  const [fullMarkerCatalogCount, setFullMarkerCatalogCount] = useState(null);
   const [localGalleryCount] = useState(() => loadLegacyLocalGallery().length);
   const [localQuotes] = useState(() => loadLegacyLocalQuotes());
   const [localArchives] = useState(() => loadLegacyLocalArchives());
@@ -68,6 +71,11 @@ export default function AdminDashboard() {
     fetchCloudArchives()
       .then((rows) => setArchiveCount(rows?.length ?? 0))
       .catch(() => setArchiveCount(null));
+    getFullBuiltInMarkers().then((builtIn) => {
+      setFullBuiltInCount(builtIn.length);
+      const local = loadLegacyLocalMarkers();
+      setFullMarkerCatalogCount(mergeMarkerCatalog(local, builtIn).length);
+    });
   }, []);
 
   const syncMarkersToCloud = async (markers, label, extraGallery = []) => {
@@ -99,7 +107,7 @@ export default function AdminDashboard() {
   };
 
   const handleSyncAllLocal = async () => {
-    const markers = buildFullMarkerCatalog();
+    const markers = await buildFullMarkerCatalog();
     const gallery = loadLegacyLocalGallery();
     const quotes = loadLegacyLocalQuotes();
     const archives = loadLegacyLocalArchives();
@@ -139,9 +147,10 @@ export default function AdminDashboard() {
   };
 
   const handleSeed = async () => {
+    const builtIn = await getFullBuiltInMarkers();
     if (
       !window.confirm(
-        `将 Git 内置 ${SAMPLE_MARKERS.length} 条地点写入云端（不含浏览器里曾单独添加的数据；已存在 id 会覆盖）。继续？`
+        `将 Git 内置 ${builtIn.length} 条地点写入云端（不含浏览器里曾单独添加的数据；已存在 id 会覆盖）。继续？`
       )
     ) {
       return;
@@ -149,7 +158,7 @@ export default function AdminDashboard() {
     setBusy(true);
     setStatus('');
     try {
-      await syncMarkersToCloud(SAMPLE_MARKERS, '内置样本');
+      await syncMarkersToCloud(builtIn, '内置样本');
     } catch (err) {
       setStatus(`失败：${err.message}`);
     } finally {
@@ -348,7 +357,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const cloudMarkersIncomplete = count != null && count < SAMPLE_MARKERS.length;
+  const cloudMarkersIncomplete = count != null && count < fullBuiltInCount;
 
   return (
     <div className="space-y-6">
@@ -358,7 +367,7 @@ export default function AdminDashboard() {
           MVP：仅超级管理员可编辑云端主数据；访客从云端 + Git 内置合并只读加载。
           {cloudMarkersIncomplete && (
             <span className="block mt-1 text-amber-800">
-              云端地点（{count}）少于 Git 内置（{SAMPLE_MARKERS.length}），请点下方「全部上云」补全。
+              云端地点（{count}）少于 Git 内置（{fullBuiltInCount}），请点下方「全部上云」补全。
             </span>
           )}
         </p>
@@ -367,8 +376,8 @@ export default function AdminDashboard() {
       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 space-y-3">
         <h2 className="text-sm font-semibold text-green-900">一键完整上云</h2>
         <p className="text-sm text-green-800">
-          合并 Git 内置 {SAMPLE_MARKERS.length} 条 + 本浏览器本地 {localMarkerCount} 条 → 共{' '}
-          <strong>{fullMarkerCatalogCount}</strong> 条地点；影像 {localGalleryCount} · 语录{' '}
+          合并 Git 内置 {fullBuiltInCount} 条 + 本浏览器本地 {localMarkerCount} 条 → 共{' '}
+          <strong>{fullMarkerCatalogCount ?? '…'}</strong> 条地点；影像 {localGalleryCount} · 语录{' '}
           {localQuoteStats.total} · 档案 {localArchiveStats.total}
         </p>
         <button
@@ -379,7 +388,7 @@ export default function AdminDashboard() {
         >
           {syncAllBusy
             ? '同步中…'
-            : `全部上云（${fullMarkerCatalogCount} 地点 + 影像 + 语录 + 档案）`}
+            : `全部上云（${fullMarkerCatalogCount ?? '…'} 地点 + 影像 + 语录 + 档案）`}
         </button>
         {syncAllStatus && (
           <p className={`text-sm ${syncAllStatus.startsWith('失败') ? 'text-red-600' : 'text-green-700'}`}>
@@ -395,7 +404,7 @@ export default function AdminDashboard() {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-xs text-gray-500">内置地点（Git）</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{SAMPLE_MARKERS.length}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{fullBuiltInCount}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-xs text-gray-500">云端语录</p>
@@ -459,7 +468,7 @@ export default function AdminDashboard() {
             disabled={busy}
             className="px-4 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium disabled:opacity-50"
           >
-            仅 Git 样本（{SAMPLE_MARKERS.length} 条）
+            仅 Git 样本（{fullBuiltInCount} 条）
           </button>
         </div>
         {status && (

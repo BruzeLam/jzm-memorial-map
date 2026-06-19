@@ -1,9 +1,5 @@
 import { isPortfolioDemoData, getStorageKeys } from '../config/branding';
 import { PORTFOLIO_SAMPLE_MARKERS } from '../data/portfolio/markers';
-import { ITINERARY_MARKERS_1990_1996 } from '../data/itineraryMarkers';
-import { ITINERARY_MARKERS_1997_2000 } from '../data/itineraryMarkers1997_2000';
-import { ITINERARY_MARKERS_2001_2002 } from '../data/itineraryMarkers2001_2002';
-import { MULTILATERAL_EVENT_MARKERS } from '../data/multilateralEvents';
 
 export const MARKER_TYPES = {
   spot: {
@@ -1159,10 +1155,6 @@ const SAMPLE_MARKERS_RAW = [
     ],
     sources: [{ title: '公开报道', note: '1990年6月1日·北京' }],
   },
-  ...ITINERARY_MARKERS_1990_1996,
-  ...ITINERARY_MARKERS_1997_2000,
-  ...ITINERARY_MARKERS_2001_2002,
-  ...MULTILATERAL_EVENT_MARKERS,
 ];
 
 /** 已从示例库撤下的标点 ID（版本迁移时从 localStorage 同步删除） */
@@ -1171,4 +1163,8 @@ export const REMOVED_MARKER_IDS = ['spot_trip_001', 'event_trip_001'];
 // 数据版本：条数变更或结构迁移时递增（34 = 2001–2002 行程 + 多边会议历史事件）
 export const DATA_VERSION = 34;
 
-export const SAMPLE_MARKERS = isPortfolioDemoData() ? PORTFOLIO_SAMPLE_MARKERS : SAMPLE_MARKERS_RAW;
+/** 首屏同步加载的核心内置标点（不含 1990–2002 行程，行程见 sampleMarkerCatalog 动态 import） */
+export const CORE_SAMPLE_MARKERS = isPortfolioDemoData() ? PORTFOLIO_SAMPLE_MARKERS : SAMPLE_MARKERS_RAW;
+
+/** @deprecated 请用 CORE_SAMPLE_MARKERS 或 getFullBuiltInMarkers()；现为仅核心子集 */
+export const SAMPLE_MARKERS = CORE_SAMPLE_MARKERS;

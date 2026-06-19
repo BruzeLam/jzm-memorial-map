@@ -38,9 +38,10 @@ async function fetchDynamicRemovedIds(supabase) {
 }
 
 async function loadFallbackSampleMarkers() {
-  const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
+  const { getFullBuiltInMarkers } = await import('../../src/utils/sampleMarkerCatalog.js');
+  const full = await getFullBuiltInMarkers();
   const removed = new Set(REMOVED_MARKER_IDS);
-  return SAMPLE_MARKERS.filter((m) => !removed.has(m.id));
+  return full.filter((m) => !removed.has(m.id));
 }
 
 export async function loadMarkersForAgent() {
@@ -66,8 +67,9 @@ export async function loadMarkersForAgent() {
     const remote = (data || [])
       .map((row) => row.payload)
       .filter((m) => m?.id && !removed.has(m.id));
-    const { SAMPLE_MARKERS } = await import('../../src/utils/constants.js');
-    return mergeMarkerCatalog(remote, SAMPLE_MARKERS, [...removed]);
+    const { getFullBuiltInMarkers } = await import('../../src/utils/sampleMarkerCatalog.js');
+    const builtIn = await getFullBuiltInMarkers();
+    return mergeMarkerCatalog(remote, builtIn, [...removed]);
   } catch (err) {
     console.warn('[agent/markers] Supabase load failed:', err?.message || err);
     return loadFallbackSampleMarkers();
