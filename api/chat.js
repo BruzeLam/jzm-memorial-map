@@ -58,10 +58,16 @@ export default async function handler(req, res) {
     : [];
 
   try {
+    const t0 = Date.now();
     const subject = getAgentSubject();
     const allMarkers = await loadMarkersForAgent();
+    console.info('[agent/chat] markers loaded', allMarkers.length, `${Date.now() - t0}ms`);
+
     const aggregate = isAggregateQuestion(message);
+    const t1 = Date.now();
     const { hits, usedLlmPlanner } = await searchMarkersForAgent(allMarkers, message, { apiKey });
+    console.info('[agent/chat] search done', hits.length, `${Date.now() - t1}ms`);
+
     const statistics = aggregate ? computeMapStatistics(allMarkers, message) : null;
 
     const summaries = aggregate ? [] : hits.map(summarizeMarkerForPrompt);
@@ -72,6 +78,7 @@ export default async function handler(req, res) {
     const skipBackground =
       shouldSkipBackgroundSupplement(message, hits.length) || Boolean(statistics);
 
+    const t2 = Date.now();
     const deepseek = createDeepSeek({ apiKey });
     const { text } = await generateText({
       model: deepseek('deepseek-chat'),
@@ -86,6 +93,7 @@ export default async function handler(req, res) {
       maxTokens: skipBackground ? 1000 : 1200,
       temperature: 0.3,
     });
+    console.info('[agent/chat] generate done', `${Date.now() - t2}ms`);
 
     res.status(200).json({
       reply: text.trim(),
@@ -114,6 +122,7 @@ export default async function handler(req, res) {
     res.status(500).json({
       error: 'agent_failed',
       message: '导览助手暂时不可用，请稍后重试',
+      detail: process.env.NODE_ENV === 'production' ? undefined : errMsg.slice(0, 200),
     });
   }
 }
