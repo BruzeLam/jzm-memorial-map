@@ -9,6 +9,7 @@ import AdminMarkerEdit from './AdminMarkerEdit';
 import AdminCollaborators from './AdminCollaborators';
 import AdminReview from './AdminReview';
 import AdminAgent from './AdminAgent';
+import AdminIntegrations from './AdminIntegrations';
 
 export default function AdminApp() {
   return (
@@ -23,6 +24,7 @@ export default function AdminApp() {
           <Route path="collaborators" element={<AdminCollaborators />} />
           <Route path="review" element={<AdminReview />} />
           <Route path="agent" element={<AdminAgent />} />
+          <Route path="integrations" element={<AdminIntegrations />} />
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
