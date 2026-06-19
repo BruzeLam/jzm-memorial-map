@@ -119,13 +119,13 @@ export default function AdminIntegrations() {
     setBusy(true);
     setError('');
     try {
-      const res = await fetch('/api/integrations-health', {
+      const res = await fetch('/api/agent-health', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ scope: 'integrations' }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

@@ -8,6 +8,7 @@ import { loadMarkersForAgent, searchMarkersForAgent, summarizeMarkerForPrompt } 
 import { isAggregateQuestion, computeMapStatistics } from './lib/agentStats.js';
 import { getAgentSystemPrompt, buildAgentUserPrompt } from './lib/agentPrompt.js';
 import { getAgentSubject } from './lib/agentContext.js';
+import { runAllIntegrationChecks } from './lib/integrationChecks.js';
 
 function step(name, fn) {
   const started = Date.now();
@@ -45,6 +46,20 @@ export default async function handler(req, res) {
     }
   }
   const runPipeline = Boolean(body?.runPipeline);
+  const scope = body?.scope === 'integrations' ? 'integrations' : 'agent';
+
+  if (scope === 'integrations') {
+    const started = Date.now();
+    const platforms = await runAllIntegrationChecks();
+    res.status(200).json({
+      ok: platforms.every((p) => !p.configured || p.ok),
+      checkedAt: new Date().toISOString(),
+      totalMs: Date.now() - started,
+      platforms,
+      note: '高德与 Stripe 为可选服务；未配置时不影响核心功能。',
+    });
+    return;
+  }
 
   const steps = [];
 
