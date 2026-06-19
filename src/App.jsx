@@ -478,7 +478,7 @@ export default function App() {
   return (
     <LanguageProvider>
     <QuotesProvider isEditor={isEditor}>
-    <ArchivesProvider isEditor={isEditor}>
+    <ArchivesProvider isEditor={isEditor} cloudFetchEnabled={showArchive || isEditor}>
     <div className="flex flex-col h-screen bg-memorial-cream-dark">
       <Header
         onOpenQuotes={() => setShowQuotes(true)}

@@ -3,8 +3,8 @@ import { useArchives } from '../hooks/useArchives';
 
 const ArchivesContext = createContext(null);
 
-export function ArchivesProvider({ children, isEditor = false }) {
-  const value = useArchives({ isEditor });
+export function ArchivesProvider({ children, isEditor = false, cloudFetchEnabled = false }) {
+  const value = useArchives({ isEditor, cloudFetchEnabled });
   return <ArchivesContext.Provider value={value}>{children}</ArchivesContext.Provider>;
 }
 
