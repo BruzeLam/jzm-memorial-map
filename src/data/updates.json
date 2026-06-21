@@ -1,4 +1,44 @@
 {
+  "2026-6-19": [
+    {
+      "type": "feature",
+      "emoji": "🔌",
+      "title": "后台外接服务状态页",
+      "description": "协作者可在 /admin/integrations 一键检测 Supabase、DeepSeek、Stripe、高德连通性；显示响应耗时、环境变量名与各平台控制台入口。"
+    },
+    {
+      "type": "feature",
+      "emoji": "🩺",
+      "title": "后台智能问诊断",
+      "description": "新增 /admin/agent 分步检测 DeepSeek API Key、catalog 加载与可选完整问答链路；服务端改用静态内置标点，修复 serverless 动态 import 卡住导致 /api/chat 超时。"
+    },
+    {
+      "type": "fix",
+      "emoji": "☁️",
+      "title": "全部上云合并完整内置目录",
+      "description": "「全部上云」时 merge Git 内置行程后再 upsert，避免云端仅 70 余条而 Git 有 200+ 条的地点数量回退。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "📦",
+      "title": "行程数据按需加载",
+      "description": "1990–2002 外事行程改为浏览器 idle 后 dynamic import；首屏仅加载核心标点，主包 gzip 约减 12KB；Admin 与智能问仍可读全量 catalog。"
+    },
+    {
+      "type": "refactor",
+      "emoji": "🧹",
+      "title": "代码瘦身与详情复用",
+      "description": "移除未使用的 SearchBar、react-calendar/web-vitals；详情弹窗抽为 MarkerDetailModal 与侧栏共用；档案馆仅在打开面板或编辑时同步云端。"
+    }
+  ],
+  "2026-6-18": [
+    {
+      "type": "optimize",
+      "emoji": "⚡",
+      "title": "地图标点增量更新",
+      "description": "选中或缩放时仅 setIcon 更新 Leaflet 标点，避免每次交互重建全部 marker；云端同步改 idle 延迟且取消全屏加载遮罩。"
+    }
+  ],
   "2026-6-16": [
     {
       "type": "optimize",
@@ -75,6 +115,18 @@
       "emoji": "☕",
       "title": "Stripe 赞赏三档（HKD）",
       "description": "续一秒 HK$4、微小的贡献 HK$8.17、谈笑风生 HK$19.26；金额与 Stripe 收银台一致。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "💬",
+      "title": "赞赏弹窗文案优化",
+      "description": "三档副标题与 HKD 金额对齐（续一秒 +1s、微小的贡献 8·17·续命、谈笑风生 1926·一杯茶）；移除 BagelPay 与国内收款码，统一 Stripe Payment Link。"
+    },
+    {
+      "type": "fix",
+      "emoji": "🗑️",
+      "title": "超管删除内置地点不再复活",
+      "description": "删除 id 写入 removed_marker_ids；刷新或重新合并 catalog 时跳过已删内置样本。"
     }
   ],
   "2026-5-25": [
@@ -127,6 +179,18 @@
       "emoji": "🔍",
       "title": "高德 POI 搜索",
       "description": "添加/编辑地点时，国内机构名可走高德 POI 检索定位，配合 OSM 底图使用。"
+    },
+    {
+      "type": "optimize",
+      "emoji": "👤",
+      "title": "顶栏账号菜单",
+      "description": "登录/退出、语言切换与赞赏入口整合到标题旁 icon 弹层；头像固定左上角，侧栏不再重复占登录位。"
+    },
+    {
+      "type": "fix",
+      "emoji": "⏱️",
+      "title": "登录限流中文提示",
+      "description": "魔法链接发送过于频繁时显示中文说明，替代英文 rate limit 原文。"
     }
   ],
   "2026-6-7": [
