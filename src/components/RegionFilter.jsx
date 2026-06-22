@@ -112,6 +112,7 @@ export default function RegionFilter({
   regionTree,
   onToggleRegion,
   onClearRegions,
+  compact = false,
 }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -180,11 +181,16 @@ export default function RegionFilter({
         ref={buttonRef}
         type="button"
         onClick={handleButtonClick}
-        className={`w-full text-xs py-1.5 px-2 rounded border transition-colors font-medium flex items-center justify-center gap-1 ${activeClass}`}
+        className={`w-full border transition-colors font-medium flex items-center justify-center gap-0.5 min-w-0 ${
+          compact ? 'text-[10px] py-1 px-1 rounded-md' : 'text-xs py-1.5 px-2 rounded'
+        } ${activeClass}`}
       >
-        🌍 {t('region.label')}
+        <span className="flex-shrink-0" aria-hidden>
+          🌍
+        </span>
+        <span className="truncate">{t('region.label')}</span>
         {hasSelection && (
-          <span className="text-memorial-gold-dark font-bold">({selectedRegionKeys.size})</span>
+          <span className="text-memorial-gold-dark font-bold flex-shrink-0">({selectedRegionKeys.size})</span>
         )}
       </button>
 

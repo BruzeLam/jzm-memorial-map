@@ -2,10 +2,9 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { collectAllMarkerTags } from '../utils/markerTags';
 import { MarkerTagPills } from './MarkerTagInput';
 import SidebarSearch from './SidebarSearch';
+import SidebarToolbar from './SidebarToolbar';
 import AgentChatInline from './AgentChatInline';
 import { useAgentChat } from '../hooks/useAgentChat';
-import FilterPanel from './FilterPanel';
-import RegionFilter from './RegionFilter';
 import MarkerDetails from './MarkerDetails';
 import AddMarkerForm from './AddMarkerForm';
 import { MARKER_TYPES } from '../utils/constants';
@@ -161,6 +160,23 @@ export default function Sidebar({
     agentLoading,
     onClearAgentChat: clearChat,
     hasAgentMessages: agentMessages.length > 0,
+  };
+
+  const toolbarProps = {
+    searchBlockProps,
+    activeFilters,
+    toggleFilter,
+    stats,
+    filteredCount: filteredMarkers.length,
+    selectedRegionKeys,
+    regionTree,
+    onToggleRegion,
+    onClearRegions,
+    onThisDayActive,
+    onToggleOnThisDay,
+    onThisDayLabel,
+    sortOrder,
+    onToggleSort: () => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc'),
   };
 
   const showAgentChat =
@@ -367,50 +383,8 @@ export default function Sidebar({
   if (compactMobile) {
     return (
       <div className="sidebar-panel flex flex-col bg-memorial-cream h-full min-h-0">
-        <div className="px-2 pt-2 pb-1.5 border-b border-memorial-border flex-shrink-0">
-          <SidebarSearch {...searchBlockProps} compact />
-        </div>
-
-        <div className="px-2 py-1.5 border-b border-memorial-border flex-shrink-0 space-y-1.5">
-          <FilterPanel activeFilters={activeFilters} toggleFilter={toggleFilter} stats={stats} />
-          <div className="flex items-center justify-between text-[10px] text-memorial-muted px-0.5">
-            <span>{t('sidebar.totalMarkers', { total: stats.total })}</span>
-            {filteredMarkers.length !== stats.total && (
-              <span>{t('sidebar.showingMarkers', { count: filteredMarkers.length })}</span>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="flex-1 min-w-0">
-              <RegionFilter
-                selectedRegionKeys={selectedRegionKeys}
-                regionTree={regionTree}
-                onToggleRegion={onToggleRegion}
-                onClearRegions={onClearRegions}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={onToggleOnThisDay}
-              title={t('sidebar.onThisDay', { date: onThisDayLabel })}
-              aria-label={t('sidebar.onThisDay', { date: onThisDayLabel })}
-              className={`flex-shrink-0 w-9 h-9 text-sm rounded-lg border transition-colors flex items-center justify-center ${
-                onThisDayActive
-                  ? 'bg-amber-50 border-amber-400 text-amber-900'
-                  : 'bg-memorial-surface border-memorial-border text-memorial-muted'
-              }`}
-            >
-              📜
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-              className="flex-shrink-0 w-9 h-9 text-xs rounded-lg bg-memorial-surface text-memorial-muted border border-memorial-border font-medium flex items-center justify-center hover:bg-memorial-cream-dark hover:text-memorial-navy transition-colors"
-              title={t('sidebar.sortTime')}
-              aria-label={t('sidebar.sortTime')}
-            >
-              {sortOrder === 'date-asc' ? '↑' : '↓'}
-            </button>
-          </div>
+        <div className="px-2 pt-2 pb-1.5 flex-shrink-0">
+          <SidebarToolbar {...toolbarProps} compact />
         </div>
 
         <MobileScrollList
@@ -469,48 +443,8 @@ export default function Sidebar({
     <div
       className="sidebar-panel flex flex-col bg-memorial-cream border-r border-memorial-border flex-shrink-0 h-full"
     >
-      <div className="px-3 pt-3 pb-2 border-b border-memorial-border">
-        <SidebarSearch {...searchBlockProps} />
-      </div>
-
-      <div className="px-3 py-2 border-b border-memorial-border">
-        <FilterPanel activeFilters={activeFilters} toggleFilter={toggleFilter} stats={stats} />
-      </div>
-
-      <div className="px-3 py-2 border-b border-memorial-border flex items-center justify-between text-xs text-memorial-muted">
-        <span>{t('sidebar.totalMarkers', { total: stats.total })}</span>
-        {filteredMarkers.length !== stats.total && (
-          <span>{t('sidebar.showingMarkers', { count: filteredMarkers.length })}</span>
-        )}
-      </div>
-
-      <div className="px-3 py-2 border-b border-memorial-border grid grid-cols-3 gap-2">
-        <RegionFilter
-          selectedRegionKeys={selectedRegionKeys}
-          regionTree={regionTree}
-          onToggleRegion={onToggleRegion}
-          onClearRegions={onClearRegions}
-        />
-        <button
-          type="button"
-          onClick={onToggleOnThisDay}
-          title={t('sidebar.onThisDay', { date: onThisDayLabel })}
-          className={`min-w-0 text-xs py-1.5 px-1.5 rounded border transition-colors font-medium flex items-center justify-center gap-0.5 ${
-            onThisDayActive
-              ? 'bg-amber-50 border-amber-400 text-amber-900'
-              : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:bg-amber-50 hover:text-amber-800'
-          }`}
-        >
-          <span className="flex-shrink-0">📜</span>
-          <span className="truncate">{t('sidebar.onThisDay', { date: onThisDayLabel })}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setSortOrder(sortOrder === 'date-asc' ? 'date-desc' : 'date-asc')}
-          className="min-w-0 text-xs py-1.5 px-2 rounded bg-memorial-surface text-memorial-muted hover:bg-memorial-cream-dark hover:text-memorial-navy transition-colors font-medium flex items-center justify-center gap-1 border border-memorial-border"
-        >
-          📅 {t('sidebar.sortTime')} {sortOrder === 'date-asc' ? '↑' : '↓'}
-        </button>
+      <div className="px-3 pt-2 pb-2 flex-shrink-0">
+        <SidebarToolbar {...toolbarProps} compact />
       </div>
 
       <div className="flex-1 overflow-y-auto sidebar-scrollable">

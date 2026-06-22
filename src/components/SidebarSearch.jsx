@@ -34,7 +34,7 @@ export default function SidebarSearch({
     : (e) => setSearchQuery(e.target.value);
 
   return (
-    <div className="space-y-2">
+    <div className={`${compact ? 'space-y-1' : 'space-y-1.5'}`}>
       {showAgent && (
         <div
           className={`flex p-0.5 rounded-lg bg-memorial-cream-dark border border-memorial-border ${compact ? 'text-[10px]' : 'text-xs'}`}
@@ -46,7 +46,7 @@ export default function SidebarSearch({
             role="tab"
             aria-selected={!isAgent}
             onClick={() => onModeChange('search')}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1 ${compact ? 'py-1' : 'py-1.5'} rounded-md font-medium transition-colors ${
               !isAgent
                 ? 'bg-memorial-surface text-memorial-navy shadow-sm'
                 : 'text-memorial-muted hover:text-memorial-ink'
@@ -60,7 +60,7 @@ export default function SidebarSearch({
             role="tab"
             aria-selected={isAgent}
             onClick={() => onModeChange('agent')}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-1 ${compact ? 'py-1' : 'py-1.5'} rounded-md font-medium transition-colors ${
               isAgent ? 'bg-memorial-surface text-violet-700 shadow-sm' : 'text-memorial-muted hover:text-memorial-ink'
             }`}
           >
