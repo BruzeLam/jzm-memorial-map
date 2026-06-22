@@ -39,14 +39,6 @@
   .memorial-divider {
     @apply border-memorial-border;
   }
-
-  .sidebar-toolbar {
-    @apply shadow-memorial;
-  }
-
-  .filter-type-cell:focus-within {
-    @apply ring-1 ring-memorial-gold/40;
-  }
 }
 
 @keyframes slideIn {
