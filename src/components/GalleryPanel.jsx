@@ -128,20 +128,20 @@ export default function GalleryPanel({
         </div>
 
         {/* Search & Upload */}
-        <div className="px-6 py-3 border-b border-gray-100 flex-shrink-0 space-y-2">
+        <div className="px-6 py-3 border-b border-memorial-border/60 flex-shrink-0 space-y-2">
           <div className="flex gap-2 items-center">
             <input
               type="text"
               placeholder={t('gallery.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400"
+              className="flex-1 px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:border-memorial-gold"
             />
             {!readOnly && !showUploadArea && (
               <button
                 onClick={() => setShowUploadArea(true)}
                 disabled={uploading}
-                className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium bg-memorial-navy hover:bg-[#162d4a] text-white rounded-lg transition-colors disabled:opacity-50"
               >
                 📸 {t('gallery.upload')}
               </button>
@@ -159,8 +159,8 @@ export default function GalleryPanel({
                 onClick={() => setSourceFilter(key)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                   sourceFilter === key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'memorial-btn-primary'
+                    : 'bg-memorial-cream-dark text-memorial-muted hover:bg-memorial-cream'
                 }`}
               >
                 {label} ({count})
@@ -175,7 +175,7 @@ export default function GalleryPanel({
               />
               <button
                 onClick={() => setShowUploadArea(false)}
-                className="text-xs text-gray-500 hover:text-gray-700"
+                className="text-xs text-memorial-muted hover:text-memorial-ink"
               >
                 ✕ {t('gallery.closeUpload')}
               </button>
@@ -186,7 +186,7 @@ export default function GalleryPanel({
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {filteredGallery.length === 0 ? (
-            <div className="text-center py-12 text-gray-400 text-sm">
+            <div className="text-center py-12 text-memorial-muted/70 text-sm">
               {searchQuery.trim() ? t('gallery.noResults') : t('gallery.empty')}
             </div>
           ) : (
@@ -199,7 +199,7 @@ export default function GalleryPanel({
                 return (
                   <div
                     key={img.id}
-                    className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors bg-gray-100 cursor-pointer"
+                    className="group relative aspect-square rounded-lg overflow-hidden border border-memorial-border hover:border-memorial-gold transition-colors bg-memorial-cream-dark cursor-pointer"
                   >
                     <img
                       src={img.data}
@@ -226,14 +226,14 @@ export default function GalleryPanel({
                       <button
                         type="button"
                         onClick={() => setViewingImageIndex(idx)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white px-3 py-1.5 rounded text-sm font-medium text-gray-700"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-memorial-surface px-3 py-1.5 rounded text-sm font-medium text-memorial-ink"
                       >
                         🔍 {t('gallery.view')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setEditingImageId(img.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white px-3 py-1.5 rounded text-sm font-medium text-gray-700"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-memorial-surface px-3 py-1.5 rounded text-sm font-medium text-memorial-ink"
                       >
                         ✏️ {t('gallery.edit')}
                       </button>

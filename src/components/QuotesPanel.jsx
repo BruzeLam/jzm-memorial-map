@@ -32,45 +32,45 @@ function UploadForm({ onSave, onCancel, initialData }) {
   return (
     <MemorialModal onClose={onCancel} zClass="z-[10000]">
       <div className="p-6">
-        <h3 className="text-base font-bold text-gray-800 mb-4">
+        <h3 className="text-base font-bold text-memorial-ink mb-4">
           {isEditing ? t('quotes.editQuote') : t('quotes.uploadQuote')}
         </h3>
 
         <div className="space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-medium text-gray-600">
+              <label className="block text-xs font-medium text-memorial-muted">
                 {t('quotes.content')} <span className="text-red-500">*</span>
               </label>
-              <span className="text-xs text-gray-500">{text.length}/200</span>
+              <span className="text-xs text-memorial-muted">{text.length}/200</span>
             </div>
             <textarea
               value={text}
               onChange={(e) => { setText(e.target.value); setError(''); }}
               rows={3}
               maxLength={200}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
+              className="w-full px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
             />
             {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">{t('quotes.source')}</label>
+            <label className="block text-xs font-medium text-memorial-muted mb-1">{t('quotes.source')}</label>
             <input
               type="text"
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+              className="w-full px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">{t('quotes.context')}</label>
+            <label className="block text-xs font-medium text-memorial-muted mb-1">{t('quotes.context')}</label>
             <input
               type="text"
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+              className="w-full px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
             />
           </div>
         </div>
@@ -79,7 +79,7 @@ function UploadForm({ onSave, onCancel, initialData }) {
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
+            className="flex-1 py-2 text-sm font-medium border border-memorial-border rounded-lg hover:bg-memorial-cream text-memorial-muted transition-colors"
           >
             {t('quotes.cancel')}
           </button>
@@ -152,47 +152,47 @@ export default function QuotesPanel({ onClose }) {
                 <button
                   type="button"
                   onClick={() => exportQuotesBackup(quotes)}
-                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
+                  className="px-3 py-1.5 text-xs font-medium border border-memorial-border rounded-lg hover:bg-memorial-cream text-memorial-muted"
                 >
                   导出备份
                 </button>
               )}
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none transition-colors ml-1"
+                className="text-memorial-muted/70 hover:text-memorial-muted text-lg leading-none transition-colors ml-1"
               >
                 ✕
               </button>
             </div>
           </div>
 
-          <div className="px-6 py-3 border-b border-gray-100">
+          <div className="px-6 py-3 border-b border-memorial-border/60">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-memorial-muted/70 text-sm">🔍</span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('quotes.searchPlaceholder')}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 bg-gray-50"
+                className="w-full pl-9 pr-4 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300 bg-memorial-cream"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-memorial-muted/70 hover:text-memorial-muted text-xs"
                 >
                   ✕
                 </button>
               )}
             </div>
             {readOnly && (
-              <p className="text-xs text-gray-500 mt-2">☁️ 语录来自云端（只读）。编辑请前往 /admin</p>
+              <p className="text-xs text-memorial-muted mt-2">☁️ 语录来自云端（只读）。编辑请前往 /admin</p>
             )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
             {filteredQuotes.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-memorial-muted/70">
                 <div className="text-3xl mb-2">🔍</div>
                 <p className="text-sm">{t('quotes.noResults')}</p>
               </div>
@@ -200,24 +200,24 @@ export default function QuotesPanel({ onClose }) {
               filteredQuotes.map((quote) => (
                 <div
                   key={quote.id}
-                  className="border border-gray-100 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors"
+                  className="border border-memorial-border/60 rounded-xl p-4 hover:border-red-200 hover:bg-red-50/30 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-gray-800 font-medium text-sm leading-relaxed mb-2 flex-1">
+                    <p className="text-memorial-ink font-medium text-sm leading-relaxed mb-2 flex-1">
                       "{quote.text}"
                     </p>
                     {!readOnly && (
                       <div className="flex gap-1 flex-shrink-0 mt-0.5">
                         <button
                           onClick={() => handleEditQuote(quote)}
-                          className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                          className="flex items-center justify-center w-7 h-7 rounded-md text-memorial-muted/70 hover:text-memorial-navy hover:bg-amber-50 transition-colors"
                           title="编辑"
                         >
                           ✎
                         </button>
                         <button
                           onClick={() => handleDeleteQuote(quote.id)}
-                          className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          className="flex items-center justify-center w-7 h-7 rounded-md text-memorial-muted/70 hover:text-red-500 hover:bg-red-50 transition-colors"
                           title="删除"
                         >
                           🗑
@@ -226,13 +226,13 @@ export default function QuotesPanel({ onClose }) {
                     )}
                   </div>
                   {quote.source && (
-                    <p className="text-xs text-gray-500 mb-1.5">—— {quote.source}</p>
+                    <p className="text-xs text-memorial-muted mb-1.5">—— {quote.source}</p>
                   )}
                   {quote.context && (
-                    <p className="text-xs text-gray-400 leading-relaxed">{quote.context}</p>
+                    <p className="text-xs text-memorial-muted/70 leading-relaxed">{quote.context}</p>
                   )}
                   {!quote.isUserAdded && (
-                    <span className="inline-block mt-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+                    <span className="inline-block mt-2 text-[10px] px-1.5 py-0.5 rounded bg-memorial-cream-dark text-memorial-muted">
                       内置
                     </span>
                   )}

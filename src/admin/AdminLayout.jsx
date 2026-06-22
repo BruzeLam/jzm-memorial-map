@@ -9,7 +9,7 @@ export default function AdminLayout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-sm text-gray-500">
+      <div className="admin-shell items-center justify-center text-sm text-memorial-muted">
         加载中…
       </div>
     );
@@ -17,17 +17,14 @@ export default function AdminLayout() {
 
   if (!user || !isEditor) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white rounded-xl shadow p-6 max-w-md w-full border border-gray-200 text-center">
-          <p className="text-sm text-gray-700 mb-4">
+      <div className="admin-shell items-center justify-center p-4">
+        <div className="admin-card p-6 max-w-md w-full text-center">
+          <p className="text-sm text-memorial-ink mb-4">
             {user && !isEditor
               ? `当前账号 ${user.email} 不在协作者列表中，无法编辑。请联系超级管理员邀请。`
               : '请先登录协作者账号。'}
           </p>
-          <Link
-            to="/admin/login"
-            className="inline-block px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium"
-          >
+          <Link to="/admin/login" className="inline-block memorial-btn-primary text-sm px-4 py-2">
             去登录
           </Link>
         </div>
@@ -41,30 +38,30 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
+    <div className="admin-shell">
+      <header className="admin-header">
         <div className="flex items-center gap-4 min-w-0">
-          <Link to="/admin" className="font-serif font-bold text-gray-900 text-sm shrink-0">
+          <Link to="/admin" className="admin-header-title">
             {getBranding().adminTitle}
           </Link>
-          <nav className="flex gap-3 text-xs text-gray-600">
-            <Link to="/admin" className="hover:text-blue-600">概览</Link>
-            <Link to="/admin/markers" className="hover:text-blue-600">地点</Link>
-            <Link to="/admin/review" className="hover:text-blue-600">审核</Link>
-            <Link to="/admin/integrations" className="hover:text-blue-600">外接服务</Link>
-            <Link to="/admin/agent" className="hover:text-blue-600">智能问</Link>
+          <nav className="flex gap-3">
+            <Link to="/admin" className="admin-nav-link">概览</Link>
+            <Link to="/admin/markers" className="admin-nav-link">地点</Link>
+            <Link to="/admin/review" className="admin-nav-link">审核</Link>
+            <Link to="/admin/integrations" className="admin-nav-link">外接服务</Link>
+            <Link to="/admin/agent" className="admin-nav-link">智能问</Link>
             {isSuperAdmin && (
-              <Link to="/admin/collaborators" className="hover:text-blue-600">协作者</Link>
+              <Link to="/admin/collaborators" className="admin-nav-link">协作者</Link>
             )}
           </nav>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-xs text-gray-500 hidden sm:inline truncate max-w-[180px]">{user.email}</span>
-          <Link to="/" className="text-xs text-gray-500 hover:text-gray-800">查看站点</Link>
+          <span className="text-xs text-memorial-muted hidden sm:inline truncate max-w-[180px]">{user.email}</span>
+          <Link to="/" className="admin-nav-link">查看站点</Link>
           <button
             type="button"
             onClick={handleSignOut}
-            className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
+            className="text-xs px-2 py-1 rounded-lg memorial-btn-secondary"
           >
             退出
           </button>

@@ -61,14 +61,14 @@ export default function AdminMarkerEdit() {
   };
 
   if (loading) {
-    return <p className="text-sm text-gray-500">加载中…</p>;
+    return <p className="text-sm text-memorial-muted">加载中…</p>;
   }
 
   if (error) {
     return (
       <div>
         <p className="text-sm text-red-600 mb-4">{error}</p>
-        <Link to="/admin/markers" className="text-sm text-blue-600">← 返回列表</Link>
+        <Link to="/admin/markers" className="text-sm text-memorial-navy">← 返回列表</Link>
       </div>
     );
   }
@@ -76,11 +76,11 @@ export default function AdminMarkerEdit() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-lg font-bold text-gray-900">{isNew ? '新建地点' : '编辑地点'}</h1>
-        <Link to="/admin/markers" className="text-sm text-gray-500 hover:text-gray-800">← 返回列表</Link>
+        <h1 className="text-lg font-bold text-memorial-navy">{isNew ? '新建地点' : '编辑地点'}</h1>
+        <Link to="/admin/markers" className="text-sm text-memorial-muted hover:text-memorial-ink">← 返回列表</Link>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 max-w-2xl">
+      <div className="admin-card p-4 max-w-2xl">
         <AddMarkerForm
           mapRef={mapRef}
           onSubmit={handleSubmit}
@@ -89,7 +89,7 @@ export default function AdminMarkerEdit() {
           allMarkerTags={allTags}
           markers={[]}
         />
-        {saving && <p className="text-xs text-gray-500 mt-2">保存中…</p>}
+        {saving && <p className="text-xs text-memorial-muted mt-2">保存中…</p>}
       </div>
     </div>
   );

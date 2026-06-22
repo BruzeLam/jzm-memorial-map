@@ -28,10 +28,10 @@ function MarkerPreview({ payload }) {
   if (!payload) return null;
   const typeInfo = MARKER_TYPES[payload.type] || MARKER_TYPES.spot;
   return (
-    <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm space-y-1">
+    <div className="mt-3 rounded-lg border border-memorial-border bg-memorial-cream p-3 text-sm space-y-1">
       <div className="flex items-center gap-2">
         <span>{typeInfo.icon}</span>
-        <span className="font-semibold text-gray-900">{payload.name}</span>
+        <span className="font-semibold text-memorial-navy">{payload.name}</span>
         <span
           className="text-xs px-2 py-0.5 rounded-full text-white"
           style={{ backgroundColor: typeInfo.color }}
@@ -39,21 +39,21 @@ function MarkerPreview({ payload }) {
           {typeInfo.label}
         </span>
       </div>
-      {payload.title && <p className="text-gray-700">{payload.title}</p>}
+      {payload.title && <p className="text-memorial-ink">{payload.title}</p>}
       {payload.date && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-memorial-muted">
           📅 {payload.date}
           {payload.endDate ? ` — ${payload.endDate}` : ''}
         </p>
       )}
       {payload.description && (
-        <p className="text-gray-600 text-xs leading-relaxed whitespace-pre-wrap">{payload.description}</p>
+        <p className="text-memorial-muted text-xs leading-relaxed whitespace-pre-wrap">{payload.description}</p>
       )}
-      <p className="text-xs text-gray-400 font-mono">
+      <p className="text-xs text-memorial-muted/70 font-mono">
         📍 {payload.latitude}, {payload.longitude}
       </p>
       {payload.images?.length > 0 && (
-        <p className="text-xs text-gray-500">📸 含 {payload.images.length} 张图片</p>
+        <p className="text-xs text-memorial-muted">📸 含 {payload.images.length} 张图片</p>
       )}
     </div>
   );
@@ -116,8 +116,8 @@ export default function AdminReview() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">内容审核</h1>
-        <p className="text-sm text-gray-600 mt-1">
+        <h1 className="text-xl font-bold text-memorial-navy">内容审核</h1>
+        <p className="text-sm text-memorial-muted mt-1">
           用户提交的内容在此审核。通过后写入正式数据并公开展示。
         </p>
       </div>
@@ -130,8 +130,8 @@ export default function AdminReview() {
             onClick={() => setStatus(tab.key)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               status === tab.key
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                ? 'memorial-btn-primary border-memorial-navy'
+                : 'bg-memorial-surface text-memorial-muted border-memorial-border hover:bg-memorial-cream'
             }`}
           >
             {tab.label}
@@ -156,9 +156,9 @@ export default function AdminReview() {
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-500">加载中…</p>
+        <p className="text-sm text-memorial-muted">加载中…</p>
       ) : rows.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-500">
+        <div className="admin-card p-8 text-center text-sm text-memorial-muted">
           {status === 'pending' ? '暂无待审核内容' : '没有记录'}
         </div>
       ) : (
@@ -167,11 +167,11 @@ export default function AdminReview() {
             const isPending = row.status === 'pending';
             const isBusy = busyId === row.id;
             return (
-              <li key={row.id} className="bg-white rounded-xl border border-gray-200 p-4">
+              <li key={row.id} className="admin-card p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                      <span className="px-2 py-0.5 rounded bg-memorial-cream-dark text-memorial-ink">
                         {TYPE_LABEL[row.type] || row.type}
                       </span>
                       <span
@@ -190,14 +190,14 @@ export default function AdminReview() {
                             : '已驳回'}
                       </span>
                     </div>
-                    <p className="text-sm font-medium text-gray-900 mt-2">
+                    <p className="text-sm font-medium text-memorial-navy mt-2">
                       {row.payload?.name || row.payload?.title || row.id}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-memorial-muted mt-1">
                       提交：{row.submitter_email} · {formatTime(row.created_at)}
                     </p>
                     {row.reviewed_at && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-memorial-muted">
                         审核：{row.reviewer_email || '—'} · {formatTime(row.reviewed_at)}
                       </p>
                     )}

@@ -39,8 +39,8 @@ export default function GalleryImageEditor({
   );
 
   const inputClass =
-    'w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400 bg-white';
-  const labelClass = 'text-xs font-medium text-gray-500 mb-1 block';
+    'w-full text-sm border border-memorial-border rounded-lg px-3 py-1.5 focus:outline-none focus:border-memorial-gold bg-white';
+  const labelClass = 'text-xs font-medium text-memorial-muted mb-1 block';
 
   return (
     <div
@@ -49,18 +49,18 @@ export default function GalleryImageEditor({
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col"
+        className="bg-memorial-surface rounded-2xl shadow-2xl w-full max-w-2xl mx-4 flex flex-col"
         style={{ maxHeight: '85vh' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-800">
+        <div className="px-6 py-4 border-b border-memorial-border/60 flex items-center justify-between flex-shrink-0">
+          <h2 className="text-xl font-bold text-memorial-ink">
             {isNew ? t('gallery.newImageInfo') : t('gallery.editImageInfo')}
           </h2>
           <button
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+            className="text-memorial-muted/70 hover:text-memorial-muted text-2xl leading-none"
           >
             ✕
           </button>
@@ -73,7 +73,7 @@ export default function GalleryImageEditor({
             <img
               src={image.data}
               alt={image.name}
-              className="w-full max-h-48 object-contain rounded-lg border border-gray-200"
+              className="w-full max-h-48 object-contain rounded-lg border border-memorial-border"
             />
           </div>
 
@@ -102,7 +102,7 @@ export default function GalleryImageEditor({
           {/* 关联地点 */}
           <div>
             <label className={labelClass}>{t('gallery.linkMarker')}</label>
-            <p className="text-xs text-gray-400 mb-2">{t('gallery.linkHint')}</p>
+            <p className="text-xs text-memorial-muted/70 mb-2">{t('gallery.linkHint')}</p>
 
             {/* 搜索框 */}
             <input
@@ -115,8 +115,8 @@ export default function GalleryImageEditor({
 
             {/* 当前关联 */}
             {relatedMarker && (
-              <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-                <span className="text-sm text-gray-700">
+              <div className="mb-2 p-2 bg-amber-50/80 border border-amber-200/80 rounded-lg flex items-center justify-between">
+                <span className="text-sm text-memorial-ink">
                   📍 {relatedMarker.icon} {relatedMarker.name}
                 </span>
                 <button
@@ -130,13 +130,13 @@ export default function GalleryImageEditor({
             )}
 
             {/* 地点列表 */}
-            <div className="bg-gray-50 rounded-lg p-2 max-h-40 overflow-y-auto border border-gray-200">
+            <div className="bg-memorial-cream rounded-lg p-2 max-h-40 overflow-y-auto border border-memorial-border">
               {markers.length === 0 ? (
-                <div className="text-sm text-gray-400 text-center py-4">
+                <div className="text-sm text-memorial-muted/70 text-center py-4">
                   {t('gallery.noMarkers')}
                 </div>
               ) : filteredMarkers.length === 0 ? (
-                <div className="text-sm text-gray-400 text-center py-4">
+                <div className="text-sm text-memorial-muted/70 text-center py-4">
                   {t('gallery.noMatch')}
                 </div>
               ) : (
@@ -148,8 +148,8 @@ export default function GalleryImageEditor({
                       onClick={() => handleSelectMarker(marker.id)}
                       className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                         form.relatedMarker === marker.id
-                          ? 'bg-blue-500 text-white font-medium'
-                          : 'bg-white border border-gray-200 hover:bg-blue-50 text-gray-700'
+                          ? 'bg-amber-50/800 text-white font-medium'
+                          : 'bg-memorial-surface border border-memorial-border hover:bg-amber-50 text-memorial-ink'
                       }`}
                     >
                       {marker.icon} {marker.name}{marker.city ? ` (${marker.city})` : ''}
@@ -162,7 +162,7 @@ export default function GalleryImageEditor({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-gray-100 flex gap-2 flex-shrink-0">
+        <div className="px-6 py-3 border-t border-memorial-border/60 flex gap-2 flex-shrink-0">
           {!isNew && (
             <button
               type="button"
@@ -179,13 +179,13 @@ export default function GalleryImageEditor({
           <div className="flex-1" />
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium bg-memorial-cream-dark hover:bg-gray-200 text-memorial-muted rounded-lg transition-colors"
           >
             {isNew ? t('gallery.cancelUpload') : t('common.cancel')}
           </button>
           <button
             onClick={() => onSave(form)}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium bg-memorial-navy hover:bg-[#162d4a] text-white rounded-lg transition-colors"
           >
             {isNew ? t('common.upload') : t('common.save')}
           </button>

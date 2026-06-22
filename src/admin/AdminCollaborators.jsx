@@ -16,9 +16,9 @@ export default function AdminCollaborators() {
 
   if (!isSuperAdmin) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 text-sm text-gray-600">
+      <div className="admin-card p-6 text-sm text-memorial-muted">
         仅超级管理员可管理协作者账号。
-        <Link to="/admin" className="block mt-3 text-blue-600 hover:underline">← 返回概览</Link>
+        <Link to="/admin" className="block mt-3 text-memorial-navy hover:underline">← 返回概览</Link>
       </div>
     );
   }
@@ -79,32 +79,32 @@ export default function AdminCollaborators() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">协作者账号</h1>
-        <p className="text-sm text-gray-600 mt-1">
+        <h1 className="text-xl font-bold text-memorial-navy">协作者账号</h1>
+        <p className="text-sm text-memorial-muted mt-1">
           访客只读；列表中的邮箱登录后可编辑地图与后台内容。超级管理员可邀请他人并分配角色。
         </p>
       </div>
 
-      <form onSubmit={handleAdd} className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">邀请协作者</h2>
+      <form onSubmit={handleAdd} className="admin-card p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-memorial-ink">邀请协作者</h2>
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">邮箱</label>
+            <label className="block text-xs text-memorial-muted mb-1">邮箱</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full text-sm border border-memorial-border rounded-lg px-3 py-2"
               placeholder="collaborator@example.com"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">角色</label>
+            <label className="block text-xs text-memorial-muted mb-1">角色</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white"
+              className="w-full text-sm memorial-input"
             >
               <option value="editor">协作者（可编辑内容）</option>
               <option value="admin">超级管理员（可编辑 + 管理账号）</option>
@@ -112,40 +112,40 @@ export default function AdminCollaborators() {
           </div>
         </div>
         <div>
-          <label className="block text-xs text-gray-500 mb-1">备注（可选）</label>
+          <label className="block text-xs text-memorial-muted mb-1">备注（可选）</label>
           <input
             type="text"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2"
+            className="w-full text-sm border border-memorial-border rounded-lg px-3 py-2"
             placeholder="如：负责华南地区标点"
           />
         </div>
         <button
           type="submit"
           disabled={submitting}
-          className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 rounded-lg memorial-btn-primary text-sm font-medium disabled:opacity-50"
         >
           {submitting ? '添加中…' : '添加协作者'}
         </button>
       </form>
 
       {status && (
-        <div className="text-sm px-4 py-3 rounded-lg bg-blue-50 border border-blue-100 text-blue-900">
+        <div className="text-sm px-4 py-3 rounded-lg bg-amber-50/80 border border-amber-200/80 text-memorial-navy">
           {status}
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100 text-sm font-semibold text-gray-800">
+      <div className="admin-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-memorial-border/60 text-sm font-semibold text-memorial-ink">
           当前协作者（{collaborators.length}）
         </div>
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-memorial-border/60">
           {collaborators.map((c) => (
             <li key={c.email} className="px-4 py-3 flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">{c.email}</div>
-                <div className="text-xs text-gray-500 mt-0.5">
+                <div className="text-sm font-medium text-memorial-navy truncate">{c.email}</div>
+                <div className="text-xs text-memorial-muted mt-0.5">
                   {ROLE_LABEL[c.role] || c.role}
                   {c.notes ? ` · ${c.notes}` : ''}
                 </div>
@@ -154,7 +154,7 @@ export default function AdminCollaborators() {
                 <button
                   type="button"
                   onClick={() => handleSendLink(c.email)}
-                  className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
+                  className="text-xs px-2 py-1 rounded border border-memorial-border hover:bg-memorial-cream"
                 >
                   发登录链接
                 </button>
@@ -169,7 +169,7 @@ export default function AdminCollaborators() {
             </li>
           ))}
           {collaborators.length === 0 && (
-            <li className="px-4 py-6 text-sm text-gray-500 text-center">暂无协作者，请先执行数据库迁移脚本。</li>
+            <li className="px-4 py-6 text-sm text-memorial-muted text-center">暂无协作者，请先执行数据库迁移脚本。</li>
           )}
         </ul>
       </div>

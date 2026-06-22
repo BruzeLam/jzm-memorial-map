@@ -244,15 +244,14 @@ export default function AddMarkerForm({
   const adminLabels = getAdminFieldLabels(form.country, form.province);
   const regionPreview = formatRegionPath(form);
 
-  const inputClass =
-    'w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400 bg-white';
-  const labelClass = 'text-xs font-medium text-gray-500 mb-1 block';
+  const inputClass = 'w-full text-sm memorial-input px-3 py-1.5';
+  const labelClass = 'admin-label';
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700">{isEditing ? '编辑标记' : '添加标记'}</span>
-        <button type="button" onClick={onCancel} className="text-gray-400 hover:text-gray-600 text-sm">✕</button>
+    <form onSubmit={handleSubmit} className="memorial-card overflow-hidden">
+      <div className="px-3 py-2 bg-memorial-cream border-b border-memorial-border flex items-center justify-between">
+        <span className="text-sm font-medium font-memorial text-memorial-navy">{isEditing ? '编辑标记' : '添加标记'}</span>
+        <button type="button" onClick={onCancel} className="text-memorial-muted hover:text-memorial-ink text-sm">✕</button>
       </div>
 
       <div className="px-3 py-3 space-y-3 max-h-[60vh] overflow-y-auto">
@@ -267,7 +266,7 @@ export default function AddMarkerForm({
                 className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
                   form.type === key
                     ? 'text-white border-transparent'
-                    : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                    : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:border-memorial-gold'
                 }`}
                 style={form.type === key ? { backgroundColor: t.color, borderColor: t.color } : {}}
               >
@@ -301,17 +300,17 @@ export default function AddMarkerForm({
           />
         </div>
 
-        <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="p-2.5 bg-amber-50/80 border border-amber-200/80 rounded-lg">
           <div className="flex items-center justify-between mb-1">
             <label className={labelClass + ' mb-0'}>行政区划</label>
-            <span className="text-[10px] text-blue-600">{adminLabels.hint}</span>
+            <span className="text-[10px] text-memorial-navy">{adminLabels.hint}</span>
           </div>
           {regionPreview && (
-            <p className="text-xs text-gray-600 mb-2 font-medium">{regionPreview}</p>
+            <p className="text-xs text-memorial-muted mb-2 font-medium">{regionPreview}</p>
           )}
-          <div className="text-sm text-gray-700 space-y-1">
+          <div className="text-sm text-memorial-ink space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-gray-500 min-w-14">国家:</span>
+              <span className="text-memorial-muted min-w-14">国家:</span>
               <input
                 type="text"
                 className={inputClass + ' text-xs'}
@@ -322,7 +321,7 @@ export default function AddMarkerForm({
             </div>
             <div className="relative">
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 min-w-14">{adminLabels.level2}:</span>
+                <span className="text-memorial-muted min-w-14">{adminLabels.level2}:</span>
                 <input
                   type="text"
                   className={inputClass + ' text-xs'}
@@ -334,13 +333,13 @@ export default function AddMarkerForm({
                 />
               </div>
               {showProvinceSuggestions && provinceSuggestions.length > 0 && (
-                <div className="absolute z-[10000] left-14 right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                <div className="absolute z-[10000] left-14 right-0 top-full mt-0.5 bg-memorial-surface border border-memorial-border rounded-lg shadow-lg max-h-40 overflow-y-auto">
                   {provinceSuggestions.map((suggestion, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onMouseDown={() => selectProvince(suggestion)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-b border-memorial-border/60 last:border-0"
                     >
                       {suggestion}
                     </button>
@@ -350,7 +349,7 @@ export default function AddMarkerForm({
             </div>
             <div className="relative">
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 min-w-14">{adminLabels.level3}:</span>
+                <span className="text-memorial-muted min-w-14">{adminLabels.level3}:</span>
                 <input
                   type="text"
                   className={inputClass + ' text-xs'}
@@ -362,13 +361,13 @@ export default function AddMarkerForm({
                 />
               </div>
               {showCitySuggestions && citySuggestions.length > 0 && (
-                <div className="absolute z-[10000] left-14 right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                <div className="absolute z-[10000] left-14 right-0 top-full mt-0.5 bg-memorial-surface border border-memorial-border rounded-lg shadow-lg max-h-40 overflow-y-auto">
                   {citySuggestions.map((suggestion, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onMouseDown={() => selectCity(suggestion)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-gray-100 last:border-0"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-amber-50 border-b border-memorial-border/60 last:border-0"
                     >
                       {suggestion}
                     </button>
@@ -400,7 +399,7 @@ export default function AddMarkerForm({
                 className={`text-xs px-2 py-1 rounded-md font-medium transition-colors ${
                   mapPickForForm
                     ? 'bg-orange-100 text-orange-700 ring-1 ring-orange-300'
-                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    : 'bg-amber-50/80 text-memorial-navy hover:bg-amber-100'
                 }`}
               >
                 {mapPickForForm ? '取消地图选点' : '📍 在地图上选点'}
@@ -409,7 +408,7 @@ export default function AddMarkerForm({
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-gray-400 mb-0.5 block">纬度</label>
+              <label className="text-[10px] text-memorial-muted/70 mb-0.5 block">纬度</label>
               <input
                 required
                 type="number"
@@ -421,7 +420,7 @@ export default function AddMarkerForm({
               />
             </div>
             <div>
-              <label className="text-[10px] text-gray-400 mb-0.5 block">经度</label>
+              <label className="text-[10px] text-memorial-muted/70 mb-0.5 block">经度</label>
               <input
                 required
                 type="number"
@@ -445,14 +444,14 @@ export default function AddMarkerForm({
             onClick={() => setShowDatePicker(!showDatePicker)}
             className={`w-full py-1.5 px-3 rounded-lg border text-sm font-medium transition-colors ${
               showDatePicker
-                ? 'bg-blue-50 border-blue-400 text-blue-600'
-                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                ? 'bg-amber-50/80 border-memorial-gold text-memorial-navy'
+                : 'bg-memorial-surface border-memorial-border text-memorial-muted hover:border-memorial-border'
             }`}
           >
             📅 选择日期
           </button>
           {form.date && (
-            <div className="text-sm text-gray-600 mt-2 px-2 py-1.5 bg-blue-50 rounded-lg">
+            <div className="text-sm text-memorial-muted mt-2 px-2 py-1.5 bg-amber-50/80 rounded-lg">
               选中: {form.date}{form.endDate ? ` — ${form.endDate}` : ''}
             </div>
           )}
@@ -517,14 +516,14 @@ export default function AddMarkerForm({
             placeholder="整段访问的共性说明；选同标签可自动填入，也可留空由其它站点提供"
           />
           {tagAutofillHint && (
-            <p className="text-xs text-blue-600 mt-1">{tagAutofillHint}</p>
+            <p className="text-xs text-memorial-navy mt-1">{tagAutofillHint}</p>
           )}
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className={labelClass + ' mb-0'}>📸 图片</label>
-            <span className="text-xs text-gray-400">{form.images.length} 张</span>
+            <span className="text-xs text-memorial-muted/70">{form.images.length} 张</span>
           </div>
           <ImageUploadInput
             onUpload={handleImageUpload}
@@ -533,7 +532,7 @@ export default function AddMarkerForm({
           />
           {form.images.length > 0 && (
             <div className="mt-2">
-              <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square border border-gray-200">
+              <div className="relative bg-memorial-cream-dark rounded-lg overflow-hidden aspect-square border border-memorial-border">
                 <img
                   src={form.images[form.images.length - 1].data}
                   alt="preview"
@@ -547,7 +546,7 @@ export default function AddMarkerForm({
                   ✕
                 </button>
               </div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-memorial-muted mt-1">
                 最新 (共 {form.images.length} 张)
               </div>
             </div>
@@ -557,7 +556,7 @@ export default function AddMarkerForm({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className={labelClass + ' mb-0'}>资料来源</label>
-            <button type="button" onClick={addSource} className="text-xs text-blue-500 hover:text-blue-700">+ 添加</button>
+            <button type="button" onClick={addSource} className="text-xs text-memorial-navy hover:text-memorial-navy">+ 添加</button>
           </div>
           {form.sources.map((s, i) => (
             <div key={i} className="flex gap-1 mb-1">
@@ -574,18 +573,18 @@ export default function AddMarkerForm({
                 placeholder="备注"
               />
               {form.sources.length > 1 && (
-                <button type="button" onClick={() => removeSource(i)} className="text-gray-400 hover:text-red-400 text-xs px-1">✕</button>
+                <button type="button" onClick={() => removeSource(i)} className="text-memorial-muted/70 hover:text-red-400 text-xs px-1">✕</button>
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="px-3 py-2 bg-gray-50 border-t border-gray-200 flex gap-2">
+      <div className="px-3 py-2 bg-memorial-cream border-t border-memorial-border flex gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-100 text-gray-600"
+          className="flex-1 py-1.5 text-sm memorial-btn-secondary"
         >
           取消
         </button>

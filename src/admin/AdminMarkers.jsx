@@ -45,10 +45,10 @@ export default function AdminMarkers() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-lg font-bold text-gray-900">地点管理</h1>
+        <h1 className="text-lg font-bold text-memorial-navy">地点管理</h1>
         <Link
           to="/admin/markers/new"
-          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+          className="px-3 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium"
         >
           + 新建
         </Link>
@@ -59,19 +59,19 @@ export default function AdminMarkers() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="搜索名称、id…"
-        className="w-full max-w-md px-3 py-2 text-sm border border-gray-300 rounded-lg"
+        className="w-full max-w-md px-3 py-2 text-sm border border-memorial-border rounded-lg"
       />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loading ? (
-        <p className="text-sm text-gray-500">加载中…</p>
+        <p className="text-sm text-memorial-muted">加载中…</p>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <ul className="divide-y divide-gray-100">
+        <div className="admin-card overflow-hidden">
+          <ul className="divide-y divide-memorial-border/60">
             {filtered.map((m) => {
               const typeInfo = MARKER_TYPES[m.type] || MARKER_TYPES.spot;
               return (
-                <li key={m.id} className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50">
+                <li key={m.id} className="px-4 py-3 flex items-start gap-3 hover:bg-memorial-cream">
                   <span
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
                     style={{ backgroundColor: typeInfo.color }}
@@ -80,10 +80,10 @@ export default function AdminMarkers() {
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-gray-900 truncate">{m.name}</span>
-                      <span className="text-[10px] text-gray-400">{m.id}</span>
+                      <span className="font-medium text-memorial-navy truncate">{m.name}</span>
+                      <span className="text-[10px] text-memorial-muted/70">{m.id}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-memorial-muted mt-0.5">
                       {markerTypeLabel(m.type)}
                       {m.date ? ` · ${m.date}` : ''}
                       {m.images?.length ? ` · ${m.images.length} 图` : ''}
@@ -92,7 +92,7 @@ export default function AdminMarkers() {
                   <div className="flex gap-2 shrink-0">
                     <Link
                       to={`/admin/markers/${encodeURIComponent(m.id)}`}
-                      className="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-white"
+                      className="text-xs px-2 py-1 rounded-lg memorial-btn-secondary"
                     >
                       编辑
                     </Link>
@@ -108,7 +108,7 @@ export default function AdminMarkers() {
               );
             })}
             {filtered.length === 0 && (
-              <li className="px-4 py-8 text-center text-sm text-gray-400">暂无数据，请先在概览页导入内置数据。</li>
+              <li className="px-4 py-8 text-center text-sm text-memorial-muted/70">暂无数据，请先在概览页导入内置数据。</li>
             )}
           </ul>
         </div>

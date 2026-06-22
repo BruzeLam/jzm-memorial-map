@@ -19,7 +19,7 @@ const PLATFORM_LINKS = {
 function StatusBadge({ configured, ok }) {
   if (!configured) {
     return (
-      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">未配置</span>
+      <span className="text-xs px-2 py-0.5 rounded-full bg-memorial-cream-dark text-memorial-muted">未配置</span>
     );
   }
   if (ok) {
@@ -36,24 +36,24 @@ function PlatformCard({ platform }) {
   const dashboard = PLATFORM_LINKS[platform.id];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+    <div className="admin-card p-4 space-y-3">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">{platform.name}</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{platform.role}</p>
+          <h3 className="text-sm font-semibold text-memorial-navy">{platform.name}</h3>
+          <p className="text-xs text-memorial-muted mt-0.5">{platform.role}</p>
         </div>
         <StatusBadge configured={platform.configured} ok={platform.ok} />
       </div>
 
-      <p className={`text-sm ${platform.ok || !platform.configured ? 'text-gray-700' : 'text-red-700'}`}>
+      <p className={`text-sm ${platform.ok || !platform.configured ? 'text-memorial-ink' : 'text-red-700'}`}>
         {platform.detail || platform.error || '—'}
         {platform.ms != null && platform.configured && (
-          <span className="text-gray-400 ml-1">({platform.ms}ms)</span>
+          <span className="text-memorial-muted/70 ml-1">({platform.ms}ms)</span>
         )}
       </p>
 
       {platform.tiers?.length > 0 && (
-        <ul className="text-xs text-gray-600 space-y-1">
+        <ul className="text-xs text-memorial-muted space-y-1">
           {platform.tiers.map((tier) => (
             <li key={tier.id} className="flex items-center gap-2">
               <span className={tier.ok ? 'text-green-600' : 'text-red-600'}>
@@ -71,7 +71,7 @@ function PlatformCard({ platform }) {
           {platform.envKeys.map((key) => (
             <code
               key={key}
-              className="text-[10px] bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 text-gray-600"
+              className="text-[10px] bg-memorial-cream border border-memorial-border rounded px-1.5 py-0.5 text-memorial-muted"
             >
               {key}
             </code>
@@ -85,7 +85,7 @@ function PlatformCard({ platform }) {
             href={dashboard}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:text-blue-800"
+            className="text-xs text-memorial-navy hover:text-memorial-ink"
           >
             打开 {platform.name} 控制台 →
           </a>
@@ -267,15 +267,15 @@ export default function AdminIntegrations() {
   }, [isEditor, refresh]);
 
   if (!isEditor) {
-    return <p className="text-sm text-gray-600">需要协作者权限。</p>;
+    return <p className="text-sm text-memorial-muted">需要协作者权限。</p>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">外接服务</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-lg font-bold text-memorial-navy">外接服务</h1>
+          <p className="text-sm text-memorial-muted mt-1">
             检测各平台连通性。Supabase / Stripe 前端变量在构建时注入；DeepSeek 仅存在于 Vercel 服务端。
           </p>
         </div>
@@ -283,7 +283,7 @@ export default function AdminIntegrations() {
           type="button"
           disabled={busy}
           onClick={refresh}
-          className="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium disabled:opacity-50 shrink-0"
+          className="px-4 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium disabled:opacity-50 shrink-0"
         >
           {busy ? '检测中…' : '重新检测'}
         </button>
@@ -311,7 +311,7 @@ export default function AdminIntegrations() {
             ))}
           </div>
 
-          {result.note && <p className="text-xs text-gray-500">{result.note}</p>}
+          {result.note && <p className="text-xs text-memorial-muted">{result.note}</p>}
         </>
       )}
     </div>

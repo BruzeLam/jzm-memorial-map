@@ -362,8 +362,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-bold text-gray-900">概览</h1>
-        <p className="text-sm text-gray-600 mt-1">
+        <h1 className="text-lg font-bold text-memorial-navy">概览</h1>
+        <p className="text-sm text-memorial-muted mt-1">
           MVP：仅超级管理员可编辑云端主数据；访客从云端 + Git 内置合并只读加载。
           {cloudMarkersIncomplete && (
             <span className="block mt-1 text-amber-800">
@@ -398,41 +398,41 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">云端地点</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{count ?? '—'}</p>
+        <div className="admin-stat-card">
+          <p className="text-xs text-memorial-muted">云端地点</p>
+          <p className="text-2xl font-bold text-memorial-navy mt-1">{count ?? '—'}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">内置地点（Git）</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{fullBuiltInCount}</p>
+        <div className="admin-stat-card">
+          <p className="text-xs text-memorial-muted">内置地点（Git）</p>
+          <p className="text-2xl font-bold text-memorial-navy mt-1">{fullBuiltInCount}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">云端语录</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{quoteCount ?? '—'}</p>
+        <div className="admin-stat-card">
+          <p className="text-xs text-memorial-muted">云端语录</p>
+          <p className="text-2xl font-bold text-memorial-navy mt-1">{quoteCount ?? '—'}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">本浏览器语录</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{localQuoteStats.total}</p>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="admin-stat-card">
+          <p className="text-xs text-memorial-muted">本浏览器语录</p>
+          <p className="text-2xl font-bold text-memorial-navy mt-1">{localQuoteStats.total}</p>
+          <p className="text-xs text-memorial-muted/70 mt-1">
             内置 {localQuoteStats.builtin} · 自添 {localQuoteStats.userAdded}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">云端档案</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{archiveCount ?? '—'}</p>
+        <div className="admin-stat-card">
+          <p className="text-xs text-memorial-muted">云端档案</p>
+          <p className="text-2xl font-bold text-memorial-navy mt-1">{archiveCount ?? '—'}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">本浏览器档案</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{localArchiveStats.total}</p>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="admin-stat-card">
+          <p className="text-xs text-memorial-muted">本浏览器档案</p>
+          <p className="text-2xl font-bold text-memorial-navy mt-1">{localArchiveStats.total}</p>
+          <p className="text-xs text-memorial-muted/70 mt-1">
             内置 {localArchiveStats.builtin} · 自添 {localArchiveStats.userAdded}
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">地点 · 恢复 / 导入</h2>
-        <p className="text-sm text-gray-600">
+      <div className="admin-card p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-memorial-ink">地点 · 恢复 / 导入</h2>
+        <p className="text-sm text-memorial-muted">
           若你曾在<strong>本浏览器</strong>录入更多地点，旧数据通常还在 localStorage 里，优先用绿色按钮恢复。
         </p>
         {localMarkerCount > 0 && (
@@ -452,7 +452,7 @@ export default function AdminDashboard() {
               {busy ? '导入中…' : `恢复地点（${localMarkerCount} 条）`}
             </button>
           )}
-          <label className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium cursor-pointer disabled:opacity-50">
+          <label className="px-4 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium cursor-pointer disabled:opacity-50">
             地点 JSON 导入
             <input
               type="file"
@@ -476,12 +476,12 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">语录 · 恢复 / 上云</h2>
-        <p className="text-sm text-gray-600">
+      <div className="admin-card p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-memorial-ink">语录 · 恢复 / 上云</h2>
+        <p className="text-sm text-memorial-muted">
           Git 内置语录 <strong>{BUILTIN_QUOTES.length} 条</strong>；你本浏览器现有{' '}
           <strong>{localQuoteStats.total}</strong> 条（自添 {localQuoteStats.userAdded} 条）。
-          首次上云语录需先在 Supabase 执行 <code className="text-xs bg-gray-100 px-1 rounded">supabase/migration-quotes.sql</code>。
+          首次上云语录需先在 Supabase 执行 <code className="text-xs bg-memorial-cream-dark px-1 rounded">supabase/migration-quotes.sql</code>。
         </p>
         {localQuoteStats.total > BUILTIN_QUOTES.length && (
           <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
@@ -501,11 +501,11 @@ export default function AdminDashboard() {
             type="button"
             onClick={handleQuotesExport}
             disabled={!localQuoteStats.total}
-            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium disabled:opacity-50"
+            className="px-4 py-2 rounded-lg bg-memorial-ink hover:bg-memorial-navy text-white text-sm font-medium disabled:opacity-50"
           >
             下载语录备份 JSON
           </button>
-          <label className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium cursor-pointer disabled:opacity-50">
+          <label className="px-4 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium cursor-pointer disabled:opacity-50">
             语录 JSON 导入
             <input
               type="file"
@@ -523,13 +523,13 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">档案馆 · 恢复 / 上云</h2>
-        <p className="text-sm text-gray-600">
+      <div className="admin-card p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-memorial-ink">档案馆 · 恢复 / 上云</h2>
+        <p className="text-sm text-memorial-muted">
           Git 内置档案 <strong>{BUILTIN_ARCHIVES.length} 条</strong>；你本浏览器现有{' '}
           <strong>{localArchiveStats.total}</strong> 条（自添 {localArchiveStats.userAdded} 条）。
           首次上云档案需先在 Supabase 执行{' '}
-          <code className="text-xs bg-gray-100 px-1 rounded">supabase/migration-archives.sql</code>。
+          <code className="text-xs bg-memorial-cream-dark px-1 rounded">supabase/migration-archives.sql</code>。
         </p>
         {localArchiveStats.userAdded > 0 && (
           <p className="text-sm text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
@@ -549,11 +549,11 @@ export default function AdminDashboard() {
             type="button"
             onClick={handleArchivesExport}
             disabled={!localArchiveStats.total}
-            className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium disabled:opacity-50"
+            className="px-4 py-2 rounded-lg bg-memorial-ink hover:bg-memorial-navy text-white text-sm font-medium disabled:opacity-50"
           >
             下载档案备份 JSON
           </button>
-          <label className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium cursor-pointer disabled:opacity-50">
+          <label className="px-4 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium cursor-pointer disabled:opacity-50">
             档案 JSON 导入
             <input
               type="file"
@@ -571,12 +571,12 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">图片对象存储（P2-05）</h2>
-        <p className="text-sm text-gray-600">
-          新上传的图片会在保存时自动写入 Supabase Storage（bucket <code className="text-xs bg-gray-100 px-1 rounded">images</code>
+      <div className="admin-card p-4 space-y-3">
+        <h2 className="text-sm font-semibold text-memorial-ink">图片对象存储（P2-05）</h2>
+        <p className="text-sm text-memorial-muted">
+          新上传的图片会在保存时自动写入 Supabase Storage（bucket <code className="text-xs bg-memorial-cream-dark px-1 rounded">images</code>
           ）。若云端仍有旧 Base64 数据，请先在 SQL Editor 执行{' '}
-          <code className="text-xs bg-gray-100 px-1 rounded">supabase/migration-storage.sql</code>，再点下方按钮一次性迁移。
+          <code className="text-xs bg-memorial-cream-dark px-1 rounded">supabase/migration-storage.sql</code>，再点下方按钮一次性迁移。
         </p>
         <button
           type="button"
@@ -600,7 +600,7 @@ export default function AdminDashboard() {
       <div className="flex gap-3">
         <Link
           to="/admin/markers"
-          className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium"
+          className="px-4 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium"
         >
           管理地点 →
         </Link>

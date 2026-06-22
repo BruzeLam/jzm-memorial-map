@@ -79,24 +79,24 @@ export default function AdminAgent() {
   );
 
   if (!isEditor) {
-    return <p className="text-sm text-gray-600">需要协作者权限。</p>;
+    return <p className="text-sm text-memorial-muted">需要协作者权限。</p>;
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-bold text-gray-900">智能问诊断</h1>
-        <p className="text-sm text-gray-600 mt-1">
+        <h1 className="text-lg font-bold text-memorial-navy">智能问诊断</h1>
+        <p className="text-sm text-memorial-muted mt-1">
           分步检测导览 Agent 链路：环境变量、标点加载、DeepSeek 调用。完整链路会额外跑样例问题「他到过哪些国家？」。
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-wrap gap-2">
+      <div className="admin-card p-4 flex flex-wrap gap-2">
         <button
           type="button"
           disabled={busy}
           onClick={() => runDiagnostics(false)}
-          className="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 rounded-lg bg-memorial-navy hover:bg-[#162d4a] text-white text-sm font-medium disabled:opacity-50"
         >
           {busy ? '检测中…' : '快速检测'}
         </button>
@@ -126,7 +126,7 @@ export default function AdminAgent() {
             {result.ok ? '全部通过' : '存在失败项'} · {result.checkedAt}
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+          <div className="admin-card divide-y divide-memorial-border/60">
             {(result.steps || []).map((step) => (
               <div key={step.name} className="px-4 py-3 flex items-start gap-3">
                 <span
@@ -137,18 +137,18 @@ export default function AdminAgent() {
                   {step.ok ? '✓' : '✗'}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-memorial-navy">
                     {STEP_LABELS[step.name] || step.name}
-                    <span className="text-gray-400 font-normal ml-2">{step.ms}ms</span>
+                    <span className="text-memorial-muted/70 font-normal ml-2">{step.ms}ms</span>
                   </p>
-                  <p className="text-xs text-gray-600 mt-0.5 break-words">{formatStepDetail(step)}</p>
+                  <p className="text-xs text-memorial-muted mt-0.5 break-words">{formatStepDetail(step)}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="text-xs text-gray-500">
-            若 DeepSeek 或 Function 超时，请到 Vercel → Logs 查看 <code className="text-gray-700">[agent/chat]</code>{' '}
+          <p className="text-xs text-memorial-muted">
+            若 DeepSeek 或 Function 超时，请到 Vercel → Logs 查看 <code className="text-memorial-ink">[agent/chat]</code>{' '}
             分步耗时。Hobby 计划 Function 上限 10s，Pro 可配置 60s。
           </p>
         </div>

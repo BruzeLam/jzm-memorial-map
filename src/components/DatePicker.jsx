@@ -10,17 +10,12 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
   const validateAndParse = (dateStr) => parseFlexibleDateInput(dateStr);
 
   const handleConfirm = () => {
-    // 如果没有填写起始日期，直接返回空值（日期可选）
     if (!startDate.trim() && !endDate.trim()) {
-      onSelect({
-        date: undefined,
-        endDate: undefined,
-      });
+      onSelect({ date: undefined, endDate: undefined });
       onClose && onClose();
       return;
     }
 
-    // 如果只有结束日期但没有起始日期，报错
     if (!startDate.trim() && endDate.trim()) {
       setError('请输入起始日期');
       return;
@@ -42,27 +37,15 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
     }
 
     if (parsedEnd && parsedStart === parsedEnd) {
-      // Same date - treat as point
-      onSelect({
-        date: parsedStart,
-        endDate: undefined,
-      });
+      onSelect({ date: parsedStart, endDate: undefined });
     } else if (parsedEnd) {
-      // Different dates - treat as range, ensure chronological order
       const [minDate, maxDate] =
         getSortableDateKey(parsedStart) <= getSortableDateKey(parsedEnd)
           ? [parsedStart, parsedEnd]
           : [parsedEnd, parsedStart];
-      onSelect({
-        date: minDate,
-        endDate: maxDate,
-      });
+      onSelect({ date: minDate, endDate: maxDate });
     } else {
-      // Only start date - point mode
-      onSelect({
-        date: parsedStart,
-        endDate: undefined,
-      });
+      onSelect({ date: parsedStart, endDate: undefined });
     }
 
     onClose && onClose();
@@ -75,15 +58,14 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
   };
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-3 max-w-sm">
-      <p className="text-xs text-gray-500 mb-2 px-2 py-1 bg-gray-50 rounded">
+    <div className="memorial-card p-3 max-w-sm shadow-memorial-lg">
+      <p className="text-xs text-memorial-muted mb-2 px-2 py-1 bg-memorial-cream rounded-lg">
         可留空；结束日期留空表示单日。支持 YYYY、YYYY-MM、YYYY-MM-DD
       </p>
 
-      {/* Input fields */}
       <div className="space-y-2 mb-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">起始日期</label>
+          <label className="admin-label">起始日期</label>
           <input
             type="text"
             value={startDate}
@@ -92,12 +74,12 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
               setError('');
             }}
             placeholder="YYYY / YYYY-MM / YYYY-MM-DD"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+            className="admin-input font-mono"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">结束日期（可选）</label>
+          <label className="admin-label">结束日期（可选）</label>
           <input
             type="text"
             value={endDate}
@@ -106,40 +88,33 @@ export default function DatePicker({ onSelect, initialDate, initialEndDate, onCl
               setError('');
             }}
             placeholder="同上（留空为时间点）"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+            className="admin-input font-mono"
           />
         </div>
       </div>
 
-      {/* Error message */}
       {error && (
-        <div className="mb-2 px-2 py-1.5 bg-red-50 border border-red-200 rounded text-xs text-red-600">
+        <div className="mb-2 px-2 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600">
           {error}
         </div>
       )}
 
-      {/* Selected dates display */}
       {startDate && (
-        <div className="mb-2 px-2 py-1 bg-blue-50 rounded text-xs text-gray-700 text-center font-medium">
+        <div className="mb-2 px-2 py-1 bg-amber-50 border border-amber-200/80 rounded-lg text-xs text-memorial-ink text-center font-medium">
           选中: {endDate && startDate !== endDate ? `${startDate} — ${endDate}` : startDate}
         </div>
       )}
 
-      {/* Action buttons */}
       <div className="flex gap-2">
         <button
           type="button"
           onClick={handleReset}
           disabled={!startDate && !endDate}
-          className="flex-1 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:hover:bg-white transition-colors"
+          className="flex-1 py-2 text-sm memorial-btn-secondary disabled:opacity-40"
         >
           重置
         </button>
-        <button
-          type="button"
-          onClick={handleConfirm}
-          className="flex-1 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-40 disabled:hover:bg-blue-500 font-medium transition-colors"
-        >
+        <button type="button" onClick={handleConfirm} className="flex-1 py-2 text-sm memorial-btn-primary">
           确定
         </button>
       </div>

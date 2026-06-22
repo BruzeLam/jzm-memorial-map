@@ -125,33 +125,33 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+        className="bg-memorial-surface rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
-          <h3 className="text-base font-bold text-gray-800">
+        <div className="px-6 py-4 border-b border-memorial-border/60 flex-shrink-0">
+          <h3 className="text-base font-bold text-memorial-ink">
             {isEditing ? t('archive.formEdit') : t('archive.formAdd')}
           </h3>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">标题（可选）</label>
+            <label className="block text-xs font-medium text-memorial-muted mb-1">标题（可选）</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="列表中显示的简短标题"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+              className="w-full px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-medium text-gray-600">
+              <label className="block text-xs font-medium text-memorial-muted">
                 正文 <span className="text-red-500">*</span>
               </label>
-              <span className="text-xs text-gray-500">{text.length}/20000</span>
+              <span className="text-xs text-memorial-muted">{text.length}/20000</span>
             </div>
             <textarea
               value={text}
@@ -159,24 +159,24 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
               placeholder="较长原文、讲话摘录等；可直接粘贴含 https:// 的链接"
               rows={10}
               maxLength={20000}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-y min-h-[160px]"
+              className="w-full px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-y min-h-[160px]"
             />
             {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">出处 / 引文</label>
+            <label className="block text-xs font-medium text-memorial-muted mb-1">出处 / 引文</label>
             <textarea
               value={source}
               onChange={(e) => setSource(e.target.value)}
               placeholder="文献名、讲话场合、日期等"
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
+              className="w-full px-3 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-xs font-medium text-memorial-muted mb-1">
               {t('archive.tagsLabel')}
             </label>
             <ArchiveTagInput
@@ -189,7 +189,7 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">相关链接</label>
+            <label className="block text-xs font-medium text-memorial-muted mb-1">相关链接</label>
             <div className="space-y-2">
               {links.map((link, idx) => (
                 <div key={idx} className="flex gap-2">
@@ -202,7 +202,7 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
                       setLinks(next);
                     }}
                     placeholder="链接说明"
-                    className="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg text-xs"
+                    className="flex-1 px-2 py-1.5 border border-memorial-border rounded-lg text-xs"
                   />
                   <input
                     type="url"
@@ -213,13 +213,13 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
                       setLinks(next);
                     }}
                     placeholder="https://"
-                    className="flex-[1.2] px-2 py-1.5 border border-gray-300 rounded-lg text-xs"
+                    className="flex-[1.2] px-2 py-1.5 border border-memorial-border rounded-lg text-xs"
                   />
                   {links.length > 1 && (
                     <button
                       type="button"
                       onClick={() => setLinks(links.filter((_, i) => i !== idx))}
-                      className="text-gray-400 hover:text-red-500 px-1"
+                      className="text-memorial-muted/70 hover:text-red-500 px-1"
                     >
                       ✕
                     </button>
@@ -237,7 +237,7 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">配图</label>
+            <label className="block text-xs font-medium text-memorial-muted mb-1">配图</label>
             {images.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {images.map((img, idx) => (
@@ -245,7 +245,7 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
                     <img
                       src={img.data}
                       alt={img.name || ''}
-                      className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                      className="w-20 h-20 object-cover rounded-lg border border-memorial-border"
                     />
                     <button
                       type="button"
@@ -258,7 +258,7 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
                 ))}
               </div>
             )}
-            <label className="inline-flex items-center gap-2 px-3 py-2 border border-dashed border-gray-300 rounded-lg text-xs text-gray-600 cursor-pointer hover:bg-gray-50">
+            <label className="inline-flex items-center gap-2 px-3 py-2 border border-dashed border-memorial-border rounded-lg text-xs text-memorial-muted cursor-pointer hover:bg-memorial-cream">
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -272,11 +272,11 @@ function ArchiveForm({ onSave, onCancel, initialData, allTags }) {
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 flex gap-2 flex-shrink-0">
+        <div className="px-6 py-4 border-t border-memorial-border/60 flex gap-2 flex-shrink-0">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600"
+            className="flex-1 py-2 text-sm font-medium border border-memorial-border rounded-lg hover:bg-memorial-cream text-memorial-muted"
           >
             取消
           </button>
@@ -356,40 +356,40 @@ export default function ArchivePanel({ onClose }) {
               )}
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none ml-1"
+                className="text-memorial-muted/70 hover:text-memorial-muted text-lg leading-none ml-1"
               >
                 ✕
               </button>
             </div>
           </div>
 
-          <div className="px-6 py-3 border-b border-gray-100">
+          <div className="px-6 py-3 border-b border-memorial-border/60">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-memorial-muted/70 text-sm">🔍</span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('archive.searchPlaceholder')}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-gray-50"
+                className="w-full pl-9 pr-4 py-2 border border-memorial-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-memorial-cream"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-memorial-muted/70 text-xs"
                 >
                   ✕
                 </button>
               )}
             </div>
             {readOnly && (
-              <p className="text-xs text-gray-500 mt-2">☁️ 档案馆来自云端（只读）。编辑请前往 /admin</p>
+              <p className="text-xs text-memorial-muted mt-2">☁️ 档案馆来自云端（只读）。编辑请前往 /admin</p>
             )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
             {filtered.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-memorial-muted/70">
                 <div className="text-3xl mb-2">🔍</div>
                 <p className="text-sm">{t('archive.noResults')}</p>
               </div>
@@ -399,7 +399,7 @@ export default function ArchivePanel({ onClose }) {
                 return (
                   <article
                     key={item.id}
-                    className="border border-gray-100 rounded-xl overflow-hidden hover:border-amber-200 transition-colors"
+                    className="border border-memorial-border/60 rounded-xl overflow-hidden hover:border-amber-200 transition-colors"
                   >
                     <button
                       type="button"
@@ -407,11 +407,11 @@ export default function ArchivePanel({ onClose }) {
                       className="w-full text-left px-4 py-3 flex items-start justify-between gap-2 bg-amber-50/40 hover:bg-amber-50/70"
                     >
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-800 mb-0.5">
+                        <h3 className="text-sm font-semibold text-memorial-ink mb-0.5">
                           {listPreview(item)}
                         </h3>
                         {item.source && !expanded && (
-                          <p className="text-xs text-gray-500 truncate">—— {item.source}</p>
+                          <p className="text-xs text-memorial-muted truncate">—— {item.source}</p>
                         )}
                         {!expanded && item.tags?.length > 0 && (
                           <ArchiveTagPills
@@ -421,7 +421,7 @@ export default function ArchivePanel({ onClose }) {
                           />
                         )}
                       </div>
-                      <span className="text-gray-400 text-xs flex-shrink-0 mt-1">
+                      <span className="text-memorial-muted/70 text-xs flex-shrink-0 mt-1">
                         {expanded ? `${t('archive.collapse')} ▲` : `${t('archive.expand')} ▼`}
                       </span>
                     </button>
@@ -435,14 +435,14 @@ export default function ArchivePanel({ onClose }) {
                                 setEditingItem(item);
                                 setShowForm(true);
                               }}
-                              className="w-7 h-7 rounded-md text-gray-400 hover:text-blue-500 hover:bg-blue-50"
+                              className="w-7 h-7 rounded-md text-memorial-muted/70 hover:text-memorial-navy hover:bg-amber-50"
                               title="编辑"
                             >
                               ✎
                             </button>
                             <button
                               onClick={() => handleDelete(item.id)}
-                              className="w-7 h-7 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50"
+                              className="w-7 h-7 rounded-md text-memorial-muted/70 hover:text-red-500 hover:bg-red-50"
                               title="删除"
                             >
                               🗑
@@ -450,12 +450,12 @@ export default function ArchivePanel({ onClose }) {
                           </div>
                         )}
 
-                        <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap mb-3">
+                        <div className="text-sm text-memorial-ink leading-relaxed whitespace-pre-wrap mb-3">
                           <TextWithLinks text={item.text} />
                         </div>
 
                         {item.source && (
-                          <p className="text-xs text-gray-600 mb-2 border-l-2 border-amber-300 pl-2">
+                          <p className="text-xs text-memorial-muted mb-2 border-l-2 border-amber-300 pl-2">
                             —— {item.source}
                           </p>
                         )}
@@ -497,7 +497,7 @@ export default function ArchivePanel({ onClose }) {
                                 <img
                                   src={img.data}
                                   alt={img.name || ''}
-                                  className="w-24 h-24 object-cover rounded-lg border border-gray-200 hover:opacity-90"
+                                  className="w-24 h-24 object-cover rounded-lg border border-memorial-border hover:opacity-90"
                                 />
                               </button>
                             ))}

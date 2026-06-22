@@ -39,6 +39,42 @@
   .memorial-divider {
     @apply border-memorial-border;
   }
+
+  .admin-shell {
+    @apply min-h-screen bg-memorial-cream-dark flex flex-col;
+  }
+
+  .admin-header {
+    @apply bg-memorial-surface border-b border-memorial-border px-4 py-3 flex items-center justify-between gap-3 shadow-memorial;
+  }
+
+  .admin-header-title {
+    @apply font-memorial font-bold text-memorial-navy text-sm shrink-0;
+  }
+
+  .admin-nav-link {
+    @apply text-xs text-memorial-muted hover:text-memorial-navy transition-colors;
+  }
+
+  .admin-card {
+    @apply bg-memorial-surface rounded-xl border border-memorial-border shadow-memorial;
+  }
+
+  .admin-stat-card {
+    @apply admin-card p-4;
+  }
+
+  .admin-label {
+    @apply block text-xs font-medium text-memorial-muted mb-1;
+  }
+
+  .admin-input {
+    @apply w-full px-3 py-2 text-sm memorial-input;
+  }
+
+  .admin-section-title {
+    @apply text-sm font-semibold text-memorial-ink;
+  }
 }
 
 @keyframes slideIn {
