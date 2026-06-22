@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { collectAllMarkerTags } from '../utils/markerTags';
 import { MarkerTagPills } from './MarkerTagInput';
-import SidebarSearch from './SidebarSearch';
 import SidebarToolbar from './SidebarToolbar';
 import AgentChatInline from './AgentChatInline';
 import { useAgentChat } from '../hooks/useAgentChat';
