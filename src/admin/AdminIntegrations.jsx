@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from './useAdminAuth';
-import { getTipConfig } from '../lib/tipConfig';
 import { isCloudEnabled } from '../lib/cloudConfig';
 import {
   fetchCloudMarkers,
@@ -12,10 +11,6 @@ import {
 const PLATFORM_LINKS = {
   supabase: 'https://supabase.com/dashboard',
   deepseek: 'https://platform.deepseek.com/',
-  afdian: 'https://afdian.net/dashboard/home',
-  stripe: 'https://dashboard.stripe.com/',
-  creem: 'https://creem.io/dashboard',
-  payment: 'https://afdian.net/dashboard/home',
   amap: 'https://console.amap.com/',
 };
 
@@ -113,48 +108,8 @@ async function timed(label, fn) {
   }
 }
 
-async function checkPaymentLinks(tiers, provider) {
-  const checks = await Promise.all(
-    tiers.map(async (tier) => {
-      try {
-        const res = await fetch(tier.paymentUrl, { method: 'HEAD', mode: 'no-cors' });
-        void res;
-        const url = tier.paymentUrl;
-        const testMode =
-          provider === 'creem'
-            ? /\/test\//i.test(url) || /test\.creem/i.test(url)
-            : provider === 'stripe'
-              ? /\/test_/i.test(url)
-              : false;
-        return {
-          id: tier.id,
-          label: tier.label,
-          ok: true,
-          testMode,
-        };
-      } catch {
-        const url = tier.paymentUrl;
-        const testMode =
-          provider === 'creem'
-            ? /\/test\//i.test(url) || /test\.creem/i.test(url)
-            : provider === 'stripe'
-              ? /\/test_/i.test(url)
-              : false;
-        return {
-          id: tier.id,
-          label: tier.label,
-          ok: false,
-          testMode,
-        };
-      }
-    })
-  );
-  return checks;
-}
-
 async function runClientIntegrationChecks(sessionToken) {
   const platforms = [];
-  const tip = getTipConfig();
 
   const supabase = await timed('supabase', async () => {
     if (!isCloudEnabled()) throw new Error('REACT_APP_SUPABASE_URL / ANON_KEY 未配置');
@@ -218,57 +173,6 @@ async function runClientIntegrationChecks(sessionToken) {
     adminPath: '/admin/agent',
   });
 
-  const paymentTiers = tip.tiers;
-  const paymentChecks = paymentTiers.length
-    ? await checkPaymentLinks(paymentTiers, tip.provider)
-    : [];
-  const tipFlagOn = (process.env.REACT_APP_TIP_ENABLED || '').trim().toLowerCase() === 'true';
-  const paymentName =
-    tip.provider === 'afdian' ? '爱发电' : tip.provider === 'creem' ? 'Creem' : tip.provider === 'stripe' ? 'Stripe' : '随缘打赏';
-  const paymentEnvKeys = [
-    'REACT_APP_TIP_ENABLED',
-    ...(tip.provider === 'afdian'
-      ? [
-          'REACT_APP_AFDIAN_TIP_URL',
-          'REACT_APP_AFDIAN_TIP_URL_4',
-          'REACT_APP_AFDIAN_TIP_URL_817',
-          'REACT_APP_AFDIAN_TIP_URL_1926',
-        ]
-      : tip.provider === 'creem'
-        ? [
-            'REACT_APP_CREEM_TIP_URL',
-            'REACT_APP_CREEM_TIP_URL_4',
-            'REACT_APP_CREEM_TIP_URL_817',
-            'REACT_APP_CREEM_TIP_URL_1926',
-          ]
-        : tip.provider === 'stripe'
-          ? [
-              'REACT_APP_STRIPE_TIP_URL',
-              'REACT_APP_STRIPE_TIP_URL_4',
-              'REACT_APP_STRIPE_TIP_URL_817',
-              'REACT_APP_STRIPE_TIP_URL_1926',
-            ]
-          : [
-              'REACT_APP_AFDIAN_TIP_URL_*',
-              'REACT_APP_CREEM_TIP_URL_*',
-              'REACT_APP_STRIPE_TIP_URL_*',
-            ]),
-  ];
-  platforms.push({
-    id: tip.provider || 'payment',
-    name: paymentName,
-    role: '随缘打赏 · Payment Link',
-    configured: tipFlagOn,
-    ok: !tipFlagOn || (tip.enabled && paymentChecks.every((t) => t.ok)),
-    envKeys: paymentEnvKeys,
-    tiers: paymentChecks,
-    detail: tip.enabled
-      ? `${paymentChecks.length} 档已配置${tip.testMode ? '（测试链接）' : ''}`
-      : tipFlagOn
-        ? '已开启但未配置 Payment Link URL'
-        : '未开启（REACT_APP_TIP_ENABLED≠true）',
-  });
-
   const amap = await timed('amap', async () => {
     const res = await fetch('/api/amap/place?keywords=北京');
     if (res.status === 503) throw new Error('高德 Key 未配置');
@@ -292,7 +196,7 @@ async function runClientIntegrationChecks(sessionToken) {
   return {
     ok: platforms.every((p) => !p.configured || p.ok),
     platforms,
-    note: 'Supabase / DeepSeek 为核心服务；爱发电 / Creem / Stripe / 高德为可选。DeepSeek 通过服务端 agent-health 探测。',
+    note: 'Supabase / DeepSeek 为核心服务；高德为可选。DeepSeek 通过服务端 agent-health 探测。',
   };
 }
 
@@ -329,7 +233,7 @@ export default function AdminIntegrations() {
         <div>
           <h1 className="text-lg font-bold text-memorial-navy">外接服务</h1>
           <p className="text-sm text-memorial-muted mt-1">
-            检测各平台连通性。Supabase / 爱发电 / Creem / Stripe 前端变量在构建时注入；DeepSeek 仅存在于 Vercel 服务端。
+            检测各平台连通性。Supabase 前端变量在构建时注入；DeepSeek 仅存在于 Vercel 服务端。
           </p>
         </div>
         <button

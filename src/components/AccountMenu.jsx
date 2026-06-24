@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../i18n/LanguageContext';
 import { isCloudEnabled } from '../lib/cloudConfig';
-import { useTipAvailable } from '../hooks/useTipAvailable';
-import TipModal from './TipModal';
 import { fetchMySubmissionStats } from '../services/submissions';
 
 function getDisplayName(email) {
@@ -154,9 +152,6 @@ export default function AccountMenu({
   const cloudOn = isCloudEnabled();
   const { user, isEditor, isSuperAdmin, signOut, loading } = useAuth();
   const [open, setOpen] = useState(false);
-  const [tipOpen, setTipOpen] = useState(false);
-  const { enabled: tipEnabled, tiers: tipTiers, provider: tipProvider, testMode, embedCheckout } =
-    useTipAvailable();
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const rootRef = useRef(null);
@@ -319,22 +314,6 @@ export default function AccountMenu({
             </div>
           )}
 
-          {tipEnabled && (
-            <div className="px-1.5 py-1.5 border-b border-gray-100">
-              <MenuRow
-                icon="☕"
-                label={t('account.supportTip')}
-                onClick={() => {
-                  setTipOpen(true);
-                  close();
-                }}
-              />
-              <p className="px-3 pt-0.5 pb-1 text-[10px] text-gray-500 leading-snug">
-                {t('account.supportTipHint')}
-              </p>
-            </div>
-          )}
-
           <LanguageSection />
           <LocalDataSection
             dataReadOnly={dataReadOnly}
@@ -344,14 +323,6 @@ export default function AccountMenu({
           />
         </div>
       )}
-      <TipModal
-        open={tipOpen}
-        tiers={tipTiers}
-        provider={tipProvider || 'afdian'}
-        testMode={testMode}
-        embedCheckout={embedCheckout}
-        onClose={() => setTipOpen(false)}
-      />
     </div>
   );
 }
