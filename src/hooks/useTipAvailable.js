@@ -1,12 +1,15 @@
 import { getTipConfig } from '../lib/tipConfig';
 
-/** 赞赏 · Stripe Payment Link 三档（HKD） */
+/** 赞赏 · 爱发电 / Creem / Stripe Payment Link 三档 */
 export function useTipAvailable() {
-  const { enabled, tiers, stripeTestMode } = getTipConfig();
+  const { enabled, tiers, provider, testMode, embedCheckout } = getTipConfig();
   return {
     loading: false,
     enabled,
     tiers,
-    stripeTestMode,
+    provider,
+    testMode,
+    embedCheckout,
+    stripeTestMode: testMode,
   };
 }

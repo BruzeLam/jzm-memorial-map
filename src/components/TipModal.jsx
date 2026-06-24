@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../i18n/LanguageContext';
-import { formatTipHkd } from '../lib/tipConfig';
+import { formatTierPrice } from '../lib/tipConfig';
 
 function TierIcon({ tierId }) {
   if (tierId === 'plus1s') return '⏱️';
@@ -8,9 +8,18 @@ function TierIcon({ tierId }) {
   return '🎙️';
 }
 
-export default function TipModal({ open, tiers = [], stripeTestMode = false, onClose }) {
+export default function TipModal({
+  open,
+  tiers = [],
+  provider = 'afdian',
+  testMode = false,
+  embedCheckout = true,
+  stripeTestMode = false,
+  onClose,
+}) {
   const { t } = useI18n();
   const [checkoutUrl, setCheckoutUrl] = useState('');
+  const isTest = testMode || stripeTestMode;
 
   const resetCheckout = useCallback(() => setCheckoutUrl(''), []);
 
@@ -29,6 +38,36 @@ export default function TipModal({ open, tiers = [], stripeTestMode = false, onC
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose, checkoutUrl, resetCheckout]);
+
+  const openCheckout = (url) => {
+    if (embedCheckout) {
+      setCheckoutUrl(url);
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const copyKeys = {
+    afdian: {
+      subtitle: 'tip.subtitleAfdian',
+      tierHint: 'tip.tierHintAfdian',
+      test: 'tip.stripeTest',
+      frameTitle: 'tip.afdianFrameTitle',
+    },
+    creem: {
+      subtitle: 'tip.subtitleCreem',
+      tierHint: 'tip.tierHintCreem',
+      test: 'tip.creemTest',
+      frameTitle: 'tip.creemFrameTitle',
+    },
+    stripe: {
+      subtitle: 'tip.subtitleStripe',
+      tierHint: 'tip.tierHintStripe',
+      test: 'tip.stripeTest',
+      frameTitle: 'tip.stripeFrameTitle',
+    },
+  };
+  const keys = copyKeys[provider] || copyKeys.stripe;
 
   if (!open || !tiers.length) return null;
 
@@ -51,9 +90,9 @@ export default function TipModal({ open, tiers = [], stripeTestMode = false, onC
             <h2 id="tip-modal-title" className="text-base font-semibold text-[#1e3a5f]">
               {t('tip.title')}
             </h2>
-            <p className="text-xs text-[#6b5b45] mt-1 leading-relaxed">{t('tip.subtitle')}</p>
-            {stripeTestMode && (
-              <p className="text-[10px] text-amber-800 font-medium mt-1.5">{t('tip.stripeTest')}</p>
+            <p className="text-xs text-[#6b5b45] mt-1 leading-relaxed">{t(keys.subtitle)}</p>
+            {isTest && (
+              <p className="text-[10px] text-amber-800 font-medium mt-1.5">{t(keys.test)}</p>
             )}
           </div>
           <button
@@ -87,7 +126,7 @@ export default function TipModal({ open, tiers = [], stripeTestMode = false, onC
             </div>
             <div className="relative flex-1 min-h-[420px] sm:min-h-[480px] bg-white">
               <iframe
-                title={t('tip.stripeFrameTitle')}
+                title={t(keys.frameTitle)}
                 src={checkoutUrl}
                 className="absolute inset-0 w-full h-full border-0"
                 allow="payment *"
@@ -100,7 +139,7 @@ export default function TipModal({ open, tiers = [], stripeTestMode = false, onC
               <button
                 key={tier.id}
                 type="button"
-                onClick={() => setCheckoutUrl(tier.paymentUrl)}
+                onClick={() => openCheckout(tier.paymentUrl)}
                 className="w-full flex items-center gap-3 rounded-xl border border-[#d4bc8a] bg-white/80 hover:bg-white hover:border-[#c9a86c] px-3 py-3 text-left transition-colors"
               >
                 <span className="text-2xl leading-none" aria-hidden>
@@ -111,12 +150,12 @@ export default function TipModal({ open, tiers = [], stripeTestMode = false, onC
                   <span className="block text-[11px] text-[#6b5b45] mt-0.5 truncate">{tier.subtitle}</span>
                 </span>
                 <span className="shrink-0 text-sm font-bold text-[#8b6914] tabular-nums">
-                  {formatTipHkd(tier.priceHkd)}
+                  {formatTierPrice(tier, provider)}
                 </span>
               </button>
             ))}
             <p className="text-[10px] text-center text-[#6b5b45]/90 leading-relaxed pt-2">
-              {t('tip.tierHint')}
+              {t(keys.tierHint)}
             </p>
             <p className="text-[10px] text-center text-[#6b5b45]/90 leading-relaxed">
               {t('tip.footer')}
