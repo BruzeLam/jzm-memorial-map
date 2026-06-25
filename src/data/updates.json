@@ -1,10 +1,32 @@
 {
+  "2026-6-24": [
+    {
+      "type": "refactor",
+      "emoji": "☕",
+      "title": "下线站内赞赏入口",
+      "description": "移除账号菜单赞赏弹窗与 Stripe / Creem / 爱发电等支付接入；三档梗文案（续一秒 / 8·17 / 1926）保留于代码备查，日后可再接赞助平台。"
+    }
+  ],
+  "2026-6-22": [
+    {
+      "type": "optimize",
+      "emoji": "🎨",
+      "title": "设计系统收尾",
+      "description": "Admin 全站、AddMarkerForm、DatePicker、影像馆 / 语录 / 档案馆大弹窗统一 memorial 暖色 token；补充 admin-* 共用样式类。"
+    },
+    {
+      "type": "fix",
+      "emoji": "📋",
+      "title": "侧栏筛选回归列表式",
+      "description": "撤销三列紧凑工具栏实验，恢复列表 + compact 小字号与较短类型提示，兼顾信息密度与可读性。"
+    }
+  ],
   "2026-6-19": [
     {
       "type": "feature",
       "emoji": "🔌",
       "title": "后台外接服务状态页",
-      "description": "协作者可在 /admin/integrations 一键检测 Supabase、DeepSeek、Stripe、高德连通性；显示响应耗时、环境变量名与各平台控制台入口。"
+      "description": "协作者可在 /admin/integrations 一键检测 Supabase、DeepSeek、高德连通性；显示响应耗时、环境变量名与各平台控制台入口（前端探测，不增大 Serverless 体积）。"
     },
     {
       "type": "feature",
@@ -105,22 +127,28 @@
   ],
   "2026-6-17": [
     {
+      "type": "optimize",
+      "emoji": "🎨",
+      "title": "纪念暖色设计系统（P1–P4）",
+      "description": "统一 design token；侧栏、详情、Header、弹窗换肤；地图 flyTo / 脉冲选中、浮窗类型色联动；侧栏收起把手重设计；筛选恢复分类说明与文字标签。"
+    },
+    {
       "type": "fix",
       "emoji": "☁️",
       "title": "恢复地点全量合并策略",
       "description": "云端记录 + 内置样本补全（同 id 以云为准）；已删 ID 仍写入 removed_marker_ids，删除不再复活。"
     },
     {
-      "type": "feature",
-      "emoji": "☕",
-      "title": "Stripe 赞赏三档（HKD）",
-      "description": "续一秒 HK$4、微小的贡献 HK$8.17、谈笑风生 HK$19.26；金额与 Stripe 收银台一致。"
+      "type": "fix",
+      "emoji": "👆",
+      "title": "地图点击与侧栏整页详情",
+      "description": "恢复标点气泡点击；选中地点侧栏整页展示简介，点 ✕ 返回列表（与 6-16 条目合并落地）。"
     },
     {
-      "type": "optimize",
-      "emoji": "💬",
-      "title": "赞赏弹窗文案优化",
-      "description": "三档副标题与 HKD 金额对齐（续一秒 +1s、微小的贡献 8·17·续命、谈笑风生 1926·一杯茶）；移除 BagelPay 与国内收款码，统一 Stripe Payment Link。"
+      "type": "feature",
+      "emoji": "☕",
+      "title": "Stripe 赞赏三档（HKD，已下线）",
+      "description": "曾上线续一秒 HK$4、微小的贡献 HK$8.17、谈笑风生 HK$19.26；6-24 已移除站内入口，文案保留备查。"
     },
     {
       "type": "fix",
@@ -130,12 +158,6 @@
     }
   ],
   "2026-5-25": [
-    {
-      "type": "feature",
-      "emoji": "☕",
-      "title": "Stripe 赞赏入口",
-      "description": "账号菜单新增「赞赏 · 支持维护」，通过 Stripe Payment Link 收银台完成随缘支持。"
-    },
     {
       "type": "fix",
       "emoji": "✉️",
@@ -184,7 +206,7 @@
       "type": "optimize",
       "emoji": "👤",
       "title": "顶栏账号菜单",
-      "description": "登录/退出、语言切换与赞赏入口整合到标题旁 icon 弹层；头像固定左上角，侧栏不再重复占登录位。"
+      "description": "登录/退出与语言切换整合到标题旁 icon 弹层；头像固定左上角，侧栏不再重复占登录位。"
     },
     {
       "type": "fix",
