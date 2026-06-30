@@ -171,6 +171,7 @@
 
 | 步骤 | 说明 |
 |:--:|:---|
+| **0** | **Cursor Skill** — 见 [`skills/memorial-map-core/`](./skills/memorial-map-core/README.md)（Fork 清单、架构、模板；Cursor 自动加载 [`.cursor/skills/memorial-map-core/`](./.cursor/skills/memorial-map-core/SKILL.md)） |
 | **1** | **Fork** — 替换 `src/utils/constants.js`、`src/data/*` 内置内容 |
 | **2** | **品牌** — 标题、Logo、favicon；可选 [PORTFOLIO 中性演示](./docs/PORTFOLIO.md) |
 | **3** | **部署** — Vercel + Supabase；高德 Key、邮件登录等按需配置 |
@@ -236,6 +237,7 @@
 | [**NOTES**](./NOTES.md) | 维护者 | 待办、灵感、迭代流水 |
 | [**ADMIN_SETUP**](./docs/ADMIN_SETUP.md) | 部署者 | Supabase、登录、协作者、Storage |
 | [**PORTFOLIO**](./docs/PORTFOLIO.md) | 演示 / 面试 | 中性品牌作品集模式 |
+| [**memorial-map-core Skill**](./skills/memorial-map-core/README.md) | Fork 复用者 | Cursor Agent Skill：架构、清单、模板 |
 | [**CLAUDE.md**](./CLAUDE.md) | 开发者 / AI | 代码结构与开发速查 |
 
 ---
